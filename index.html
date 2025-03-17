@@ -3,21 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Button</title>
-    <script>
-        function showAlert() {
-            alert("traveling to github");
-        }
-    </script>
+    <title>Basic Button</title>
 </head>
 <body>
-        <button onclick="showAlert()window.location.href='https://www.example.com';">Go to Example</button>
+    <button>Click Me!</button>
 </body>
 </html>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled Button</title>
     <style>
+        button {
+            padding: 15px 30px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+    </style>
+</head>
+<body>
+    <button>Styled Button</button>
+</body>
+</html>
+
         body {
             background-color: lightblue; /* Set background color */
         }
