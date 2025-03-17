@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Platforms for every occasion</title>
+    <title>Platforms for Every Occasion</title>
     <style>
         /* General button styles */
         button {
             padding: 15px 30px;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 18px;
             transition: background-color 0.3s ease, transform 0.2s ease;
@@ -32,6 +32,8 @@
         /* Styling for anchor links */
         .button-link {
             text-decoration: none;
+            display: inline-block;
+            margin: 10px;
         }
 
         /* Specific button colors */
@@ -58,12 +60,20 @@
         .edx-button:hover {
             background-color: #006f74; /* Darker teal on hover */
         }
+
+        .sololearn-button {
+            background-color: #4A9F3D; /* Sololearn green */
+        }
+
+        .sololearn-button:hover {
+            background-color: #3e8e32; /* Darker green on hover */
+        }
     </style>
 </head>
 
 <body>
     <h1>Choose a coding platform</h1>
-    
+
     <!-- GitHub Button -->
     <a href="https://github.com/yourusername/yourrepository" class="button-link" target="_blank" aria-label="Go to GitHub Repository">
         <button class="github-button" type="button">Go to GitHub</button>
@@ -77,6 +87,11 @@
     <!-- edX Button -->
     <a href="https://www.edx.org" class="button-link" target="_blank" aria-label="Go to edX">
         <button class="edx-button" type="button">Go to edX</button>
+    </a>
+
+    <!-- Sololearn Button -->
+    <a href="https://www.sololearn.com" class="button-link" target="_blank" aria-label="Go to Sololearn">
+        <button class="sololearn-button" type="button">Go to Sololearn</button>
     </a>
 </body>
 
