@@ -5,224 +5,250 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Platforms for Every Occasion. Choose a coding platform to enhance your skills.">
+    <meta name="keywords" content="coding, platforms, GitHub, Codecademy, edX, Sololearn, Udacity, freeCodeCamp, Udemy, Khan Academy, Coursera">
     <title>Platforms for Every Occasion</title>
-    <style>
-        /* General button styles */
-        button {
-            padding: 15px 30px;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        /* Hover effect */
-        button:hover {
-            transform: scale(1.05);
-            /* Slight scale effect on hover */
-        }
-
-        /* Focus effect for accessibility */
-        button:focus {
-            outline: 3px solid #4CAF50;
-            outline-offset: 2px;
-        }
-
-        /* Styling for anchor links */
-        .button-link {
-            text-decoration: none;
-            display: inline-block;
-            margin: 10px;
-        }
-
-        /* Specific button colors */
-        .github-button {
-            background-color: #4CAF50;
-            /* Green */
-        }
-
-        .github-button:hover {
-            background-color: #45a049;
-            /* Darker green on hover */
-        }
-
-        .codecademy-button {
-            background-color: #403f4c;
-            /* Codecademy color */
-        }
-
-        .codecademy-button:hover {
-            background-color: #2c2b33;
-            /* Darker color on hover */
-        }
-
-        .edx-button {
-            background-color: #007A87;
-            /* edX primary color */
-        }
-
-        .edx-button:hover {
-            background-color: #006f74;
-            /* Darker teal on hover */
-        }
-
-        .sololearn-button {
-            background-color: #FF4C4C;
-            /* Red color for Sololearn */
-        }
-
-        .sololearn-button:hover {
-            background-color: #e03c3c;
-            /* Darker red on hover */
-        }
-
-        .udacity-button {
-            background-color: #00B1E1;
-            /* Udacity blue */
-        }
-
-        .udacity-button:hover {
-            background-color: #009AC1;
-            /* Darker blue on hover */
-        }
-
-        .freecodecamp-button {
-            background-color: #4CAF50;
-            /* freeCodeCamp green */
-        }
-
-        .freecodecamp-button:hover {
-            background-color: #45a049;
-            /* Darker green on hover */
-        }
-
-        .udemy-button {
-            background-color: #F24E1E;
-            /* Udemy orange */
-        }
-
-        .udemy-button:hover {
-            background-color: #e0441a;
-            /* Darker orange on hover */
-        }
-
-        .khanacademy-button {
-            background-color: #3E8E41;
-            /* Khan Academy green */
-        }
-
-        .khanacademy-button:hover {
-            background-color: #357F32;
-            /* Darker green on hover */
-        }
-
-        .coursera-button {
-            background-color: #0061F2;
-            /* Coursera's brand color */
-            color: white;
-            font-size: 18px;
-            /* Match the font size of other buttons */
-            font-weight: bold;
-            padding: 15px 30px;
-            /* Match the padding of other buttons */
-            border: none;
-            border-radius: 8px;
-            /* Match the border radius of other buttons */
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .coursera-button:hover {
-            background-color: #0053C0;
-            /* Slightly darker shade on hover */
-        }
-
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #111;
-            overflow: hidden;
-        }
-
-        .glowing-background {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
-            background-size: 400% 400%;
-            animation: glowing 15s ease infinite;
-        }
-
-        @keyframes glowing {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
     <div class="glowing-background"></div>
-    <h1>Choose a coding platform</h1>
+    <header>
+        <h1>Choose a coding platform</h1>
+    </header>
+    <main>
+        <!-- GitHub Button -->
+        <a href="https://github.com/yourusername/yourrepository" class="button-link" target="_blank" aria-label="Go to GitHub Repository" role="button">
+            <button class="github-button" type="button">Go to GitHub</button>
+        </a>
 
-    <!-- GitHub Button -->
-    <a href="https://github.com/yourusername/yourrepository" class="button-link" target="_blank"
-        aria-label="Go to GitHub Repository">
-        <button class="github-button" type="button">Go to GitHub</button>
-    </a>
+        <!-- Codecademy Button -->
+        <a href="https://www.codecademy.com" class="button-link" target="_blank" aria-label="Go to Codecademy" role="button">
+            <button class="codecademy-button" type="button">Go to Codecademy</button>
+        </a>
 
-    <!-- Codecademy Button -->
-    <a href="https://www.codecademy.com" class="button-link" target="_blank" aria-label="Go to Codecademy">
-        <button class="codecademy-button" type="button">Go to Codecademy</button>
-    </a>
+        <!-- edX Button -->
+        <a href="https://www.edx.org" class="button-link" target="_blank" aria-label="Go to edX" role="button">
+            <button class="edx-button" type="button">Go to edX</button>
+        </a>
 
-    <!-- edX Button -->
-    <a href="https://www.edx.org" class="button-link" target="_blank" aria-label="Go to edX">
-        <button class="edx-button" type="button">Go to edX</button>
-    </a>
+        <!-- Sololearn Button -->
+        <a href="https://www.sololearn.com" class="button-link" target="_blank" aria-label="Go to Sololearn" role="button">
+            <button class="sololearn-button" type="button">Go to Sololearn</button>
+        </a>
 
-    <!-- Sololearn Button -->
-    <a href="https://www.sololearn.com" class="button-link" target="_blank" aria-label="Go to Sololearn">
-        <button class="sololearn-button" type="button">Go to Sololearn</button>
-    </a>
+        <!-- Udacity Button -->
+        <a href="https://www.udacity.com" class="button-link" target="_blank" aria-label="Go to Udacity" role="button">
+            <button class="udacity-button" type="button">Go to Udacity</button>
+        </a>
 
-    <!-- Udacity Button -->
-    <a href="https://www.udacity.com" class="button-link" target="_blank" aria-label="Go to Udacity">
-        <button class="udacity-button" type="button">Go to Udacity</button>
-    </a>
+        <!-- freeCodeCamp Button -->
+        <a href="https://www.freecodecamp.org" class="button-link" target="_blank" aria-label="Go to freeCodeCamp" role="button">
+            <button class="freecodecamp-button" type="button">Go to freeCodeCamp</button>
+        </a>
 
-    <!-- freeCodeCamp Button -->
-    <a href="https://www.freecodecamp.org" class="button-link" target="_blank" aria-label="Go to freeCodeCamp">
-        <button class="freecodecamp-button" type="button">Go to freeCodeCamp</button>
-    </a>
+        <!-- Udemy Button -->
+        <a href="https://www.udemy.com" class="button-link" target="_blank" aria-label="Go to Udemy" role="button">
+            <button class="udemy-button" type="button">Go to Udemy</button>
+        </a>
 
-    <!-- Udemy Button -->
-    <a href="https://www.udemy.com" class="button-link" target="_blank" aria-label="Go to Udemy">
-        <button class="udemy-button" type="button">Go to Udemy</button>
-    </a>
+        <!-- Khan Academy Button -->
+        <a href="https://www.khanacademy.org" class="button-link" target="_blank" aria-label="Go to Khan Academy" role="button">
+            <button class="khanacademy-button" type="button">Go to Khan Academy</button>
+        </a>
 
-    <!-- Khan Academy Button -->
-    <a href="https://www.khanacademy.org" class="button-link" target="_blank" aria-label="Go to Khan Academy">
-        <button class="khanacademy-button" type="button">Go to Khan Academy</button>
-    </a>
-
-    <!-- Coursera Button -->
-    <a href="https://www.coursera.org" class="button-link" target="_blank" aria-label="Go to Coursera">
-        <button class="coursera-button" type="button">Go to Coursera</button>
-    </a>
+        <!-- Coursera Button -->
+        <a href="https://www.coursera.org" class="button-link" target="_blank" aria-label="Go to Coursera" role="button">
+            <button class="coursera-button" type="button">Go to Coursera</button>
+        </a>
+    </main>
+    <footer>
+        <p>&copy; 2025 Your Name</p>
+    </footer>
 </body>
+    /* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Glowing Background */
+.glowing-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
+    background-size: 400% 400%;
+    animation: glowing 15s ease infinite;
+}
+
+@keyframes glowing {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Header Styling */
+header {
+    margin-top: 50px;
+}
+
+h1 {
+    font-size: 3rem;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+/* Main Section Styling */
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 50px;
+}
+
+/* Button Styling */
+.button-link {
+    text-decoration: none;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* GitHub Button */
+.github-button {
+    background-color: #24292f;
+    color: white;
+}
+
+.github-button:hover {
+    background-color: #6cc644;
+    box-shadow: 0 0 10px #6cc644;
+}
+
+/* Codecademy Button */
+.codecademy-button {
+    background-color: #2a73cc;
+    color: white;
+}
+
+.codecademy-button:hover {
+    background-color: #4c8bf5;
+    box-shadow: 0 0 10px #4c8bf5;
+}
+
+/* edX Button */
+.edx-button {
+    background-color: #002f6c;
+    color: white;
+}
+
+.edx-button:hover {
+    background-color: #005cb2;
+    box-shadow: 0 0 10px #005cb2;
+}
+
+/* Sololearn Button */
+.sololearn-button {
+    background-color: #3e9e9e;
+    color: white;
+}
+
+.sololearn-button:hover {
+    background-color: #00b8a9;
+    box-shadow: 0 0 10px #00b8a9;
+}
+
+/* Udacity Button */
+.udacity-button {
+    background-color: #00c2e0;
+    color: white;
+}
+
+.udacity-button:hover {
+    background-color: #00b3c1;
+    box-shadow: 0 0 10px #00b3c1;
+}
+
+/* freeCodeCamp Button */
+.freecodecamp-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.freecodecamp-button:hover {
+    background-color: #45a049;
+    box-shadow: 0 0 10px #45a049;
+}
+
+/* Udemy Button */
+.udemy-button {
+    background-color: #e03c31;
+    color: white;
+}
+
+.udemy-button:hover {
+    background-color: #d32f2f;
+    box-shadow: 0 0 10px #d32f2f;
+}
+
+/* Khan Academy Button */
+.khanacademy-button {
+    background-color: #7a9b9f;
+    color: white;
+}
+
+.khanacademy-button:hover {
+    background-color: #5c7980;
+    box-shadow: 0 0 10px #5c7980;
+}
+
+/* Coursera Button */
+.coursera-button {
+    background-color: #0061f2;
+    color: white;
+}
+
+.coursera-button:hover {
+    background-color: #0051d5;
+    box-shadow: 0 0 10px #0051d5;
+}
+
+/* Footer Styling */
+footer {
+    margin-top: auto;
+    padding: 20px;
+    background-color: #111;
+    color: white;
+    font-size: 1rem;
+    text-align: center;
+    border-top: 1px solid #444;
+}
 </html>
