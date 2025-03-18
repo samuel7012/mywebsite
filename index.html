@@ -8,152 +8,184 @@
     <meta name="description" content="Platforms for Every Occasion. Choose a coding platform to enhance your skills.">
     <meta name="keywords" content="coding, platforms, GitHub, Codecademy, edX, Sololearn, Udacity, freeCodeCamp, Udemy, Khan Academy, Coursera">
     <title>Platforms for Every Occasion</title>
-    
-    <!-- Correct placement of the CSS -->
-    <style>
-        /* General Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: white;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-align: center;
-            overflow: hidden;
-        }
-
-        /* Glowing Background */
-        .glowing-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
-            background-size: 400% 400%;
-            animation: glowing 15s ease infinite;
-        }
-
-        @keyframes glowing {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Header Styling */
-        header {
-            margin-top: 50px;
-        }
-
-        h1 {
-            font-size: 3rem;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
-        }
-
-        /* Main Section Styling */
-        main {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            margin-top: 50px;
-        }
-
-        /* Button Link Styling */
-        .button-link {
-            text-decoration: none;
-        }
-
-        button {
-            padding: 12px 24px;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 200px;
-            margin: 10px;
-        }
-
-        /* Platform Buttons Styling */
-        .platform-button {
-            color: white;
-        }
-
-        /* Individual Button Styles */
-        .github-button { background-color: #24292f; }
-        .github-button:hover { background-color: #6cc644; box-shadow: 0 0 10px #6cc644; }
-
-        .codecademy-button { background-color: #2a73cc; }
-        .codecademy-button:hover { background-color: #4c8bf5; box-shadow: 0 0 10px #4c8bf5; }
-
-        .edx-button { background-color: #002f6c; }
-        .edx-button:hover { background-color: #005cb2; box-shadow: 0 0 10px #005cb2; }
-
-        .sololearn-button { background-color: #3e9e9e; }
-        .sololearn-button:hover { background-color: #00b8a9; box-shadow: 0 0 10px #00b8a9; }
-
-        .udacity-button { background-color: #00c2e0; }
-        .udacity-button:hover { background-color: #00b3c1; box-shadow: 0 0 10px #00b3c1; }
-
-        .freecodecamp-button { background-color: #4caf50; }
-        .freecodecamp-button:hover { background-color: #45a049; box-shadow: 0 0 10px #45a049; }
-
-        .udemy-button { background-color: #e03c31; }
-        .udemy-button:hover { background-color: #d32f2f; box-shadow: 0 0 10px #d32f2f; }
-
-        .khanacademy-button { background-color: #7a9b9f; }
-        .khanacademy-button:hover { background-color: #5c7980; box-shadow: 0 0 10px #5c7980; }
-
-        .coursera-button { background-color: #0061f2; }
-        .coursera-button:hover { background-color: #0051d5; box-shadow: 0 0 10px #0051d5; }
-
-        /* Footer Styling */
-        footer {
-            margin-top: auto;
-            padding: 20px;
-            background-color: #111;
-            color: white;
-            font-size: 1rem;
-            text-align: center;
-            border-top: 1px solid #444;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div class="glowing-background"></div>
-    
     <header>
         <h1>Choose a coding platform</h1>
     </header>
-
     <main>
         <!-- Platform Buttons -->
         <a href="https://github.com/yourusername/yourrepository" class="button-link" target="_blank" aria-label="Go to GitHub">
             <button class="platform-button github-button">Go to GitHub</button>
         </a>
 
-        <!-- Add other platform buttons here -->
-    </main>
+        <a href="https://www.codecademy.com" class="button-link" target="_blank" aria-label="Go to Codecademy">
+            <button class="platform-button codecademy-button">Go to Codecademy</button>
+        </a>
 
+        <a href="https://www.edx.org" class="button-link" target="_blank" aria-label="Go to edX">
+            <button class="platform-button edx-button">Go to edX</button>
+        </a>
+
+        <a href="https://www.sololearn.com" class="button-link" target="_blank" aria-label="Go to Sololearn">
+            <button class="platform-button sololearn-button">Go to Sololearn</button>
+        </a>
+
+        <a href="https://www.udacity.com" class="button-link" target="_blank" aria-label="Go to Udacity">
+            <button class="platform-button udacity-button">Go to Udacity</button>
+        </a>
+
+        <a href="https://www.freecodecamp.org" class="button-link" target="_blank" aria-label="Go to freeCodeCamp">
+            <button class="platform-button freecodecamp-button">Go to freeCodeCamp</button>
+        </a>
+
+        <a href="https://www.udemy.com" class="button-link" target="_blank" aria-label="Go to Udemy">
+            <button class="platform-button udemy-button">Go to Udemy</button>
+        </a>
+
+        <a href="https://www.khanacademy.org" class="button-link" target="_blank" aria-label="Go to Khan Academy">
+            <button class="platform-button khanacademy-button">Go to Khan Academy</button>
+        </a>
+
+        <a href="https://www.coursera.org" class="button-link" target="_blank" aria-label="Go to Coursera">
+            <button class="platform-button coursera-button">Go to Coursera</button>
+        </a>
+    </main>
     <footer>
         <p>&copy; 2025 Your Name</p>
     </footer>
 </body>
 
 </html>
+<head>
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #45a049;
+    --hover-scale: 1.05;
+}
+
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Glowing Background */
+.glowing-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
+    background-size: 400% 400%;
+    animation: glowing 15s ease infinite;
+    z-index: -1;
+}
+
+@keyframes glowing {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Header Styling */
+header {
+    margin-top: 50px;
+}
+
+h1 {
+    font-size: 3rem;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+/* Main Section Styling */
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 50px;
+}
+
+/* Button Link Styling */
+.button-link {
+    text-decoration: none;
+}
+
+/* Platform Buttons Styling */
+button {
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 200px;
+    margin: 10px;
+}
+
+/* Individual Button Styles */
+.platform-button {
+    color: white;
+}
+
+.github-button { background-color: #24292f; }
+.github-button:hover { background-color: #6cc644; box-shadow: 0 0 10px #6cc644; }
+
+.codecademy-button { background-color: #2a73cc; }
+.codecademy-button:hover { background-color: #4c8bf5; box-shadow: 0 0 10px #4c8bf5; }
+
+.edx-button { background-color: #002f6c; }
+.edx-button:hover { background-color: #005cb2; box-shadow: 0 0 10px #005cb2; }
+
+.sololearn-button { background-color: #3e9e9e; }
+.sololearn-button:hover { background-color: #00b8a9; box-shadow: 0 0 10px #00b8a9; }
+
+.udacity-button { background-color: #00c2e0; }
+.udacity-button:hover { background-color: #00b3c1; box-shadow: 0 0 10px #00b3c1; }
+
+.freecodecamp-button { background-color: #4caf50; }
+.freecodecamp-button:hover { background-color: #45a049; box-shadow: 0 0 10px #45a049; }
+
+.udemy-button { background-color: #e03c31; }
+.udemy-button:hover { background-color: #d32f2f; box-shadow: 0 0 10px #d32f2f; }
+
+.khanacademy-button { background-color: #7a9b9f; }
+.khanacademy-button:hover { background-color: #5c7980; box-shadow: 0 0 10px #5c7980; }
+
+.coursera-button { background-color: #0061f2; }
+.coursera-button:hover { background-color: #0051d5; box-shadow: 0 0 10px #0051d5; }
+
+/* Footer Styling */
+footer {
+    margin-top: auto;
+    padding: 20px;
+    background-color: #111;
+    color: white;
+    font-size: 1rem;
+    text-align: center;
+    border-top: 1px solid #444;
+}
+</head>
