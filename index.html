@@ -10,62 +10,63 @@
     <title>Platforms for Every Occasion</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="glowing-background"></div>
+    
     <header>
         <h1>Choose a coding platform</h1>
     </header>
+
     <main>
-        <!-- GitHub Button -->
-        <a href="https://github.com/yourusername/yourrepository" class="button-link" target="_blank" aria-label="Go to GitHub Repository" role="button">
-            <button class="github-button" type="button">Go to GitHub</button>
+        <!-- Platform Buttons -->
+        <a href="https://github.com/yourusername/yourrepository" class="button-link" target="_blank" aria-label="Go to GitHub">
+            <button class="platform-button github-button">Go to GitHub</button>
         </a>
 
-        <!-- Codecademy Button -->
-        <a href="https://www.codecademy.com" class="button-link" target="_blank" aria-label="Go to Codecademy" role="button">
-            <button class="codecademy-button" type="button">Go to Codecademy</button>
+        <a href="https://www.codecademy.com" class="button-link" target="_blank" aria-label="Go to Codecademy">
+            <button class="platform-button codecademy-button">Go to Codecademy</button>
         </a>
 
-        <!-- edX Button -->
-        <a href="https://www.edx.org" class="button-link" target="_blank" aria-label="Go to edX" role="button">
-            <button class="edx-button" type="button">Go to edX</button>
+        <a href="https://www.edx.org" class="button-link" target="_blank" aria-label="Go to edX">
+            <button class="platform-button edx-button">Go to edX</button>
         </a>
 
-        <!-- Sololearn Button -->
-        <a href="https://www.sololearn.com" class="button-link" target="_blank" aria-label="Go to Sololearn" role="button">
-            <button class="sololearn-button" type="button">Go to Sololearn</button>
+        <a href="https://www.sololearn.com" class="button-link" target="_blank" aria-label="Go to Sololearn">
+            <button class="platform-button sololearn-button">Go to Sololearn</button>
         </a>
 
-        <!-- Udacity Button -->
-        <a href="https://www.udacity.com" class="button-link" target="_blank" aria-label="Go to Udacity" role="button">
-            <button class="udacity-button" type="button">Go to Udacity</button>
+        <a href="https://www.udacity.com" class="button-link" target="_blank" aria-label="Go to Udacity">
+            <button class="platform-button udacity-button">Go to Udacity</button>
         </a>
 
-        <!-- freeCodeCamp Button -->
-        <a href="https://www.freecodecamp.org" class="button-link" target="_blank" aria-label="Go to freeCodeCamp" role="button">
-            <button class="freecodecamp-button" type="button">Go to freeCodeCamp</button>
+        <a href="https://www.freecodecamp.org" class="button-link" target="_blank" aria-label="Go to freeCodeCamp">
+            <button class="platform-button freecodecamp-button">Go to freeCodeCamp</button>
         </a>
 
-        <!-- Udemy Button -->
-        <a href="https://www.udemy.com" class="button-link" target="_blank" aria-label="Go to Udemy" role="button">
-            <button class="udemy-button" type="button">Go to Udemy</button>
+        <a href="https://www.udemy.com" class="button-link" target="_blank" aria-label="Go to Udemy">
+            <button class="platform-button udemy-button">Go to Udemy</button>
         </a>
 
-        <!-- Khan Academy Button -->
-        <a href="https://www.khanacademy.org" class="button-link" target="_blank" aria-label="Go to Khan Academy" role="button">
-            <button class="khanacademy-button" type="button">Go to Khan Academy</button>
+        <a href="https://www.khanacademy.org" class="button-link" target="_blank" aria-label="Go to Khan Academy">
+            <button class="platform-button khanacademy-button">Go to Khan Academy</button>
         </a>
 
-        <!-- Coursera Button -->
-        <a href="https://www.coursera.org" class="button-link" target="_blank" aria-label="Go to Coursera" role="button">
-            <button class="coursera-button" type="button">Go to Coursera</button>
+        <a href="https://www.coursera.org" class="button-link" target="_blank" aria-label="Go to Coursera">
+            <button class="platform-button coursera-button">Go to Coursera</button>
         </a>
     </main>
+
     <footer>
         <p>&copy; 2025 Your Name</p>
     </footer>
-<body>
-    /* General Reset */
+</body>
+
+</html>
+Enhanced CSS:
+css
+Copy
+/* General Reset */
 * {
     margin: 0;
     padding: 0;
@@ -127,7 +128,7 @@ main {
     margin-top: 50px;
 }
 
-/* Button Styling */
+/* Button Link Styling */
 .button-link {
     text-decoration: none;
 }
@@ -139,12 +140,18 @@ button {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    width: 200px;
+    margin: 10px;
+}
+
+/* Platform Buttons Styling */
+.platform-button {
+    color: white;
 }
 
 /* GitHub Button */
 .github-button {
     background-color: #24292f;
-    color: white;
 }
 
 .github-button:hover {
@@ -155,7 +162,6 @@ button {
 /* Codecademy Button */
 .codecademy-button {
     background-color: #2a73cc;
-    color: white;
 }
 
 .codecademy-button:hover {
@@ -166,7 +172,6 @@ button {
 /* edX Button */
 .edx-button {
     background-color: #002f6c;
-    color: white;
 }
 
 .edx-button:hover {
@@ -177,7 +182,6 @@ button {
 /* Sololearn Button */
 .sololearn-button {
     background-color: #3e9e9e;
-    color: white;
 }
 
 .sololearn-button:hover {
@@ -188,7 +192,6 @@ button {
 /* Udacity Button */
 .udacity-button {
     background-color: #00c2e0;
-    color: white;
 }
 
 .udacity-button:hover {
@@ -199,7 +202,6 @@ button {
 /* freeCodeCamp Button */
 .freecodecamp-button {
     background-color: #4caf50;
-    color: white;
 }
 
 .freecodecamp-button:hover {
@@ -210,7 +212,6 @@ button {
 /* Udemy Button */
 .udemy-button {
     background-color: #e03c31;
-    color: white;
 }
 
 .udemy-button:hover {
@@ -221,7 +222,6 @@ button {
 /* Khan Academy Button */
 .khanacademy-button {
     background-color: #7a9b9f;
-    color: white;
 }
 
 .khanacademy-button:hover {
@@ -232,7 +232,6 @@ button {
 /* Coursera Button */
 .coursera-button {
     background-color: #0061f2;
-    color: white;
 }
 
 .coursera-button:hover {
@@ -250,4 +249,3 @@ footer {
     text-align: center;
     border-top: 1px solid #444;
 }
-</html>
