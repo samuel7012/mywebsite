@@ -8,7 +8,7 @@
     <title>Platforms for Every Occasion</title>
     <style>
         /* General button styles */
-            button {
+        button {
             padding: 15px 30px;
             color: white;
             border: none;
@@ -20,7 +20,8 @@
 
         /* Hover effect */
         button:hover {
-            transform: scale(1.05); /* Slight scale effect on hover */
+            transform: scale(1.05);
+            /* Slight scale effect on hover */
         }
 
         /* Focus effect for accessibility */
@@ -38,98 +39,149 @@
 
         /* Specific button colors */
         .github-button {
-            background-color: #4CAF50; /* Green */
+            background-color: #4CAF50;
+            /* Green */
         }
 
         .github-button:hover {
-            background-color: #45a049; /* Darker green on hover */
+            background-color: #45a049;
+            /* Darker green on hover */
         }
 
         .codecademy-button {
-            background-color: #403f4c; /* Codecademy color */
+            background-color: #403f4c;
+            /* Codecademy color */
         }
 
         .codecademy-button:hover {
-            background-color: #2c2b33; /* Darker color on hover */
+            background-color: #2c2b33;
+            /* Darker color on hover */
         }
 
         .edx-button {
-            background-color: #007A87; /* edX primary color */
+            background-color: #007A87;
+            /* edX primary color */
         }
 
         .edx-button:hover {
-            background-color: #006f74; /* Darker teal on hover */
+            background-color: #006f74;
+            /* Darker teal on hover */
         }
 
         .sololearn-button {
-            background-color: #FF4C4C; /* Red color for Sololearn */
+            background-color: #FF4C4C;
+            /* Red color for Sololearn */
         }
 
         .sololearn-button:hover {
-            background-color: #e03c3c; /* Darker red on hover */
+            background-color: #e03c3c;
+            /* Darker red on hover */
         }
 
         .udacity-button {
-            background-color: #00B1E1; /* Udacity blue */
+            background-color: #00B1E1;
+            /* Udacity blue */
         }
 
         .udacity-button:hover {
-            background-color: #009AC1; /* Darker blue on hover */
+            background-color: #009AC1;
+            /* Darker blue on hover */
         }
 
         .freecodecamp-button {
-            background-color: #4CAF50; /* freeCodeCamp green */
+            background-color: #4CAF50;
+            /* freeCodeCamp green */
         }
 
         .freecodecamp-button:hover {
-            background-color: #45a049; /* Darker green on hover */
+            background-color: #45a049;
+            /* Darker green on hover */
         }
 
         .udemy-button {
-            background-color: #F24E1E; /* Udemy orange */
+            background-color: #F24E1E;
+            /* Udemy orange */
         }
 
         .udemy-button:hover {
-            background-color: #e0441a; /* Darker orange on hover */
+            background-color: #e0441a;
+            /* Darker orange on hover */
         }
 
         .khanacademy-button {
-            background-color: #3E8E41; /* Khan Academy green */
+            background-color: #3E8E41;
+            /* Khan Academy green */
         }
 
         .khanacademy-button:hover {
-            background-color: #357F32; /* Darker green on hover */
+            background-color: #357F32;
+            /* Darker green on hover */
         }
 
         .coursera-button {
-    background-color: #0061F2; /* Coursera's brand color */
-    color: white;
-    font-size: 18px; /* Match the font size of other buttons */
-    font-weight: bold;
-    padding: 15px 30px; /* Match the padding of other buttons */
-    border: none;
-    border-radius: 8px; /* Match the border radius of other buttons */
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
-}
-
-.coursera-button:hover {
-    background-color: #0053C0; /* Slightly darker shade on hover */
-}
+            background-color: #0061F2;
+            /* Coursera's brand color */
+            color: white;
+            font-size: 18px;
+            /* Match the font size of other buttons */
+            font-weight: bold;
+            padding: 15px 30px;
+            /* Match the padding of other buttons */
+            border: none;
+            border-radius: 8px;
+            /* Match the border radius of other buttons */
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
 
         .coursera-button:hover {
-            background-color: #0053C0; /* Slightly darker shade on hover */
+            background-color: #0053C0;
+            /* Slightly darker shade on hover */
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #111;
+            overflow: hidden;
+        }
+
+        .glowing-background {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
+            background-size: 400% 400%;
+            animation: glowing 15s ease infinite;
+        }
+
+        @keyframes glowing {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="glowing-background"></div>
     <h1>Choose a coding platform</h1>
 
     <!-- GitHub Button -->
-    <a href="https://github.com/yourusername/yourrepository" class="button-link" target="_blank" aria-label="Go to GitHub Repository">
+    <a href="https://github.com/yourusername/yourrepository" class="button-link" target="_blank"
+        aria-label="Go to GitHub Repository">
         <button class="github-button" type="button">Go to GitHub</button>
     </a>
 
@@ -173,38 +225,4 @@
         <button class="coursera-button" type="button">Go to Coursera</button>
     </a>
 </body>
-    body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #111;
-            overflow: hidden;
-        }
-
-        .glowing-background {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
-            background-size: 400% 400%;
-            animation: glowing 15s ease infinite;
-        }
-
-        @keyframes glowing {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="glowing-background"></div>
-<h1>Choose a drawing platform</h1>
 </html>
