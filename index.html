@@ -11,7 +11,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: background-color 2s;
+            transition: background-color 5s ease-in-out;
         }
     </style>
 </head>
@@ -31,7 +31,10 @@
         }
 
         // Automatically change the blue shade when the page loads
-        window.onload = changeBlueShade;
+        window.onload = function() {
+            changeBlueShade();
+            setInterval(changeBlueShade, 5000); // Change color every 5 seconds
+        };
     </script>
 </body>
 </html>
