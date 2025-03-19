@@ -1,69 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Soothing song</title>
+    <title>Blue Background</title>
     <style>
-        /* General Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* Body styling */
         body {
-            font-family: Arial, sans-serif;
+            margin: 0;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            background: linear-gradient(45deg, #33F6FF, #33BBFF, #, #3371FF);
-            background-size: 400% 400%;
-            animation: gradientAnimation 15s ease infinite;
-            color: white;
-            overflow: hidden;
-        }
-
-        /* Gradient animation for background */
-        @keyframes gradientAnimation {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Decorative pattern */
-        .background-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/diagonal-stripes.png') repeat;
-            opacity: 0.1; /* Makes the pattern very subtle */
-        }
-
-        /* Main content area styling */
-        .content {
-            z-index: 1;
+            transition: background-color 2s;
         }
     </style>
 </head>
-
 <body>
-    <div class="background-pattern"></div>
-    <div class="content">
-    </div>
-</body>
+    <button onclick="changeBlueShade()">Change Blue Shade</button>
 
+    <script>
+        function getRandomBlueShade() {
+            // Generate a random shade of blue by varying the RGB values
+            const r = 0;  // Red stays at 0 for pure blue shades
+            const g = Math.floor(Math.random() * 256);  // Green varies randomly
+            const b = Math.floor(Math.random() * 256);  // Blue varies randomly
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function changeBlueShade() {
+            // Change the background to a random shade of blue
+            document.body.style.backgroundColor = getRandomBlueShade();
+        }
+    </script>
+</body>
 </html>
