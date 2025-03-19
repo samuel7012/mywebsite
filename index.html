@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blue Background and Soundtrack</title>
+    <meta name="description" content="A webpage with a blue background that changes shades and an autoplay soundtrack.">
+    <meta property="og:title" content="Blue Background and Soundtrack">
+    <meta property="og:description" content="A webpage with a blue background that changes shades and an autoplay soundtrack.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/samuel7012/mywebsite">
+    <meta property="og:image" content="URL to an image representing your page">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         body {
             margin: 0;
@@ -16,33 +23,27 @@
     </style>
 </head>
 <body>
-    <script>
+    <script defer>
         function getRandomBlueShade() {
-            // Generate a random shade of blue by varying the RGB values
-            const r = 0;  // Red stays at 0 for pure blue shades
-            const g = Math.floor(Math.random() * 256);  // Green varies randomly
-            const b = Math.floor(Math.random() * 256);  // Blue varies randomly
-            return `rgb(${r}, ${g}, ${b})`;
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(0, ${g}, ${b})`;
         }
 
         function changeBlueShade() {
-            // Change the background to a random shade of blue
             document.body.style.backgroundColor = getRandomBlueShade();
         }
 
-        // Automatically change the blue shade when the page loads
         window.onload = function() {
             changeBlueShade();
-            setInterval(changeBlueShade, 5000); // Change color every 5 seconds
+            setInterval(changeBlueShade, 5000);
         };
     </script>
     <audio autoplay loop>
         <!-- Direct link to an audio file -->
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.ogg" type="audio/ogg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3" alt="Audio description">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.ogg" type="audio/ogg" alt="Audio description">
         Your browser does not support the audio element.
     </audio>
-    
-    
 </body>
 </html>
