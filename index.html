@@ -16,8 +16,6 @@
     </style>
 </head>
 <body>
-    <button onclick="changeBlueShade()">Change Blue Shade</button>
-
     <script>
         function getRandomBlueShade() {
             // Generate a random shade of blue by varying the RGB values
@@ -31,6 +29,9 @@
             // Change the background to a random shade of blue
             document.body.style.backgroundColor = getRandomBlueShade();
         }
+
+        // Automatically change the blue shade when the page loads
+        window.onload = changeBlueShade;
     </script>
 </body>
 </html>
