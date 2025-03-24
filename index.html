@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue Background and Soundtrack</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="A webpage with a blue background that changes shades and an autoplay soundtrack.">
     <meta name="keywords" content="blue background, soundtrack, autoplay, webpage">
     <meta property="og:title" content="Blue Background and Soundtrack">
@@ -11,20 +11,46 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://github.com/samuel7012/mywebsite">
     <meta property="og:image" content="URL to an image representing your page">
+    <meta name="robots" content="index, follow">
+    
+    <title>Blue Background and Soundtrack</title>
+
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+
     <style>
-        body {
+        /* Resetting body margin and padding */
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             transition: background-color 5s ease-in-out;
+            font-family: Arial, sans-serif;
+        }
+
+        audio {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            opacity: 0.5;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
-    <script defer>
+    <audio autoplay loop>
+        <source src="https://soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing" type="audio/mpeg" alt="Calming music">
+        <source src="https://soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing-Song-1.ogg" type="audio/ogg" alt="Calming music">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
         function getRandomBlueShade() {
             const g = Math.floor(Math.random() * 256);
             const b = Math.floor(Math.random() * 256);
@@ -40,9 +66,5 @@
             setInterval(changeBlueShade, 5000);
         };
     </script>
-    <audio autoplay loop>
-        <source src="https://soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing" type="audio/mpeg" alt="Audio description">
-        <source src="https://soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing-Song-1.ogg" type="audio/ogg" alt="Audio description">
-    </audio>
 </body>
 </html>
