@@ -41,6 +41,17 @@
             opacity: 0.5;
             z-index: 10;
         }
+
+        /* Apply background CSS to the iframe and position it in the top left corner */
+        iframe {
+            width: 150px; /* Adjust the size for square shape */
+            height: 150px; /* Height same as width to make it square */
+            background-color: #f0f0f0; /* Optional background color */
+            border: none;
+            position: absolute; /* Positioning it in the top-left corner */
+            top: 10px; /* Add a small margin from the top */
+            left: 10px; /* Add a small margin from the left */
+        }
     </style>
 </head>
 <body>
@@ -49,9 +60,13 @@
         <source src="https://soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing-Song-1.ogg" type="audio/ogg" alt="Calming music">
         Your browser does not support the audio element.
     </audio>
-<iframe width="100%" height="166" scrolling="no" frameborder="no" 
-src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for&auto_play=true&loop=true">
-</iframe>
+
+    <!-- Embed the iframe with SoundCloud player, now square and positioned in the top-left corner -->
+    <iframe src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for&auto_play=true&loop=true" 
+            frameborder="no" 
+            scrolling="no">
+    </iframe>
+
     <script>
         function getRandomBlueShade() {
             const g = Math.floor(Math.random() * 256);
