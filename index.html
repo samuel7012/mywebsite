@@ -35,7 +35,7 @@
             left: 50px;
             background-color: #ff6347; /* Character color (tomato red) */
             border-radius: 5px;
-            transition: left 0.1s linear, transform 0.1s ease;
+            transition: left 0.2s ease-out, transform 0.2s ease-out, bottom 0.1s ease-out;
         }
     </style>
 </head>
@@ -79,13 +79,21 @@
             isRunning = true;
 
             let targetPosition = position + 200;
-            const interval = setInterval(() => {
-                moveCharacter(position += 2);
-                if (position >= targetPosition) {
-                    clearInterval(interval);
+            moveRightSmoothly(targetPosition);
+        }
+
+        function moveRightSmoothly(targetPosition) {
+            const moveStep = 2;
+            const moveInterval = () => {
+                if (position < targetPosition) {
+                    position += moveStep;
+                    moveCharacter(position);
+                    requestAnimationFrame(moveInterval); // Smooth transition
+                } else {
                     isRunning = false;
                 }
-            }, 10);
+            };
+            moveInterval();
         }
 
         function runLeft() {
@@ -95,36 +103,51 @@
             isRunning = true;
 
             let targetPosition = position - 200;
-            const interval = setInterval(() => {
-                moveCharacter(position -= 2);
-                if (position <= targetPosition) {
-                    clearInterval(interval);
+            moveLeftSmoothly(targetPosition);
+        }
+
+        function moveLeftSmoothly(targetPosition) {
+            const moveStep = 2;
+            const moveInterval = () => {
+                if (position > targetPosition) {
+                    position -= moveStep;
+                    moveCharacter(position);
+                    requestAnimationFrame(moveInterval); // Smooth transition
+                } else {
                     isRunning = false;
                 }
-            }, 10);
+            };
+            moveInterval();
         }
 
         function jump() {
             isJumping = true;
             let jumpHeight = 0;
-            let jumpInterval = setInterval(() => {
+            const jumpInterval = () => {
                 if (jumpHeight >= 100) {
                     // Start falling down
-                    clearInterval(jumpInterval);
-                    let fallInterval = setInterval(() => {
-                        if (jumpHeight <= 0) {
-                            clearInterval(fallInterval);
-                            isJumping = false;
-                        } else {
-                            jumpHeight -= 2;
-                            character.style.bottom = jumpHeight + "px";
-                        }
-                    }, 20);
+                    fall();
                 } else {
                     jumpHeight += 2;
                     character.style.bottom = jumpHeight + "px";
+                    requestAnimationFrame(jumpInterval); // Smooth jump
                 }
-            }, 20);
+            };
+            jumpInterval();
+        }
+
+        function fall() {
+            let jumpHeight = 100;
+            const fallInterval = () => {
+                if (jumpHeight <= 0) {
+                    isJumping = false;
+                } else {
+                    jumpHeight -= 2;
+                    character.style.bottom = jumpHeight + "px";
+                    requestAnimationFrame(fallInterval); // Smooth fall
+                }
+            };
+            fallInterval();
         }
     </script>
 </body>
