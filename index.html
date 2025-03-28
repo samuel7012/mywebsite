@@ -3,86 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="A webpage with a blue background that changes shades and an autoplay soundtrack.">
-    <meta name="keywords" content="blue background, soundtrack, autoplay, webpage">
-    <meta property="og:title" content="Blue Background and Soundtrack">
-    <meta property="og:description" content="A webpage with a blue background that changes shades and an autoplay soundtrack.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://github.com/samuel7012/mywebsite">
-    <meta property="og:image" content="URL to an image representing your page">
-    <meta name="robots" content="index, follow">
-    
-    <title>Blue Background and Soundtrack</title>
-
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-
+    <title>Character Movement</title>
     <style>
-        /* Resetting body margin and padding */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            height: 100vh;
+        body, html {
+            height: 100%;
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: background-color 5s ease-in-out;
-            font-family: Arial, sans-serif;
         }
 
-        audio {
+        #game-container {
+            width: 500px;
+            height: 300px;
+            background-color: #87CEEB;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #character {
+            width: 50px;
+            height: 50px;
+            background-color: red;
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            opacity: 0.5;
-            z-index: 10;
-        }
-
-        /* Apply background CSS to the iframe and position it in the top left corner */
-        iframe {
-            width: 150px; /* Adjust the size for square shape */
-            height: 150px; /* Height same as width to make it square */
-            background-color: #f0f0f0; /* Optional background color */
-            border: none;
-            position: absolute; /* Positioning it in the top-left corner */
-            top: 10px; /* Add a small margin from the top */
-            left: 10px; /* Add a small margin from the left */
+            bottom: 0;
+            left: 50px;
+            border-radius: 5px;
+            transition: transform 0.1s;
         }
     </style>
 </head>
 <body>
-    <audio autoplay loop>
-        <source src="https://soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing" type="audio/mpeg" alt="Calming music">
-        <source src="https://soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing-Song-1.ogg" type="audio/ogg" alt="Calming music">
-        Your browser does not support the audio element.
-    </audio>
-
-    <!-- Embed the iframe with SoundCloud player, square, positioned in the top-left corner, and without controls -->
-    <iframe src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/slowmusic-music/sets/01-slow-music-to-calm-down-for&auto_play=true&loop=true&visual=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false" 
-            frameborder="no" 
-            scrolling="no" 
-            allow="autoplay">
-    </iframe>
+    <div id="game-container">
+        <div id="character"></div>
+    </div>
 
     <script>
-        function getRandomBlueShade() {
-            const g = Math.floor(Math.random() * 256);
-            const b = Math.floor(Math.random() * 256);
-            return `rgb(0, ${g}, ${b})`;
+        const character = document.getElementById("character");
+        let isJumping = false;
+        let isRunning = false;
+        let isFacingRight = true;
+        let characterPosition = 50; // initial left position
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowRight") {
+                // Run Right
+                if (!isRunning) {
+                    isRunning = true;
+                    character.style.transition = "left 0.1s linear";
+                    runRight();
+                }
+            } else if (e.key === "ArrowLeft") {
+                // Run Left
+                if (!isRunning) {
+                    isRunning = true;
+                    character.style.transition = "left 0.1s linear";
+                    runLeft();
+                }
+            } else if (e.key === " " && !isJumping) {
+                // Jump
+                jump();
+            }
+        });
+
+        document.addEventListener("keyup", () => {
+            isRunning = false;
+            character.style.transition = "none"; // stop running
+        });
+
+        function runRight() {
+            if (isFacingRight) return; // No need to turn if already facing right
+            character.style.transform = "scaleX(1)"; // Face right
+            isFacingRight = true;
+
+            let position = 50;
+            const interval = setInterval(() => {
+                position += 2;
+                character.style.left = position + "px";
+                if (position >= 450) {
+                    clearInterval(interval);
+                }
+            }, 10);
         }
 
-        function changeBlueShade() {
-            document.body.style.backgroundColor = getRandomBlueShade();
+        function runLeft() {
+            if (!isFacingRight) return; // No need to turn if already facing left
+            character.style.transform = "scaleX(-1)"; // Face left
+            isFacingRight = false;
+
+            let position = 50;
+            const interval = setInterval(() => {
+                position -= 2;
+                character.style.left = position + "px";
+                if (position <= 0) {
+                    clearInterval(interval);
+                }
+            }, 10);
         }
 
-        window.onload = function() {
-            changeBlueShade();
-            setInterval(changeBlueShade, 5000);
-        };
+        function jump() {
+            isJumping = true;
+            let jumpHeight = 0;
+            let jumpInterval = setInterval(() => {
+                if (jumpHeight >= 100) {
+                    // Start falling down
+                    clearInterval(jumpInterval);
+                    let fallInterval = setInterval(() => {
+                        if (jumpHeight <= 0) {
+                            clearInterval(fallInterval);
+                            isJumping = false;
+                        } else {
+                            jumpHeight -= 2;
+                            character.style.bottom = jumpHeight + "px";
+                        }
+                    }, 20);
+                } else {
+                    jumpHeight += 2;
+                    character.style.bottom = jumpHeight + "px";
+                }
+            }, 20);
+        }
     </script>
 </body>
 </html>
