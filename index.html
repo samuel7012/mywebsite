@@ -29,7 +29,7 @@
 
         #character {
             width: 50px;
-            height: 50px;
+            height: 60px;
             background-color: red;
             position: absolute;
             bottom: 0;
@@ -51,20 +51,21 @@
         let isFacingRight = true;
         let characterPosition = 50; // initial left position
 
+        const gameContainer = document.getElementById("game-container");
+        const maxRightPosition = gameContainer.clientWidth - character.offsetWidth;
+
         document.addEventListener("keydown", (e) => {
             if (e.key === "ArrowRight") {
                 // Run Right
                 if (!isRunning) {
                     isRunning = true;
-                    character.style.transition = "left 0.1s linear";
-                    runRight();
+                    runCharacter("right");
                 }
             } else if (e.key === "ArrowLeft") {
                 // Run Left
                 if (!isRunning) {
                     isRunning = true;
-                    character.style.transition = "left 0.1s linear";
-                    runLeft();
+                    runCharacter("left");
                 }
             } else if (e.key === " " && !isJumping) {
                 // Jump
@@ -74,60 +75,61 @@
 
         document.addEventListener("keyup", () => {
             isRunning = false;
-            character.style.transition = "none"; // stop running
+            character.style.transition = "none"; // stop running animation
         });
 
-        function runRight() {
-            if (isFacingRight) return; // No need to turn if already facing right
-            character.style.transform = "scaleX(1)"; // Face right
-            isFacingRight = true;
+        function runCharacter(direction) {
+            if (direction === "right" && !isFacingRight) {
+                character.style.transform = "scaleX(1)"; // Face right
+                isFacingRight = true;
+            } else if (direction === "left" && isFacingRight) {
+                character.style.transform = "scaleX(-1)"; // Face left
+                isFacingRight = false;
+            }
 
-            let position = 50;
-            const interval = setInterval(() => {
-                position += 2;
+            let moveStep = direction === "right" ? 2 : -2;
+            let position = characterPosition;
+
+            const move = () => {
+                position += moveStep;
+                if (position <= 0) position = 0;
+                if (position >= maxRightPosition) position = maxRightPosition;
+
                 character.style.left = position + "px";
-                if (position >= 450) {
-                    clearInterval(interval);
-                }
-            }, 10);
-        }
+                characterPosition = position;
 
-        function runLeft() {
-            if (!isFacingRight) return; // No need to turn if already facing left
-            character.style.transform = "scaleX(-1)"; // Face left
-            isFacingRight = false;
-
-            let position = 50;
-            const interval = setInterval(() => {
-                position -= 2;
-                character.style.left = position + "px";
-                if (position <= 0) {
-                    clearInterval(interval);
+                if (isRunning) {
+                    requestAnimationFrame(move);
                 }
-            }, 10);
+            };
+
+            move();
         }
 
         function jump() {
             isJumping = true;
             let jumpHeight = 0;
-            let jumpInterval = setInterval(() => {
-                if (jumpHeight >= 100) {
-                    // Start falling down
-                    clearInterval(jumpInterval);
-                    let fallInterval = setInterval(() => {
-                        if (jumpHeight <= 0) {
-                            clearInterval(fallInterval);
-                            isJumping = false;
-                        } else {
-                            jumpHeight -= 2;
-                            character.style.bottom = jumpHeight + "px";
-                        }
-                    }, 20);
-                } else {
+            const jumpUp = () => {
+                if (jumpHeight < 100) {
                     jumpHeight += 2;
                     character.style.bottom = jumpHeight + "px";
+                    requestAnimationFrame(jumpUp);
+                } else {
+                    fall();
                 }
-            }, 20);
+            };
+
+            const fall = () => {
+                if (jumpHeight > 0) {
+                    jumpHeight -= 2;
+                    character.style.bottom = jumpHeight + "px";
+                    requestAnimationFrame(fall);
+                } else {
+                    isJumping = false;
+                }
+            };
+
+            jumpUp();
         }
     </script>
 </body>
