@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>run</title>
+    <title>Character Movement</title>
     <style>
         * {
             margin: 0;
@@ -28,14 +28,14 @@
         }
 
         #character {
-            width: 50px;
+            width: 60px;
             height: 60px;
             background-color: red;
             position: absolute;
             bottom: 0;
             left: 50px;
             border-radius: 5px;
-            transition: transform 0.1s;
+            transition: transform 0.1s ease-in-out, bottom 0.1s ease-in-out;
         }
     </style>
 </head>
@@ -87,19 +87,17 @@
                 isFacingRight = false;
             }
 
-            let moveStep = direction === "right" ? 2 : -2;
-            let position = characterPosition;
+            let moveStep = direction === "right" ? 5 : -5; // Increased speed
 
             const move = () => {
-                position += moveStep;
-                if (position <= 0) position = 0;
-                if (position >= maxRightPosition) position = maxRightPosition;
+                characterPosition += moveStep;
+                if (characterPosition <= 0) characterPosition = 0;
+                if (characterPosition >= maxRightPosition) characterPosition = maxRightPosition;
 
-                character.style.left = position + "px";
-                characterPosition = position;
+                character.style.left = characterPosition + "px";
 
                 if (isRunning) {
-                    requestAnimationFrame(move);
+                    requestAnimationFrame(move); // Smooth movement
                 }
             };
 
@@ -110,8 +108,8 @@
             isJumping = true;
             let jumpHeight = 0;
             const jumpUp = () => {
-                if (jumpHeight < 100) {
-                    jumpHeight += 2;
+                if (jumpHeight < 120) { // Higher jump
+                    jumpHeight += 4; // Faster jump
                     character.style.bottom = jumpHeight + "px";
                     requestAnimationFrame(jumpUp);
                 } else {
@@ -121,7 +119,7 @@
 
             const fall = () => {
                 if (jumpHeight > 0) {
-                    jumpHeight -= 2;
+                    jumpHeight -= 4; // Faster fall
                     character.style.bottom = jumpHeight + "px";
                     requestAnimationFrame(fall);
                 } else {
