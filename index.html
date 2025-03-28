@@ -34,7 +34,7 @@
             bottom: 0;
             left: 50px;
             border-radius: 5px;
-            transition: transform 0.1s;
+            transition: transform 0.05s;
         }
 
         #character img {
@@ -63,14 +63,14 @@
                 // Run Right
                 if (!isRunning) {
                     isRunning = true;
-                    character.style.transition = "left 0.1s linear";
+                    character.style.transition = "left 0.05s linear";
                     runRight();
                 }
             } else if (e.key === "ArrowLeft") {
                 // Run Left
                 if (!isRunning) {
                     isRunning = true;
-                    character.style.transition = "left 0.1s linear";
+                    character.style.transition = "left 0.05s linear";
                     runLeft();
                 }
             } else if (e.key === " " && !isJumping) {
@@ -94,12 +94,12 @@
                     clearInterval(interval);
                     return;
                 }
-                characterPosition += 2;
+                characterPosition += 4;
                 character.style.left = characterPosition + "px";
                 if (characterPosition >= 450) {
                     clearInterval(interval);
                 }
-            }, 10);
+            }, 20);
         }
 
         function runLeft() {
@@ -112,12 +112,12 @@
                     clearInterval(interval);
                     return;
                 }
-                characterPosition -= 2;
+                characterPosition -= 4;
                 character.style.left = characterPosition + "px";
                 if (characterPosition <= 0) {
                     clearInterval(interval);
                 }
-            }, 10);
+            }, 20);
         }
 
         function jump() {
@@ -132,12 +132,12 @@
                             clearInterval(fallInterval);
                             isJumping = false;
                         } else {
-                            jumpHeight -= 2;
+                            jumpHeight -= 4;
                             character.style.bottom = jumpHeight + "px";
                         }
                     }, 20);
                 } else {
-                    jumpHeight += 2;
+                    jumpHeight += 4;
                     character.style.bottom = jumpHeight + "px";
                 }
             }, 20);
