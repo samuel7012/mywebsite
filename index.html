@@ -33,83 +33,73 @@
             position: absolute;
             bottom: 0;
             left: 50px;
+            background-color: #ff6347; /* Character color (tomato red) */
             border-radius: 5px;
-            transition: transform 0.1s;
-        }
-
-        #character img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+            transition: left 0.1s linear, transform 0.1s ease;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <div id="character">
-            <img src="https://w7.pngwing.com/pngs/912/409/png-transparent-pixelated-penguin-illustration-pixel-penguin-pixel-art-pixel-art-game-animals-text-thumbnail.png" alt="pixelated penguin illustration, Pixel Penguin Pixel art, pixel art, game, animals, text png" />
-        </div>
+        <div id="character"></div>
     </div>
 
     <script>
         const character = document.getElementById("character");
+        const containerWidth = document.getElementById("game-container").offsetWidth;
         let isJumping = false;
         let isRunning = false;
         let isFacingRight = true;
-        let characterPosition = 50; // initial left position
+        let position = 50; // initial left position of the character
 
         document.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowRight") {
-                // Run Right
-                if (!isRunning) {
-                    isRunning = true;
-                    character.style.transition = "left 0.1s linear";
-                    runRight();
-                }
-            } else if (e.key === "ArrowLeft") {
-                // Run Left
-                if (!isRunning) {
-                    isRunning = true;
-                    character.style.transition = "left 0.1s linear";
-                    runLeft();
-                }
+            if (e.key === "ArrowRight" && !isRunning) {
+                runRight();
+            } else if (e.key === "ArrowLeft" && !isRunning) {
+                runLeft();
             } else if (e.key === " " && !isJumping) {
-                // Jump
                 jump();
             }
         });
 
         document.addEventListener("keyup", () => {
             isRunning = false;
-            character.style.transition = "none"; // stop running
+            character.style.transition = "none"; // stop running transition
         });
+
+        function moveCharacter(newPosition) {
+            position = Math.max(0, Math.min(newPosition, containerWidth - 50)); // Keep the character within the container
+            character.style.left = position + "px";
+        }
 
         function runRight() {
             if (isFacingRight) return; // No need to turn if already facing right
-            character.style.transform = "scaleX(1)"; // Face right
             isFacingRight = true;
+            character.style.transform = "scaleX(1)"; // Face right
+            isRunning = true;
 
-            let position = 50;
+            let targetPosition = position + 200;
             const interval = setInterval(() => {
-                position += 2;
-                character.style.left = position + "px";
-                if (position >= 450) {
+                moveCharacter(position += 2);
+                if (position >= targetPosition) {
                     clearInterval(interval);
+                    isRunning = false;
                 }
             }, 10);
         }
 
         function runLeft() {
             if (!isFacingRight) return; // No need to turn if already facing left
-            character.style.transform = "scaleX(-1)"; // Face left
             isFacingRight = false;
+            character.style.transform = "scaleX(-1)"; // Face left
+            isRunning = true;
 
-            let position = 50;
+            let targetPosition = position - 200;
             const interval = setInterval(() => {
-                position -= 2;
-                character.style.left = position + "px";
-                if (position <= 0) {
+                moveCharacter(position -= 2);
+                if (position <= targetPosition) {
                     clearInterval(interval);
+                    isRunning = false;
                 }
             }, 10);
         }
