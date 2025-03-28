@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movement</title>
+    <title>Character Movement</title>
     <style>
         * {
             margin: 0;
@@ -33,121 +33,114 @@
             position: absolute;
             bottom: 0;
             left: 50px;
-            background-color: #ff6347; /* Character color (tomato red) */
             border-radius: 5px;
-            transition: left 0.2s ease-out, transform 0.2s ease-out, bottom 0.1s ease-out;
+            transition: transform 0.1s;
+        }
+
+        #character img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <div id="character"></div>
+        <div id="character">
+            <img src="https://w7.pngwing.com/pngs/912/409/png-transparent-pixelated-penguin-illustration-pixel-penguin-pixel-art-pixel-art-game-animals-text-thumbnail.png" alt="pixelated penguin image">
+        </div>
     </div>
 
     <script>
         const character = document.getElementById("character");
-        const containerWidth = document.getElementById("game-container").offsetWidth;
         let isJumping = false;
         let isRunning = false;
         let isFacingRight = true;
-        let position = 50; // initial left position of the character
+        let characterPosition = 50; // initial left position
 
         document.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowRight" && !isRunning) {
-                runRight();
-            } else if (e.key === "ArrowLeft" && !isRunning) {
-                runLeft();
+            if (e.key === "ArrowRight") {
+                // Run Right
+                if (!isRunning) {
+                    isRunning = true;
+                    character.style.transition = "left 0.1s linear";
+                    runRight();
+                }
+            } else if (e.key === "ArrowLeft") {
+                // Run Left
+                if (!isRunning) {
+                    isRunning = true;
+                    character.style.transition = "left 0.1s linear";
+                    runLeft();
+                }
             } else if (e.key === " " && !isJumping) {
+                // Jump
                 jump();
             }
         });
 
         document.addEventListener("keyup", () => {
             isRunning = false;
-            character.style.transition = "none"; // stop running transition
+            character.style.transition = "none"; // stop running
         });
-
-        function moveCharacter(newPosition) {
-            position = Math.max(0, Math.min(newPosition, containerWidth - 50)); // Keep the character within the container
-            character.style.left = position + "px";
-        }
 
         function runRight() {
             if (isFacingRight) return; // No need to turn if already facing right
-            isFacingRight = true;
             character.style.transform = "scaleX(1)"; // Face right
-            isRunning = true;
+            isFacingRight = true;
 
-            let targetPosition = position + 200;
-            moveRightSmoothly(targetPosition);
-        }
-
-        function moveRightSmoothly(targetPosition) {
-            const moveStep = 2;
-            const moveInterval = () => {
-                if (position < targetPosition) {
-                    position += moveStep;
-                    moveCharacter(position);
-                    requestAnimationFrame(moveInterval); // Smooth transition
-                } else {
-                    isRunning = false;
+            const interval = setInterval(() => {
+                if (!isRunning) {
+                    clearInterval(interval);
+                    return;
                 }
-            };
-            moveInterval();
+                characterPosition += 2;
+                character.style.left = characterPosition + "px";
+                if (characterPosition >= 450) {
+                    clearInterval(interval);
+                }
+            }, 10);
         }
 
         function runLeft() {
             if (!isFacingRight) return; // No need to turn if already facing left
-            isFacingRight = false;
             character.style.transform = "scaleX(-1)"; // Face left
-            isRunning = true;
+            isFacingRight = false;
 
-            let targetPosition = position - 200;
-            moveLeftSmoothly(targetPosition);
-        }
-
-        function moveLeftSmoothly(targetPosition) {
-            const moveStep = 2;
-            const moveInterval = () => {
-                if (position > targetPosition) {
-                    position -= moveStep;
-                    moveCharacter(position);
-                    requestAnimationFrame(moveInterval); // Smooth transition
-                } else {
-                    isRunning = false;
+            const interval = setInterval(() => {
+                if (!isRunning) {
+                    clearInterval(interval);
+                    return;
                 }
-            };
-            moveInterval();
+                characterPosition -= 2;
+                character.style.left = characterPosition + "px";
+                if (characterPosition <= 0) {
+                    clearInterval(interval);
+                }
+            }, 10);
         }
 
         function jump() {
             isJumping = true;
             let jumpHeight = 0;
-            const jumpInterval = () => {
+            let jumpInterval = setInterval(() => {
                 if (jumpHeight >= 100) {
                     // Start falling down
-                    fall();
+                    clearInterval(jumpInterval);
+                    let fallInterval = setInterval(() => {
+                        if (jumpHeight <= 0) {
+                            clearInterval(fallInterval);
+                            isJumping = false;
+                        } else {
+                            jumpHeight -= 2;
+                            character.style.bottom = jumpHeight + "px";
+                        }
+                    }, 20);
                 } else {
                     jumpHeight += 2;
                     character.style.bottom = jumpHeight + "px";
-                    requestAnimationFrame(jumpInterval); // Smooth jump
                 }
-            };
-            jumpInterval();
-        }
-
-        function fall() {
-            let jumpHeight = 100;
-            const fallInterval = () => {
-                if (jumpHeight <= 0) {
-                    isJumping = false;
-                } else {
-                    jumpHeight -= 2;
-                    character.style.bottom = jumpHeight + "px";
-                    requestAnimationFrame(fallInterval); // Smooth fall
-                }
-            };
-            fallInterval();
+            }, 20);
         }
     </script>
 </body>
