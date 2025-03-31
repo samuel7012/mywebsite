@@ -3,60 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS Character Example</title>
+    <title>Moving Stick Figure</title>
     <style>
-        .character {
-            width: 100px;
-            height: 200px;
-            position: relative;
-            background-color: #f0c0a0;
-            margin: 0 auto;
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        .stick-figure {
+            position: absolute;
+            width: 50px;
+            height: 100px;
+            background-color: black;
+            top: 200px;
+            left: 200px;
         }
 
         .head {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #f0a0a0;
             position: absolute;
-            top: -30px;
-            left: 20px;
+            width: 30px;
+            height: 30px;
+            background-color: black;
+            border-radius: 50%;
+            top: -35px;
+            left: 10px;
         }
 
         .arms {
-            width: 120px;
-            height: 10px;
-            background-color: #f0c0a0;
             position: absolute;
-            top: 70px;
+            width: 70px;
+            height: 10px;
+            background-color: black;
+            top: 30px;
             left: -10px;
         }
 
         .legs {
+            position: absolute;
             width: 50px;
             height: 10px;
-            background-color: #f0c0a0;
-            position: absolute;
-            top: 170px;
-            left: 25px;
-        }
-
-        .body {
-            width: 40px;
-            height: 80px;
-            background-color: #f0a0a0;
-            position: absolute;
-            top: 60px;
-            left: 30px;
+            background-color: black;
+            top: 85px;
+            left: 0;
         }
     </style>
 </head>
 <body>
-    <div class="character">
+
+    <div class="stick-figure" id="stickFigure">
         <div class="head"></div>
-        <div class="body"></div>
         <div class="arms"></div>
         <div class="legs"></div>
     </div>
+
+    <script>
+        const stickFigure = document.getElementById('stickFigure');
+        let x = 200; // Starting X position
+        let y = 200; // Starting Y position
+
+        // Move the stick figure when arrow keys are pressed
+        document.addEventListener('keydown', (event) => {
+            const step = 10;
+
+            if (event.key === 'ArrowUp') {
+                y -= step; // Move up
+            } else if (event.key === 'ArrowDown') {
+                y += step; // Move down
+            } else if (event.key === 'ArrowLeft') {
+                x -= step; // Move left
+            } else if (event.key === 'ArrowRight') {
+                x += step; // Move right
+            }
+
+            // Update the stick figure position
+            stickFigure.style.top = `${y}px`;
+            stickFigure.style.left = `${x}px`;
+        });
+    </script>
+
 </body>
 </html>
