@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skinnier Moving Stick Figure with Longer Legs</title>
+    <title>Pak'nSave-Inspired Stick Figure</title>
     <style>
         body {
             margin: 0;
@@ -11,41 +11,54 @@
             background-color: #f0f0f0;
         }
 
+        /* Stick Figure Container */
         .stick-figure {
             position: absolute;
-            width: 10px; /* Thinner body */
-            height: 100px;
-            background-color: black;
+            width: 50px; /* Body width */
+            height: 120px; /* Body height */
             top: 200px;
             left: 200px;
+            background-color: transparent;
         }
 
+        /* Head of the stick figure */
         .head {
             position: absolute;
-            width: 20px; /* Skinnier head */
-            height: 20px;
+            width: 40px;
+            height: 40px;
             background-color: black;
             border-radius: 50%;
-            top: -25px;
-            left: 0;
+            top: -50px;
+            left: 5px;
         }
 
+        /* Arms of the stick figure */
         .arms {
             position: absolute;
-            width: 30px; /* Skinnier arms */
-            height: 5px;
+            width: 80px; /* Wide arms */
+            height: 10px;
             background-color: black;
             top: 30px;
-            left: -10px;
+            left: -15px;
         }
 
+        /* Legs of the stick figure */
         .legs {
             position: absolute;
-            width: 10px; /* Skinnier legs */
-            height: 60px; /* Longer legs */
+            width: 20px;
+            height: 80px;
             background-color: black;
-            top: 100px;
-            left: 0;
+            top: 85px;
+            left: 15px;
+        }
+
+        .legs-left {
+            position: absolute;
+            width: 20px;
+            height: 80px;
+            background-color: black;
+            top: 85px;
+            left: -25px;
         }
     </style>
 </head>
@@ -55,6 +68,7 @@
         <div class="head"></div>
         <div class="arms"></div>
         <div class="legs"></div>
+        <div class="legs-left"></div>
     </div>
 
     <script>
