@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stickman with JavaScript</title>
+    <title>Stickman with HTML and CSS</title>
     <style>
         body {
             display: flex;
@@ -14,58 +14,86 @@
             background-color: #f0f0f0;
         }
 
-        canvas {
-            background-color: #fff; /* No border around the canvas */
+        .stickman {
+            position: relative;
+            width: 100px;
+            height: 300px;
+        }
+
+        /* Head */
+        .head {
+            position: absolute;
+            top: 0;
+            left: 25px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #000;
+        }
+
+        /* Body */
+        .body {
+            position: absolute;
+            top: 50px;
+            left: 45px;
+            width: 10px;
+            height: 100px;
+            background-color: #000;
+        }
+
+        /* Arms */
+        .arms {
+            position: absolute;
+            top: 90px;
+            left: 0;
+            width: 100px;
+            height: 10px;
+            background-color: #000;
+        }
+
+        /* Left Leg */
+        .left-leg {
+            position: absolute;
+            top: 150px;
+            left: 40px;
+            width: 10px;
+            height: 100px;
+            background-color: #000;
+            transform: rotate(45deg);
+            transform-origin: top left;
+        }
+
+        /* Right Leg */
+        .right-leg {
+            position: absolute;
+            top: 150px;
+            left: 50px;
+            width: 10px;
+            height: 100px;
+            background-color: #000;
+            transform: rotate(-45deg);
+            transform-origin: top right;
         }
     </style>
 </head>
 <body>
 
-<canvas id="stickmanCanvas" width="200" height="400"></canvas>
+<div class="stickman">
+    <!-- Head -->
+    <div class="head"></div>
 
-<script>
-    const canvas = document.getElementById('stickmanCanvas');
-    const ctx = canvas.getContext('2d');
+    <!-- Body -->
+    <div class="body"></div>
 
-    function drawStickman() {
-        // Draw platform
-        ctx.beginPath();
-        ctx.moveTo(30, 350); // Left side of platform
-        ctx.lineTo(170, 350); // Right side of platform
-        ctx.stroke();
+    <!-- Arms -->
+    <div class="arms"></div>
 
-        // Head
-        ctx.beginPath();
-        ctx.arc(100, 50, 20, 0, Math.PI * 2); // (x, y, radius, start angle, end angle)
-        ctx.stroke();
+    <!-- Left Leg -->
+    <div class="left-leg"></div>
 
-        // Body
-        ctx.beginPath();
-        ctx.moveTo(100, 70); // Start at the neck
-        ctx.lineTo(100, 150); // Draw the body down
-        ctx.stroke();
-
-        // Arms
-        ctx.beginPath();
-        ctx.moveTo(50, 90); // Left arm
-        ctx.lineTo(150, 90); // Right arm
-        ctx.stroke();
-
-        // Left Leg
-        ctx.beginPath();
-        ctx.moveTo(100, 150);
-        ctx.lineTo(60, 220); // Left leg going down and to the left
-        ctx.stroke();
-
-        // Right Leg
-        ctx.beginPath();
-        ctx.moveTo(100, 150);
-        ctx.lineTo(140, 220); // Right leg going down and to the right
-        ctx.stroke();
-    }
-
-    drawStickman();
-</script>
+    <!-- Right Leg -->
+    <div class="right-leg"></div>
+</div>
 
 </body>
 </html>
