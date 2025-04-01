@@ -3,98 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pak'nSave-Inspired Stick Figure</title>
+    <title>Stickman with JavaScript</title>
     <style>
         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
-            overflow: hidden;
             background-color: #f0f0f0;
         }
 
-        /* Stick Figure Container */
-        .stick-figure {
-            position: absolute;
-            width: 50px; /* Body width */
-            height: 120px; /* Body height */
-            top: 200px;
-            left: 200px;
-            background-color: yellow;
-        }
-
-        /* Head of the stick figure */
-        .head {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background-color: black;
-            border-radius: 50%;
-            top: -50px;
-            left: 5px;
-        }
-
-        /* Arms of the stick figure */
-        .arms {
-            position: absolute;
-            width: 80px; /* Wide arms */
-            height: 10px;
-            background-color: black;
-            top: 30px;
-            left: -15px;
-        }
-
-        /* Legs of the stick figure */
-        .legs {
-            position: absolute;
-            width: 20px;
-            height: 80px;
-            background-color: black;
-            top: 85px;
-            left: 15px;
-        }
-
-        .legs-left {
-            position: absolute;
-            width: 20px;
-            height: 80px;
-            background-color: black;
-            top: 85px;
-            left: -25px;
+        canvas {
+            border: 1px solid black;
         }
     </style>
 </head>
 <body>
 
-    <div class="stick-figure" id="stickFigure">
-        <div class="head"></div>
-        <div class="arms"></div>
-        <div class="legs"></div>
-        <div class="legs-left"></div>
-    </div>
+<canvas id="stickmanCanvas" width="200" height="400"></canvas>
 
-    <script>
-        const stickFigure = document.getElementById('stickFigure');
-        let x = 200; // Starting X position
-        let y = 200; // Starting Y position
+<script>
+    const canvas = document.getElementById('stickmanCanvas');
+    const ctx = canvas.getContext('2d');
 
-        // Move the stick figure when arrow keys are pressed
-        document.addEventListener('keydown', (event) => {
-            const step = 10;
+    function drawStickman() {
+        // Head
+        ctx.beginPath();
+        ctx.arc(100, 50, 20, 0, Math.PI * 2); // (x, y, radius, start angle, end angle)
+        ctx.stroke();
 
-            if (event.key === 'ArrowUp') {
-                y -= step; // Move up
-            } else if (event.key === 'ArrowDown') {
-                y += step; // Move down
-            } else if (event.key === 'ArrowLeft') {
-                x -= step; // Move left
-            } else if (event.key === 'ArrowRight') {
-                x += step; // Move right
-            }
+        // Body
+        ctx.beginPath();
+        ctx.moveTo(100, 70); // Start at the neck
+        ctx.lineTo(100, 150); // Draw the body down
+        ctx.stroke();
 
-            // Update the stick figure position
-            stickFigure.style.top = `${y}px`;
-            stickFigure.style.left = `${x}px`;
-        });
-    </script>
+        // Arms
+        ctx.beginPath();
+        ctx.moveTo(50, 90); // Left arm
+        ctx.lineTo(150, 90); // Right arm
+        ctx.stroke();
+
+        // Left Leg
+        ctx.beginPath();
+        ctx.moveTo(100, 150);
+        ctx.lineTo(60, 220); // Left leg going down and to the left
+        ctx.stroke();
+
+        // Right Leg
+        ctx.beginPath();
+        ctx.moveTo(100, 150);
+        ctx.lineTo(140, 220); // Right leg going down and to the right
+        ctx.stroke();
+    }
+
+    drawStickman();
+</script>
 
 </body>
 </html>
