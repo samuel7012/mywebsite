@@ -15,7 +15,7 @@
         }
 
         canvas {
-            border: 1px solid black;
+            background-color: #fff; /* No border around the canvas */
         }
     </style>
 </head>
@@ -28,6 +28,12 @@
     const ctx = canvas.getContext('2d');
 
     function drawStickman() {
+        // Draw platform
+        ctx.beginPath();
+        ctx.moveTo(30, 350); // Left side of platform
+        ctx.lineTo(170, 350); // Right side of platform
+        ctx.stroke();
+
         // Head
         ctx.beginPath();
         ctx.arc(100, 50, 20, 0, Math.PI * 2); // (x, y, radius, start angle, end angle)
