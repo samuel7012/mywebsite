@@ -5,31 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Text Box with Toggle Visibility</title>
   <style>
+    /* Initially hidden elements */
     #textBox, #label {
-      display: none; /* Initially hidden */
+      display: none;
     }
-  </style>
-</head>
-<body>
-  <!-- Button to show the text box and label -->
-  <button onclick="showTextBox()">Start</button>
 
-  <!-- Hidden label and text box -->
-  <label for="playerInput" id="label">Enter your text:</label>
-  <input type="text" id="textBox" placeholder="Type here">
-
-  <script>
-    function showTextBox() {
-      // Show the label and text box
-      document.getElementById('label').style.display = 'block';
-      document.getElementById('textBox').style.display = 'block';
-    }
-  </script>
-</body>
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
     /* Basic button styling */
     button {
       background-color: #4CAF50; /* Green background */
@@ -62,4 +42,19 @@
   </style>
 </head>
 <body>
+  <!-- Button to show the text box and label -->
+  <button onclick="showTextBox()">Start</button>
+
+  <!-- Hidden label and text box -->
+  <label for="playerInput" id="label">Enter your text:</label>
+  <input type="text" id="textBox" placeholder="Type here">
+
+  <script>
+    function showTextBox() {
+      // Show the label and text box
+      document.getElementById('label').style.display = 'block';
+      document.getElementById('textBox').style.display = 'block';
+    }
+  </script>
+</body>
 </html>
