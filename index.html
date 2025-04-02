@@ -1,98 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stickman</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-
-        .stickman {
-            position: relative;
-            width: 100px;
-            height: 300px;
-        }
-
-        /* Head */
-        .head {
-            position: absolute;
-            top: 0;
-            left: 25px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #000;
-        }
-
-        /* Body */
-        .body {
-            position: absolute;
-            top: 50px;
-            left: 45px;
-            width: 10px;
-            height: 100px;
-            background-color: #000;
-        }
-
-        /* Arms */
-        .arms {
-            position: absolute;
-            top: 90px;
-            left: 0;
-            width: 100px;
-            height: 10px;
-            background-color: #000;
-        }
-
-        /* Left Leg */
-        .left-leg {
-            position: absolute;
-            top: 119px;
-            left: 45px;
-            width: 10px;
-            height: 100px;
-            background-color: #000;
-            transform: rotate(45deg);
-            transform-origin: top left;
-        }
-
-        /* Right Leg */
-        .right-leg {
-            position: absolute;
-            top: 119px;
-            left: 45px;
-            width: 10px;
-            height: 100px;
-            background-color: #000;
-            transform: rotate(-45deg);
-            transform-origin: top right;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Box Example</title>
 </head>
 <body>
-
-<div class="stickman">
-    <!-- Head -->
-    <div class="head"></div>
-
-    <!-- Body -->
-    <div class="body"></div>
-
-    <!-- Arms -->
-    <div class="arms"></div>
-
-    <!-- Left Leg -->
-    <div class="left-leg"></div>
-
-    <!-- Right Leg -->
-    <div class="right-leg"></div>
-</div> <!-- This closes the stickman div -->
+  <label for="playerInput">Enter your text:</label>
+  <input type="text" id="playerInput" placeholder="Type here">
 </body>
 </html>
