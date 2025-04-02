@@ -3,10 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Text Box Example</title>
+  <title>Text Box with Toggle Visibility</title>
+  <style>
+    #textBox, #label {
+      display: none; /* Initially hidden */
+    }
+  </style>
 </head>
 <body>
-  <label for="playerInput">Enter your answer:</label>
-  <input type="text" id="playerInput" placeholder="Type here">
+  <!-- Button to show the text box and label -->
+  <button onclick="showTextBox()">Show Text Box</button>
+
+  <!-- Hidden label and text box -->
+  <label for="playerInput" id="label">Enter your text:</label>
+  <input type="text" id="textBox" placeholder="Type here">
+
+  <script>
+    function showTextBox() {
+      // Show the label and text box
+      document.getElementById('label').style.display = 'block';
+      document.getElementById('textBox').style.display = 'block';
+    }
+  </script>
 </body>
 </html>
