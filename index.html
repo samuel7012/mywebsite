@@ -119,54 +119,38 @@
     </div>
 
     <script>
-        // Generate math question
-        function generateQuestion() {
-            // Generate two random numbers between 1 and 10
-            let num1 = Math.floor(Math.random() * 10) + 1;
-            let num2 = Math.floor(Math.random() * 10) + 1;
+    // Generate math question
+    function generateQuestion() {
+        // Generate two random numbers between 1 and 10
+        let num1 = Math.floor(Math.random() * 10) + 1;
+        let num2 = Math.floor(Math.random() * 10) + 1;
 
-            // Display the question in the div
-            document.getElementById('question').textContent = `What is ${num1} + ${num2}?`;
+        // Display the question in the div
+        document.getElementById('question').textContent = `What is ${num1} + ${num2}?`;
 
-            // Optionally, you can clear the answer box when a new question is generated
-            document.getElementById('answerBox').value = '';
+        // Optionally, you can clear the answer box when a new question is generated
+        document.getElementById('answerBox').value = '';
+    }
+
+    // Function to show the text box
+    function showTextBox() {
+        const newTextBox = document.createElement('textarea');
+        newTextBox.classList.add('newTextBox');
+        newTextBox.placeholder = 'New Text Box';
+
+        document.getElementById('newTextBoxes').appendChild(newTextBox);
+        newTextBox.focus(); // Focus on the new text box for immediate typing
+    }
+
+    // Add a new smaller text box and show the text box when Enter is pressed in the answer box
+    document.getElementById('answerBox').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the Enter key from submitting the form
+
+            // Show the text box
+            showTextBox();
         }
-
-        // Function to show the text box
-        function showTextBox() {
-            document.getElementById('textBox').style.display = 'block';
-        }
-
-        // Add a new smaller text box when Enter is pressed in the main text box
-        document.getElementById('textBox').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent the Enter key from submitting the form
-                
-                const newTextBox = document.createElement('textarea');
-                newTextBox.classList.add('newTextBox');
-                newTextBox.placeholder = 'New Text Box';
-                
-                document.getElementById('newTextBoxes').appendChild(newTextBox);
-                newTextBox.focus(); // Focus on the new text box for immediate typing
-            }
-        });
-
-        // Add a new smaller text box and show the text box when Enter is pressed in the answer box
-        document.getElementById('answerBox').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent the Enter key from submitting the form
-
-                // Show the text box
-                showTextBox();
-
-                const newTextBox = document.createElement('textarea');
-                newTextBox.classList.add('newTextBox');
-                newTextBox.placeholder = 'New Text Box';
-
-                document.getElementById('newTextBoxes').appendChild(newTextBox);
-                newTextBox.focus(); // Focus on the new text box for immediate typing
-            }
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
