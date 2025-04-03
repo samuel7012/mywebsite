@@ -126,6 +126,20 @@
         newTextBox.focus(); // Focus on the new text box for immediate typing
       }
     });
+
+    // Add a new smaller text box when Enter is pressed in the answer box
+    document.getElementById('answerBox').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent the Enter key from submitting the form
+
+        const newTextBox = document.createElement('textarea');
+        newTextBox.classList.add('newTextBox');
+        newTextBox.placeholder = 'New Text Box';
+
+        document.getElementById('newTextBoxes').appendChild(newTextBox);
+        newTextBox.focus(); // Focus on the new text box for immediate typing
+      }
+    });
   </script>
 </body>
 </html>
