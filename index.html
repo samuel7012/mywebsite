@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Math trainer</title>
+  <title>Matg</title>
   <style>
     /* Initially hidden elements */
     #textBox, #label {
@@ -52,6 +52,11 @@
       background-color: #f4f4f9;
     }
 
+    .container-wrapper {
+      display: flex;
+      gap: 20px; /* Gap between the container and text box */
+    }
+
     .container {
       text-align: center;
       padding: 20px;
@@ -85,18 +90,28 @@
       padding: 5px;
       border: 1px solid #ccc;
     }
+
+    #textBox {
+      width: 200px; /* Adjust width as needed */
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Area for new text boxes -->
-    <div id="newTextBoxes"></div>
+  <div class="container-wrapper">
+    <div class="container">
+      <!-- Area for new text boxes -->
+      <div id="newTextBoxes"></div>
 
-    <!-- Math question generator -->
-    <div id="question">Press "Generate question" to get a math problem.</div>
-    <input type="text" id="answerBox" placeholder="Enter your answer here">
-    <br>
-    <button onclick="generateQuestion()">Generate Question</button>
+      <!-- Math question generator -->
+      <div id="question">Press "Generate question" to get a math problem.</div>
+      <input type="text" id="answerBox" placeholder="Enter your answer here">
+      <br>
+      <button onclick="generateQuestion()">Generate Question</button>
+    </div>
+    <textarea id="textBox" placeholder="Text Box"></textarea>
   </div>
 
   <script>
