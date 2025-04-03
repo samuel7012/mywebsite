@@ -80,9 +80,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- Button to show the text box and label -->
-    <button id="toggleButton" onclick="showTextBox()" aria-expanded="false">Show Text Box</button>
-
     <!-- Hidden label and text box -->
     <label for="playerInput" id="label" aria-live="polite">Enter your text:</label>
     <input type="text" id="textBox" placeholder="Type here">
@@ -95,17 +92,6 @@
   </div>
 
   <script>
-    function showTextBox() {
-      // Show the label and text box
-      var label = document.getElementById('label');
-      var textBox = document.getElementById('textBox');
-      var button = document.getElementById('toggleButton');
-      
-      label.style.display = 'block';
-      textBox.style.display = 'block';
-      button.setAttribute('aria-expanded', 'true');
-    }
-
     function generateQuestion() {
       // Generate two random numbers between 1 and 10
       let num1 = Math.floor(Math.random() * 10) + 1;
