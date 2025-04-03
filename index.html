@@ -102,6 +102,14 @@
             border: 1px solid #ccc;
             border-radius: 8px;
         }
+
+        /* Styling result message */
+        #resultMessage {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: green;
+        }
     </style>
 </head>
 <body>
@@ -115,42 +123,65 @@
             <input type="text" id="answerBox" placeholder="Enter your answer here">
             <br>
             <button onclick="generateQuestion()">Generate Question</button>
+            
+            <!-- Result Message -->
+            <div id="resultMessage"></div>
         </div>
     </div>
 
     <script>
-    // Generate math question
-    function generateQuestion() {
-        // Generate two random numbers between 1 and 10
-        let num1 = Math.floor(Math.random() * 10) + 1;
-        let num2 = Math.floor(Math.random() * 10) + 1;
+        let correctAnswer;
 
-        // Display the question in the div
-        document.getElementById('question').textContent = `What is ${num1} + ${num2}?`;
+        // Generate math question and store the correct answer
+        function generateQuestion() {
+            // Generate two random numbers between 1 and 10
+            let num1 = Math.floor(Math.random() * 10) + 1;
+            let num2 = Math.floor(Math.random() * 10) + 1;
 
-        // Optionally, you can clear the answer box when a new question is generated
-        document.getElementById('answerBox').value = '';
-    }
+            // Store the correct answer
+            correctAnswer = num1 + num2;
 
-    // Function to show the text box
-    function showTextBox() {
-        const newTextBox = document.createElement('textarea');
-        newTextBox.classList.add('newTextBox');
-        newTextBox.placeholder = 'New Text Box';
+            // Display the question in the div
+            document.getElementById('question').textContent = `What is ${num1} + ${num2}?`;
 
-        document.getElementById('newTextBoxes').appendChild(newTextBox);
-        newTextBox.focus(); // Focus on the new text box for immediate typing
-    }
-
-    // Add a new smaller text box and show the text box when Enter is pressed in the answer box
-    document.getElementById('answerBox').addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent the Enter key from submitting the form
-
-            // Show the text box
-            showTextBox();
+            // Optionally, clear the answer box and result message when a new question is generated
+            document.getElementById('answerBox').value = '';
+            document.getElementById('resultMessage').textContent = '';
         }
-    });
-</script>
+
+        // Function to show the text box
+        function showTextBox() {
+            const newTextBox = document.createElement('textarea');
+            newTextBox.classList.add('newTextBox');
+            newTextBox.placeholder = 'New Text Box';
+
+            document.getElementById('newTextBoxes').appendChild(newTextBox);
+            newTextBox.focus(); // Focus on the new text box for immediate typing
+        }
+
+        // Add a new smaller text box and show the text box when Enter is pressed in the answer box
+        document.getElementById('answerBox').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the Enter key from submitting the form
+
+                // Check the answer
+                const userAnswer = parseInt(document.getElementById('answerBox').value);
+
+                if (userAnswer === correctAnswer) {
+                    document.getElementById('resultMessage').textContent = 'Yes!'; // Correct answer
+                    document.getElementById('resultMessage').style.color = 'green'; // Green for correct
+                } else {
+                    document.getElementById('resultMessage').textContent = 'No'; // Incorrect answer
+                    document.getElementById('resultMessage').style.color = 'red'; // Red for incorrect
+                }
+
+                // Show the new text box
+                showTextBox();
+
+                // Clear the answer box after checking
+                document.getElementById('answerBox').value = '';
+            }
+        });
+    </script>
 </body>
 </html>
