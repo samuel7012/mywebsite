@@ -1,172 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Matg</title>
-  <style>
-    /* Initially hidden elements */
-    #textBox, #label {
-      display: block;
-    }
-
-    /* Basic button styling */
-    button {
-      background-color: #4CAF50; /* Green background */
-      color: white; /* White text */
-      border: none; /* Remove default border */
-      padding: 15px 32px; /* Add padding for size */
-      text-align: center; /* Center the text */
-      text-decoration: none; /* Remove underline */
-      display: inline-block; /* Keep it inline with other elements */
-      font-size: 16px; /* Font size */
-      border-radius: 8px; /* Rounded corners */
-      cursor: pointer; /* Pointer cursor on hover */
-      transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-      margin-top: 20px; /* Add margin for spacing */
-    }
-
-    /* Button hover effect */
-    button:hover {
-      background-color: #45a049; /* Darker green on hover */
-    }
-
-    /* Button active (clicked) effect */
-    button:active {
-      background-color: #388e3c; /* Even darker green when clicked */
-    }
-
-    /* Optional: Add focus style for accessibility */
-    button:focus {
-      outline: 3px solid #FFD700; /* Gold outline on focus */
-    }
-
-    /* Center everything */
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-    }
-
-    .container-wrapper {
-      display: flex;
-      gap: 20px; /* Gap between the container and text box */
-    }
-
-    .container {
-      text-align: center;
-      padding: 20px;
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      background-color: #fff;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Styling the input box */
-    #answerBox {
-      width: 80%; /* Reduced width */
-      padding: 15px;
-      font-size: 18px;
-      margin-top: 20px;
-      border-radius: 8px;
-      border: 2px solid #ddd;
-    }
-
-    /* Displaying the math question */
-    #question {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    /* Styling the new smaller text boxes */
-    .newTextBox {
-      width: 200px;
-      height: 50px;
-      margin-top: 10px;
-      padding: 5px;
-      border: 1px solid #ccc;
-    }
-
-    #textBox {
-      width: 200px; /* Adjust width as needed */
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container-wrapper">
-    <div class="container">
-      <!-- Area for new text boxes -->
-      <div id="newTextBoxes"></div>
-
-      <!-- Math question generator -->
-      <div id="question">Press "Generate question" to get a math problem.</div>
-      <input type="text" id="answerBox" placeholder="Enter your answer here">
-      <br>
-      <button onclick="generateQuestion()">Generate Question</button>
-    </div>
-  </div>
-
-  <script>
-    // Generate math question
-    function generateQuestion() {
-      // Generate two random numbers between 1 and 10
-      let num1 = Math.floor(Math.random() * 10) + 1;
-      let num2 = Math.floor(Math.random() * 10) + 1;
-
-      // Display the question in the div
-      document.getElementById('question').textContent = `What is ${num1} + ${num2}?`;
-
-      // Optionally, you can clear the answer box when a new question is generated
-      document.getElementById('answerBox').value = '';
-    }
-
-    // Function to show the text box
-    function showTextBox() {
-      document.getElementById('textBox').style.display = 'block';
-    }
-
-    // Add a new smaller text box when Enter is pressed in the main text box
-    document.getElementById('textBox').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault(); // Prevent the Enter key from submitting the form
-        
-        const newTextBox = document.createElement('textarea');
-        newTextBox.classList.add('newTextBox');
-        newTextBox.placeholder = 'New Text Box';
-        
-        document.getElementById('newTextBoxes').appendChild(newTextBox);
-        newTextBox.focus(); // Focus on the new text box for immediate typing
-      }
-    });
-
-    // Add a new smaller text box and show the text box when Enter is pressed in the answer box
-    document.getElementById('answerBox').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault(); // Prevent the Enter key from submitting the form
-
-        // Show the text box
-        showTextBox();
-
-        const newTextBox = document.createElement('textarea');
-        newTextBox.classList.add('newTextBox');
-        newTextBox.placeholder = 'New Text Box';
-
-        document.getElementById('newTextBoxes').appendChild(newTextBox);
-        newTextBox.focus(); // Focus on the new text box for immediate typing
-      }
-    });
-  </script>
-</body>
-  <!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Textbox Creator</title>
@@ -175,39 +9,164 @@
             display: block;
             margin: 10px 0;
         }
+
+        /* Initially hidden elements */
+        #textBox, #label {
+            display: block;
+        }
+
+        /* Basic button styling */
+        button {
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+            border: none; /* Remove default border */
+            padding: 15px 32px; /* Add padding for size */
+            text-align: center; /* Center the text */
+            text-decoration: none; /* Remove underline */
+            display: inline-block; /* Keep it inline with other elements */
+            font-size: 16px; /* Font size */
+            border-radius: 8px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor on hover */
+            transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+            margin-top: 20px; /* Add margin for spacing */
+        }
+
+        /* Button hover effect */
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        /* Button active (clicked) effect */
+        button:active {
+            background-color: #388e3c; /* Even darker green when clicked */
+        }
+
+        /* Optional: Add focus style for accessibility */
+        button:focus {
+            outline: 3px solid #FFD700; /* Gold outline on focus */
+        }
+
+        /* Center everything */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        .container-wrapper {
+            display: flex;
+            gap: 20px; /* Gap between the container and text box */
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling the input box */
+        #answerBox {
+            width: 80%; /* Reduced width */
+            padding: 15px;
+            font-size: 18px;
+            margin-top: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+
+        /* Displaying the math question */
+        #question {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Styling the new smaller text boxes */
+        .newTextBox {
+            width: 200px;
+            height: 50px;
+            margin-top: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #textBox {
+            width: 200px; /* Adjust width as needed */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
-    <div id="textbox-container">
-        <input type="text" class="textbox" id="textbox-1">
+    <div class="container-wrapper">
+        <div class="container">
+            <!-- Area for new text boxes -->
+            <div id="newTextBoxes"></div>
+
+            <!-- Math question generator -->
+            <div id="question">Press "Generate question" to get a math problem.</div>
+            <input type="text" id="answerBox" placeholder="Enter your answer here">
+            <br>
+            <button onclick="generateQuestion()">Generate Question</button>
+        </div>
     </div>
+
     <script>
-        document.getElementById('textbox-1').addEventListener('keypress', function(event) {
+        // Generate math question
+        function generateQuestion() {
+            // Generate two random numbers between 1 and 10
+            let num1 = Math.floor(Math.random() * 10) + 1;
+            let num2 = Math.floor(Math.random() * 10) + 1;
+
+            // Display the question in the div
+            document.getElementById('question').textContent = `What is ${num1} + ${num2}?`;
+
+            // Optionally, you can clear the answer box when a new question is generated
+            document.getElementById('answerBox').value = '';
+        }
+
+        // Function to show the text box
+        function showTextBox() {
+            document.getElementById('textBox').style.display = 'block';
+        }
+
+        // Add a new smaller text box when Enter is pressed in the main text box
+        document.getElementById('textBox').addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-                createNewTextbox();
+                event.preventDefault(); // Prevent the Enter key from submitting the form
+                
+                const newTextBox = document.createElement('textarea');
+                newTextBox.classList.add('newTextBox');
+                newTextBox.placeholder = 'New Text Box';
+                
+                document.getElementById('newTextBoxes').appendChild(newTextBox);
+                newTextBox.focus(); // Focus on the new text box for immediate typing
             }
         });
 
-        function createNewTextbox() {
-            var container = document.getElementById('textbox-container');
-            var newTextbox = document.createElement('input');
-            var textboxes = document.getElementsByClassName('textbox');
-            var newId = 'textbox-' + (textboxes.length + 1);
+        // Add a new smaller text box and show the text box when Enter is pressed in the answer box
+        document.getElementById('answerBox').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the Enter key from submitting the form
 
-            newTextbox.type = 'text';
-            newTextbox.className = 'textbox';
-            newTextbox.id = newId;
+                // Show the text box
+                showTextBox();
 
-            // Add event listener for the new textbox
-            newTextbox.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    createNewTextbox();
-                }
-            });
+                const newTextBox = document.createElement('textarea');
+                newTextBox.classList.add('newTextBox');
+                newTextBox.placeholder = 'New Text Box';
 
-            container.appendChild(newTextbox);
-        }
+                document.getElementById('newTextBoxes').appendChild(newTextBox);
+                newTextBox.focus(); // Focus on the new text box for immediate typing
+            }
+        });
     </script>
 </body>
-</html>
 </html>
