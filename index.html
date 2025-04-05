@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic-like Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #87CEEB; /* Sky blue background */
+        }
+
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: #32CD32; /* Grass-like green for the floor */
+        }
+
+        .sonic {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #0080FF; /* Sonic blue */
+            border-radius: 50%;
+            bottom: 20px;
+            left: 50px;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background-color: #8B4513; /* Brown ground */
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="sonic"></div>
+        <div class="ground"></div>
+    </div>
+
+    <script>
+        // Sonic game logic
+        const sonic = document.querySelector('.sonic');
+        const gameContainer = document.querySelector('.game-container');
+
+        let sonicSpeed = 5;
+        let jumpHeight = 15;
+        let isJumping = false;
+        let velocityY = 0;
+        let gravity = 1;
+
+        // Sonic movement (left and right)
+        let sonicPositionX = 50;
+        let sonicPositionY = gameContainer.clientHeight - 70;
+
+        function moveSonic(e) {
+            if (e.key === 'ArrowRight') {
+                sonicPositionX += sonicSpeed;
+            } else if (e.key === 'ArrowLeft') {
+                sonicPositionX -= sonicSpeed;
+            }
+
+            // Keep Sonic inside the game boundaries
+            if (sonicPositionX < 0) sonicPositionX = 0;
+            if (sonicPositionX > gameContainer.clientWidth - 50) {
+                sonicPositionX = gameContainer.clientWidth - 50;
+            }
+
+            sonic.style.left = `${sonicPositionX}px`;
+        }
+
+        // Sonic jump logic
+        function jump() {
+            if (isJumping) return;
+            isJumping = true;
+            velocityY = -jumpHeight;
+        }
+
+        // Gravity and jump physics
+        function applyPhysics() {
+            if (isJumping) {
+                velocityY += gravity; // Apply gravity
+                sonicPositionY += velocityY;
+
+                if (sonicPositionY >= gameContainer.clientHeight - 70) {
+                    sonicPositionY = gameContainer.clientHeight - 70;
+                    isJumping = false;
+                }
+
+                sonic.style.bottom = `${gameContainer.clientHeight - sonicPositionY - 20}px`;
+            }
+        }
+
+        // Game loop
+        function gameLoop() {
+            applyPhysics();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners
+        window.addEventListener('keydown', (e) => {
+            moveSonic(e);
+            if (e.key === ' ' || e.key === 'ArrowUp') {
+                jump();
+            }
+        });
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
