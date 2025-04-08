@@ -16,7 +16,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            background-color: #87CEEB; /* Sky blue background (just keeping the sky) */
+            background-color: #87CEEB; /* Sky blue background */
         }
 
         .sonic {
@@ -28,11 +28,21 @@
             bottom: 20px;
             left: 50px;
         }
+
+        .cloud {
+            position: absolute;
+            width: 150px;
+            height: 80px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 50px 20px 0px 0px white, 70px 10px 0px 0px white, 110px 20px 0px 0px white;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
         <div class="sonic"></div>
+        <!-- Clouds will be added dynamically via JavaScript -->
     </div>
 
     <script>
@@ -88,9 +98,36 @@
             }
         }
 
+        // Cloud logic
+        const clouds = [];
+        const cloudSpeed = 0.5;
+
+        function createCloud() {
+            const cloud = document.createElement('div');
+            cloud.classList.add('cloud');
+            cloud.style.top = `${Math.random() * 200 + 20}px`; // Random height for each cloud
+            cloud.style.left = `${gameContainer.clientWidth}px`; // Start at the right edge
+            gameContainer.appendChild(cloud);
+            clouds.push(cloud);
+        }
+
+        function moveClouds() {
+            clouds.forEach(cloud => {
+                let cloudPositionX = parseFloat(cloud.style.left);
+                cloudPositionX -= cloudSpeed;
+
+                if (cloudPositionX + cloud.offsetWidth <= 0) {
+                    cloud.style.left = `${gameContainer.clientWidth}px`; // Reset cloud to the right edge
+                } else {
+                    cloud.style.left = `${cloudPositionX}px`;
+                }
+            });
+        }
+
         // Game loop
         function gameLoop() {
             applyPhysics();
+            moveClouds();
             requestAnimationFrame(gameLoop);
         }
 
@@ -101,6 +138,9 @@
                 jump();
             }
         });
+
+        // Create clouds at regular intervals
+        setInterval(createCloud, 3000); // New cloud every 3 seconds
 
         // Start the game loop
         gameLoop();
