@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Meta Information -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="FNF Clone - A fun rhythm game built with HTML5 Canvas." />
-  
-  <!-- Title -->
   <title>FNF Clone - Rhythm Game</title>
-
-  <!-- Internal Styles -->
   <style>
     * {
       box-sizing: border-box;
@@ -32,7 +27,7 @@
       text-align: center;
     }
 
-    .menu.active, .game.active {
+    .active {
       display: flex;
     }
 
@@ -62,26 +57,27 @@
 
     canvas {
       border: 2px solid #fff;
+      background: #222;
     }
   </style>
 </head>
 <body>
 
-  <!-- Menu Screen -->
+  <!-- Menu -->
   <div id="menu" class="menu active">
     <h1>🎤 Friday Night Clone</h1>
     <button id="startButton">Start Game</button>
   </div>
 
-  <!-- Game Screen -->
+  <!-- Game -->
   <div id="game" class="game">
     <div id="score">Score: 0</div>
     <canvas id="gameCanvas" width="800" height="600">
-      <noscript>Your browser does not support the canvas element. Please enable JavaScript or use a modern browser.</noscript>
+      <noscript>Your browser does not support the canvas element. Please enable JavaScript.</noscript>
     </canvas>
   </div>
 
-  <!-- Internal Script -->
+  <!-- JavaScript -->
   <script>
     const menu = document.getElementById("menu");
     const game = document.getElementById("game");
@@ -91,6 +87,7 @@
     const scoreDisplay = document.getElementById("score");
 
     let score = 0;
+    let gameRunning = false;
 
     startButton.addEventListener("click", () => {
       menu.classList.remove("active");
@@ -99,20 +96,31 @@
     });
 
     function startGame() {
-      // Clear screen
+      gameRunning = true;
+      score = 0;
+      updateScore();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updateScore() {
+      scoreDisplay.textContent = "Score: " + score;
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Show placeholder game state
-      ctx.fillStyle = "white";
-      ctx.font = "32px Arial";
+      // Example game graphics
+      ctx.fillStyle = "#0f0";
+      ctx.font = "30px Arial";
       ctx.fillText("Game Started!", 300, 300);
 
-      // You can start music and note logic here...
-      // Example score increment
-      setInterval(() => {
-        score += 10;
-        scoreDisplay.innerText = "Score: " + score;
-      }, 1000);
+      // Example score increase
+      score++;
+      updateScore();
+
+      requestAnimationFrame(gameLoop);
     }
   </script>
 
