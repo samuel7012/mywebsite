@@ -3,109 +3,103 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="FNF Clone - A fun rhythm game built with HTML5 Canvas." />
   <title>FNF Clone - Rhythm Game</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
       margin: 0;
       background-color: #111;
       color: #fff;
       font-family: Arial, sans-serif;
     }
-    #menu, #game {
+
+    .screen {
       display: none;
+      height: 100vh;
+      width: 100vw;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      height: 100vh;
-      width: 100vw;
-      text-align: center;
     }
+
     .active {
       display: flex;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 18px;
-      border: none;
-      border-radius: 8px;
-      background-color: #ff4c4c;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #e03c3c;
-    }
+
     #score {
       position: absolute;
       top: 10px;
       left: 10px;
       font-size: 20px;
-      z-index: 1;
     }
+
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #ff4c4c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
     canvas {
       border: 2px solid white;
       background-color: #222;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
   <!-- Menu -->
-  <div id="menu" class="active">
+  <div id="menu" class="screen active">
     <h1>🎤 Friday Night Clone</h1>
     <button id="startButton">Start Game</button>
   </div>
 
-  <!-- Game -->
-  <div id="game">
+  <!-- Game Screen -->
+  <div id="game" class="screen">
     <div id="score">Score: 0</div>
-    <canvas id="gameCanvas" width="800" height="600">
-      Your browser does not support the canvas element.
-    </canvas>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
   </div>
 
   <script>
-    const menu = document.getElementById("menu");
-    const game = document.getElementById("game");
-    const startButton = document.getElementById("startButton");
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const scoreDisplay = document.getElementById("score");
+    const menu = document.getElementById('menu');
+    const game = document.getElementById('game');
+    const startButton = document.getElementById('startButton');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
 
     let score = 0;
-    let gameInterval;
+    let interval;
 
-    startButton.addEventListener("click", () => {
-      // Switch screens
-      menu.classList.remove("active");
-      game.classList.add("active");
-
-      // Start game
+    startButton.addEventListener('click', () => {
+      menu.classList.remove('active');
+      game.classList.add('active');
       startGame();
     });
 
     function startGame() {
       score = 0;
       updateScore();
+      draw();
 
-      // Draw something on the canvas
-      ctx.fillStyle = "white";
-      ctx.font = "30px Arial";
-      ctx.fillText("Game Started!", 280, 300);
-
-      // Increase score every second
-      gameInterval = setInterval(() => {
+      interval = setInterval(() => {
         score += 10;
         updateScore();
       }, 1000);
     }
 
     function updateScore() {
-      scoreDisplay.textContent = "Score: " + score;
+      scoreDisplay.textContent = 'Score: ' + score;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.font = '32px Arial';
+      ctx.fillText('Game Started!', 300, 300);
     }
   </script>
 
