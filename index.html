@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ultra Gooey Blob party!</title>
+  <title>Exploding Goo Blobs</title>
   <style>
     body {
       margin: 0;
@@ -35,8 +35,8 @@ class Node {
   constructor(x, y, angle, radius, center) {
     this.center = center;
     this.angle = angle;
-    this.radius = radius;
     this.baseRadius = radius;
+    this.radius = radius;
     this.x = x;
     this.y = y;
     this.vx = 0;
@@ -44,8 +44,7 @@ class Node {
   }
 
   update(time) {
-    // Dynamic radius (adds jiggle)
-    const wobble = Math.sin(time * 0.003 + this.angle * 3) * 4;
+    const wobble = Math.sin(time * 0.004 + this.angle * 3) * 4;
     const dynamicRadius = this.baseRadius + wobble;
 
     this.targetX = this.center.x + Math.cos(this.angle) * dynamicRadius;
@@ -53,12 +52,10 @@ class Node {
 
     let dx = this.targetX - this.x;
     let dy = this.targetY - this.y;
-    
-    // Increase jiggle factor
+
     this.vx += dx * 0.2;
     this.vy += dy * 0.2;
 
-    // Looser damping = more goo
     this.vx *= 0.7;
     this.vy *= 0.7;
 
@@ -71,14 +68,13 @@ class Blob {
   constructor(x, y, color = '#00bfff') {
     this.x = x;
     this.y = y;
-    this.vx = (Math.random() - 0.5) * 1.5;
-    this.vy = (Math.random() - 0.5) * 1.5;
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = (Math.random() - 0.5) * 2;
     this.radius = 50 + Math.random() * 20;
     this.color = color;
     this.nodes = [];
 
     const nodeCount = 32;
-
     for (let i = 0; i < nodeCount; i++) {
       let angle = (Math.PI * 2 / nodeCount) * i;
       let nx = x + Math.cos(angle) * this.radius;
@@ -87,21 +83,38 @@ class Blob {
     }
   }
 
-  applyStickyForce(otherBlob) {
+  applyStickyOrBounce(otherBlob) {
     const dx = otherBlob.x - this.x;
     const dy = otherBlob.y - this.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const minDist = (this.radius + otherBlob.radius) * 0.85;
 
     if (dist < minDist && dist > 0) {
-      const force = (minDist - dist) * 0.015;
-      const ax = (dx / dist) * force;
-      const ay = (dy / dist) * force;
+      const relVx = otherBlob.vx - this.vx;
+      const relVy = otherBlob.vy - this.vy;
+      const relativeSpeed = Math.sqrt(relVx * relVx + relVy * relVy);
 
-      this.vx -= ax;
-      this.vy -= ay;
-      otherBlob.vx += ax;
-      otherBlob.vy += ay;
+      if (relativeSpeed > 2.5) {
+        // 💥 BOUNCE OFF
+        const force = 0.05;
+        const ax = (dx / dist) * force;
+        const ay = (dy / dist) * force;
+
+        this.vx -= ax * 5;
+        this.vy -= ay * 5;
+        otherBlob.vx += ax * 5;
+        otherBlob.vy += ay * 5;
+      } else {
+        // 👯 Gentle stickiness
+        const force = (minDist - dist) * 0.015;
+        const ax = (dx / dist) * force;
+        const ay = (dy / dist) * force;
+
+        this.vx -= ax;
+        this.vy -= ay;
+        otherBlob.vx += ax;
+        otherBlob.vy += ay;
+      }
     }
   }
 
@@ -143,9 +156,8 @@ class Blob {
   }
 }
 
-// Create ultra gooey blobs
 const blobs = [];
-const blobCount = 6;
+const blobCount = 7;
 
 for (let i = 0; i < blobCount; i++) {
   const x = Math.random() * width;
@@ -157,10 +169,10 @@ function animate(time) {
   ctx.clearRect(0, 0, width, height);
   ctx.imageSmoothingEnabled = false;
 
-  // Sticky interactions
+  // Apply sticky or bounce logic
   for (let i = 0; i < blobs.length; i++) {
     for (let j = i + 1; j < blobs.length; j++) {
-      blobs[i].applyStickyForce(blobs[j]);
+      blobs[i].applyStickyOrBounce(blobs[j]);
     }
   }
 
