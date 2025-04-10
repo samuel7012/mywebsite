@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Exploding Goo Blobs</title>
+  <title>xploding Goo Blobs</title>
   <style>
     body {
       margin: 0;
@@ -22,21 +22,17 @@
 <script>
 const canvas = document.getElementById('gooCanvas');
 const ctx = canvas.getContext('2d');
-let width, height;
+let width = window.innerWidth;
+let height = window.innerHeight;
+canvas.width = width;
+canvas.height = height;
 
-function resize() {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resize);
-resize();
-
+// Goo Blob Code -----------------------------------
 class Node {
   constructor(x, y, angle, radius, center) {
     this.center = center;
     this.angle = angle;
     this.baseRadius = radius;
-    this.radius = radius;
     this.x = x;
     this.y = y;
     this.vx = 0;
@@ -45,16 +41,12 @@ class Node {
 
   update(time) {
     const wobble = Math.sin(time * 0.004 + this.angle * 3) * 4;
-    const dynamicRadius = this.baseRadius + wobble;
+    const r = this.baseRadius + wobble;
+    const tx = this.center.x + Math.cos(this.angle) * r;
+    const ty = this.center.y + Math.sin(this.angle) * r;
 
-    this.targetX = this.center.x + Math.cos(this.angle) * dynamicRadius;
-    this.targetY = this.center.y + Math.sin(this.angle) * dynamicRadius;
-
-    let dx = this.targetX - this.x;
-    let dy = this.targetY - this.y;
-
-    this.vx += dx * 0.2;
-    this.vy += dy * 0.2;
+    this.vx += (tx - this.x) * 0.2;
+    this.vy += (ty - this.y) * 0.2;
 
     this.vx *= 0.7;
     this.vy *= 0.7;
@@ -83,37 +75,35 @@ class Blob {
     }
   }
 
-  applyStickyOrBounce(otherBlob) {
-    const dx = otherBlob.x - this.x;
-    const dy = otherBlob.y - this.y;
+  applyStickyOrBounce(other) {
+    const dx = other.x - this.x;
+    const dy = other.y - this.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const minDist = (this.radius + otherBlob.radius) * 0.85;
+    const minDist = (this.radius + other.radius) * 0.85;
 
     if (dist < minDist && dist > 0) {
-      const relVx = otherBlob.vx - this.vx;
-      const relVy = otherBlob.vy - this.vy;
-      const relativeSpeed = Math.sqrt(relVx * relVx + relVy * relVy);
+      const rvx = other.vx - this.vx;
+      const rvy = other.vy - this.vy;
+      const relSpeed = Math.sqrt(rvx * rvx + rvy * rvy);
 
-      if (relativeSpeed > 2.5) {
-        // 💥 BOUNCE OFF
+      if (relSpeed > 2.5) {
         const force = 0.05;
         const ax = (dx / dist) * force;
         const ay = (dy / dist) * force;
 
         this.vx -= ax * 5;
         this.vy -= ay * 5;
-        otherBlob.vx += ax * 5;
-        otherBlob.vy += ay * 5;
+        other.vx += ax * 5;
+        other.vy += ay * 5;
       } else {
-        // 👯 Gentle stickiness
         const force = (minDist - dist) * 0.015;
         const ax = (dx / dist) * force;
         const ay = (dy / dist) * force;
 
         this.vx -= ax;
         this.vy -= ay;
-        otherBlob.vx += ax;
-        otherBlob.vy += ay;
+        other.vx += ax;
+        other.vy += ay;
       }
     }
   }
@@ -122,7 +112,6 @@ class Blob {
     this.x += this.vx;
     this.y += this.vy;
 
-    // Bounce off walls
     if (this.x - this.radius < 0 || this.x + this.radius > width) this.vx *= -1;
     if (this.y - this.radius < 0 || this.y + this.radius > height) this.vy *= -1;
 
@@ -138,13 +127,12 @@ class Blob {
     ctx.beginPath();
     ctx.moveTo(this.nodes[0].x, this.nodes[0].y);
     for (let i = 1; i < this.nodes.length; i++) {
-      const current = this.nodes[i];
+      const curr = this.nodes[i];
       const prev = this.nodes[i - 1];
-      const cx = (prev.x + current.x) / 2;
-      const cy = (prev.y + current.y) / 2;
+      const cx = (prev.x + curr.x) / 2;
+      const cy = (prev.y + curr.y) / 2;
       ctx.quadraticCurveTo(prev.x, prev.y, cx, cy);
     }
-
     const first = this.nodes[0];
     const last = this.nodes[this.nodes.length - 1];
     const cx = (last.x + first.x) / 2;
@@ -156,20 +144,23 @@ class Blob {
   }
 }
 
+// Create blobs after canvas is ready
 const blobs = [];
 const blobCount = 7;
-
-for (let i = 0; i < blobCount; i++) {
-  const x = Math.random() * width;
-  const y = Math.random() * height;
-  blobs.push(new Blob(x, y));
+function initBlobs() {
+  blobs.length = 0;
+  for (let i = 0; i < blobCount; i++) {
+    const margin = 100;
+    const x = margin + Math.random() * (width - margin * 2);
+    const y = margin + Math.random() * (height - margin * 2);
+    blobs.push(new Blob(x, y));
+  }
 }
+initBlobs();
 
 function animate(time) {
   ctx.clearRect(0, 0, width, height);
-  ctx.imageSmoothingEnabled = false;
 
-  // Apply sticky or bounce logic
   for (let i = 0; i < blobs.length; i++) {
     for (let j = i + 1; j < blobs.length; j++) {
       blobs[i].applyStickyOrBounce(blobs[j]);
@@ -185,6 +176,13 @@ function animate(time) {
 }
 
 animate();
+
+// Resize support
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  initBlobs(); // regenerate blobs to stay visible
+});
 </script>
 </body>
 </html>
