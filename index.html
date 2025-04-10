@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Blue Goo Blob</title>
+  <title>Blobby Goo</title>
   <style>
     body {
       margin: 0;
@@ -20,67 +20,123 @@
 <canvas id="gooCanvas"></canvas>
 
 <script>
-  const canvas = document.getElementById('gooCanvas');
-  const ctx = canvas.getContext('2d');
-  let width, height;
+const canvas = document.getElementById('gooCanvas');
+const ctx = canvas.getContext('2d');
+let width, height;
 
-  function resize() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+function resize() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Node-based blob setup
+class Node {
+  constructor(x, y, angle, radius, center) {
+    this.center = center;
+    this.angle = angle;
+    this.radius = radius;
+    this.x = x;
+    this.y = y;
+    this.targetX = x;
+    this.targetY = y;
+    this.vx = 0;
+    this.vy = 0;
   }
 
-  window.addEventListener('resize', resize);
-  resize();
+  update() {
+    // Target position is relative to center (circular)
+    this.targetX = this.center.x + Math.cos(this.angle) * this.radius;
+    this.targetY = this.center.y + Math.sin(this.angle) * this.radius;
 
-  class Blob {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-      this.radius = 30 + Math.random() * 20;
-      this.vx = (Math.random() - 0.5) * 2;
-      this.vy = (Math.random() - 0.5) * 2;
-      this.color = '#00bfff'; // DeepSkyBlue
+    // Apply springy physics
+    let dx = this.targetX - this.x;
+    let dy = this.targetY - this.y;
+    this.vx += dx * 0.1;
+    this.vy += dy * 0.1;
+
+    // Damping
+    this.vx *= 0.8;
+    this.vy *= 0.8;
+
+    // Update position
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+}
+
+class Blob {
+  constructor(x, y, nodeCount = 20, radius = 60) {
+    this.x = x;
+    this.y = y;
+    this.vx = 2;
+    this.vy = 1.5;
+    this.radius = radius;
+    this.nodes = [];
+
+    for (let i = 0; i < nodeCount; i++) {
+      let angle = (Math.PI * 2 / nodeCount) * i;
+      let nx = x + Math.cos(angle) * radius;
+      let ny = y + Math.sin(angle) * radius;
+      this.nodes.push(new Node(nx, ny, angle, radius, this));
+    }
+  }
+
+  update() {
+    // Move center
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // Bounce off walls
+    if (this.x - this.radius < 0 || this.x + this.radius > width) this.vx *= -1;
+    if (this.y - this.radius < 0 || this.y + this.radius > height) this.vy *= -1;
+
+    // Update nodes
+    for (let node of this.nodes) {
+      node.center = this;
+      node.update();
+    }
+  }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.fillStyle = '#00bfff';
+    ctx.beginPath();
+    ctx.moveTo(this.nodes[0].x, this.nodes[0].y);
+    for (let i = 1; i < this.nodes.length; i++) {
+      const current = this.nodes[i];
+      const prev = this.nodes[i - 1];
+      const cx = (prev.x + current.x) / 2;
+      const cy = (prev.y + current.y) / 2;
+      ctx.quadraticCurveTo(prev.x, prev.y, cx, cy);
     }
 
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-
-      // Bounce off walls
-      if (this.x < this.radius || this.x > width - this.radius) this.vx *= -1;
-      if (this.y < this.radius || this.y > height - this.radius) this.vy *= -1;
-    }
-
-    draw(ctx) {
-      ctx.save();
-      ctx.fillStyle = this.color;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
+    // Close loop
+    const first = this.nodes[0];
+    const last = this.nodes[this.nodes.length - 1];
+    const cx = (last.x + first.x) / 2;
+    const cy = (last.y + first.y) / 2;
+    ctx.quadraticCurveTo(last.x, last.y, cx, cy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   }
+}
 
-  const blobs = [];
-  for (let i = 0; i < 1; i++) {
-    blobs.push(new Blob(Math.random() * width, Math.random() * height));
-  }
+const blob = new Blob(width / 2, height / 2);
 
-  function animate() {
-    ctx.clearRect(0, 0, width, height);
+function animate() {
+  ctx.clearRect(0, 0, width, height);
+  ctx.imageSmoothingEnabled = false;
 
-    // Pixelated effect
-    ctx.imageSmoothingEnabled = false;
+  blob.update();
+  blob.draw(ctx);
 
-    blobs.forEach(blob => {
-      blob.update();
-      blob.draw(ctx);
-    });
+  requestAnimationFrame(animate);
+}
 
-    requestAnimationFrame(animate);
-  }
-
-  animate();
+animate();
 </script>
 </body>
 </html>
