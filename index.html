@@ -1,124 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="A rhythm game inspired by Friday Night Funkin'." />
-  <meta name="author" content="samuel7012" />
-  <title>FNF Clone - Rhythm Game</title>
+  <meta charset="UTF-8">
+  <title>Blue Goo Blob</title>
   <style>
     body {
       margin: 0;
-      background-color: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
-    }
-
-    .screen {
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-
-    #score {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 20px;
-    }
-
-    button {
-      padding: 12px 24px;
-      font-size: 18px;
-      background-color: #ff4c4c;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #ff6666;
+      overflow: hidden;
+      background: #111;
     }
 
     canvas {
-      border: 2px solid white;
-      background-color: #222;
-      margin-top: 20px;
+      display: block;
+      image-rendering: pixelated;
     }
   </style>
 </head>
 <body>
-  <!-- Game Screen -->
-  <main>
-    <div id="game" class="screen">
-      <div id="score">Score: 0</div>
-      <canvas id="gameCanvas" width="800" height="600" aria-label="Game Canvas"></canvas>
-      <button id="pauseButton">Pause</button>
-    </div>
-  </main>
+<canvas id="gooCanvas"></canvas>
 
-  <script>
-    const game = document.getElementById('game');
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const scoreDisplay = document.getElementById('score');
-    const pauseButton = document.getElementById('pauseButton');
+<script>
+  const canvas = document.getElementById('gooCanvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
 
-    let score = 0;
-    let interval;
-    let isPaused = false;
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
 
-    // Initialize Game on Load
-    window.onload = function () {
-      startGame();
-    };
+  window.addEventListener('resize', resize);
+  resize();
 
-    pauseButton.addEventListener('click', () => {
-      togglePause();
+  class Blob {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.radius = 30 + Math.random() * 20;
+      this.vx = (Math.random() - 0.5) * 2;
+      this.vy = (Math.random() - 0.5) * 2;
+      this.color = '#00bfff'; // DeepSkyBlue
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // Bounce off walls
+      if (this.x < this.radius || this.x > width - this.radius) this.vx *= -1;
+      if (this.y < this.radius || this.y > height - this.radius) this.vy *= -1;
+    }
+
+    draw(ctx) {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  const blobs = [];
+  for (let i = 0; i < 1; i++) {
+    blobs.push(new Blob(Math.random() * width, Math.random() * height));
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Pixelated effect
+    ctx.imageSmoothingEnabled = false;
+
+    blobs.forEach(blob => {
+      blob.update();
+      blob.draw(ctx);
     });
 
-    function startGame() {
-      score = 0;
-      updateScore();
-      startGameLoop();
-    }
+    requestAnimationFrame(animate);
+  }
 
-    function togglePause() {
-      isPaused = !isPaused;
-      if (isPaused) {
-        clearInterval(interval);
-        pauseButton.textContent = 'Resume';
-      } else {
-        startGameLoop();
-        pauseButton.textContent = 'Pause';
-      }
-    }
-
-    function updateScore() {
-      scoreDisplay.textContent = `Score: ${score}`;
-    }
-
-    function startGameLoop() {
-      interval = setInterval(() => {
-        if (!isPaused) {
-          score += 10;
-          updateScore();
-          draw();
-        }
-      }, 1000);
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'white';
-      ctx.font = '32px Arial';
-      ctx.fillText('Game Started!', 300, 300);
-    }
-  </script>
+  animate();
+</script>
 </body>
 </html>
