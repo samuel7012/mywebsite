@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sticky Goo Blobs</title>
+  <title>Ultra Gooey Blobs</title>
   <style>
     body {
       margin: 0;
@@ -36,23 +36,31 @@ class Node {
     this.center = center;
     this.angle = angle;
     this.radius = radius;
+    this.baseRadius = radius;
     this.x = x;
     this.y = y;
     this.vx = 0;
     this.vy = 0;
   }
 
-  update() {
-    this.targetX = this.center.x + Math.cos(this.angle) * this.radius;
-    this.targetY = this.center.y + Math.sin(this.angle) * this.radius;
+  update(time) {
+    // Dynamic radius (adds jiggle)
+    const wobble = Math.sin(time * 0.003 + this.angle * 3) * 4;
+    const dynamicRadius = this.baseRadius + wobble;
+
+    this.targetX = this.center.x + Math.cos(this.angle) * dynamicRadius;
+    this.targetY = this.center.y + Math.sin(this.angle) * dynamicRadius;
 
     let dx = this.targetX - this.x;
     let dy = this.targetY - this.y;
-    this.vx += dx * 0.1;
-    this.vy += dy * 0.1;
+    
+    // Increase jiggle factor
+    this.vx += dx * 0.2;
+    this.vy += dy * 0.2;
 
-    this.vx *= 0.8;
-    this.vy *= 0.8;
+    // Looser damping = more goo
+    this.vx *= 0.7;
+    this.vy *= 0.7;
 
     this.x += this.vx;
     this.y += this.vy;
@@ -63,13 +71,14 @@ class Blob {
   constructor(x, y, color = '#00bfff') {
     this.x = x;
     this.y = y;
-    this.vx = (Math.random() - 0.5) * 2;
-    this.vy = (Math.random() - 0.5) * 2;
-    this.radius = 40 + Math.random() * 20;
+    this.vx = (Math.random() - 0.5) * 1.5;
+    this.vy = (Math.random() - 0.5) * 1.5;
+    this.radius = 50 + Math.random() * 20;
     this.color = color;
     this.nodes = [];
 
-    const nodeCount = 20;
+    const nodeCount = 32;
+
     for (let i = 0; i < nodeCount; i++) {
       let angle = (Math.PI * 2 / nodeCount) * i;
       let nx = x + Math.cos(angle) * this.radius;
@@ -82,10 +91,10 @@ class Blob {
     const dx = otherBlob.x - this.x;
     const dy = otherBlob.y - this.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const minDist = (this.radius + otherBlob.radius) * 0.8;
+    const minDist = (this.radius + otherBlob.radius) * 0.85;
 
     if (dist < minDist && dist > 0) {
-      const force = (minDist - dist) * 0.01;
+      const force = (minDist - dist) * 0.015;
       const ax = (dx / dist) * force;
       const ay = (dy / dist) * force;
 
@@ -96,16 +105,17 @@ class Blob {
     }
   }
 
-  update() {
+  update(time) {
     this.x += this.vx;
     this.y += this.vy;
 
+    // Bounce off walls
     if (this.x - this.radius < 0 || this.x + this.radius > width) this.vx *= -1;
     if (this.y - this.radius < 0 || this.y + this.radius > height) this.vy *= -1;
 
     for (let node of this.nodes) {
       node.center = this;
-      node.update();
+      node.update(time);
     }
   }
 
@@ -121,6 +131,7 @@ class Blob {
       const cy = (prev.y + current.y) / 2;
       ctx.quadraticCurveTo(prev.x, prev.y, cx, cy);
     }
+
     const first = this.nodes[0];
     const last = this.nodes[this.nodes.length - 1];
     const cx = (last.x + first.x) / 2;
@@ -132,9 +143,9 @@ class Blob {
   }
 }
 
-// Make the goo army
+// Create ultra gooey blobs
 const blobs = [];
-const blobCount = 7;
+const blobCount = 6;
 
 for (let i = 0; i < blobCount; i++) {
   const x = Math.random() * width;
@@ -142,7 +153,7 @@ for (let i = 0; i < blobCount; i++) {
   blobs.push(new Blob(x, y));
 }
 
-function animate() {
+function animate(time) {
   ctx.clearRect(0, 0, width, height);
   ctx.imageSmoothingEnabled = false;
 
@@ -154,7 +165,7 @@ function animate() {
   }
 
   for (let blob of blobs) {
-    blob.update();
+    blob.update(time);
     blob.draw(ctx);
   }
 
