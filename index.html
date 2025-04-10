@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A rhythm game inspired by Friday Night Funkin'." />
+  <meta name="author" content="samuel7012" />
   <title>FNF Clone - Rhythm Game</title>
   <style>
     body {
@@ -13,16 +15,12 @@
     }
 
     .screen {
-      display: none;
       height: 100vh;
       width: 100vw;
+      display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-    }
-
-    .active {
-      display: flex;
     }
 
     #score {
@@ -40,6 +38,11 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ff6666;
     }
 
     canvas {
@@ -50,49 +53,64 @@
   </style>
 </head>
 <body>
-
-  <!-- Menu -->
-  <div id="menu" class="screen active">
-    <h1>🎤 Friday Night Clone</h1>
-    <button id="startButton">Start Game</button>
-  </div>
-
   <!-- Game Screen -->
-  <div id="game" class="screen">
-    <div id="score">Score: 0</div>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-  </div>
+  <main>
+    <div id="game" class="screen">
+      <div id="score">Score: 0</div>
+      <canvas id="gameCanvas" width="800" height="600" aria-label="Game Canvas"></canvas>
+      <button id="pauseButton">Pause</button>
+    </div>
+  </main>
 
   <script>
-    const menu = document.getElementById('menu');
     const game = document.getElementById('game');
-    const startButton = document.getElementById('startButton');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const scoreDisplay = document.getElementById('score');
+    const pauseButton = document.getElementById('pauseButton');
 
     let score = 0;
     let interval;
+    let isPaused = false;
 
-    startButton.addEventListener('click', () => {
-      menu.classList.remove('active');
-      game.classList.add('active');
+    // Initialize Game on Load
+    window.onload = function () {
       startGame();
+    };
+
+    pauseButton.addEventListener('click', () => {
+      togglePause();
     });
 
     function startGame() {
       score = 0;
       updateScore();
-      draw();
+      startGameLoop();
+    }
 
-      interval = setInterval(() => {
-        score += 10;
-        updateScore();
-      }, 1000);
+    function togglePause() {
+      isPaused = !isPaused;
+      if (isPaused) {
+        clearInterval(interval);
+        pauseButton.textContent = 'Resume';
+      } else {
+        startGameLoop();
+        pauseButton.textContent = 'Pause';
+      }
     }
 
     function updateScore() {
-      scoreDisplay.textContent = 'Score: ' + score;
+      scoreDisplay.textContent = `Score: ${score}`;
+    }
+
+    function startGameLoop() {
+      interval = setInterval(() => {
+        if (!isPaused) {
+          score += 10;
+          updateScore();
+          draw();
+        }
+      }, 1000);
     }
 
     function draw() {
@@ -102,6 +120,5 @@
       ctx.fillText('Game Started!', 300, 300);
     }
   </script>
-
 </body>
 </html>
