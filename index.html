@@ -119,6 +119,76 @@
     });
 
     requestAnimationFrame(gameLoop);
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FNF Clone</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+    }
+    .menu, .game {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .menu.active, .game.active {
+      display: flex;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 20px;
+      font-size: 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #ff4c4c;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Menu Screen -->
+  <div class="menu active" id="menu">
+    <h1>Friday Night Clone 🎤</h1>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div class="game" id="game">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+  </div>
+
+  <script>
+    const menu = document.getElementById("menu");
+    const game = document.getElementById("game");
+
+    function startGame() {
+      menu.classList.remove("active");
+      game.classList.add("active");
+      initGame();
+    }
+
+    function initGame() {
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Game logic goes here...
+      ctx.fillStyle = "white";
+      ctx.font = "30px Arial";
+      ctx.fillText("Game Started!", 300, 300);
+
+      // Later: Start music and spawn notes
+    }
   </script>
 </body>
 </html>
