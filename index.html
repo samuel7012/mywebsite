@@ -1,194 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Meta Information -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FNF Clone</title>
+  <meta name="description" content="FNF Clone - A fun rhythm game built with HTML5 Canvas." />
+  
+  <!-- Title -->
+  <title>FNF Clone - Rhythm Game</title>
+
+  <!-- Internal Styles -->
   <style>
-    body {
-      margin: 0;
-      background: black;
-      color: white;
-      font-family: sans-serif;
-      overflow: hidden;
-      text-align: center;
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background: #222;
-    }
-    #score {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div id="score">Score: 0</div>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-
-    const arrowSize = 50;
-    const arrows = ["left", "down", "up", "right"];
-    const arrowColors = {
-      left: "red",
-      down: "yellow",
-      up: "green",
-      right: "blue"
-    };
-
-    let score = 0;
-
-    class Note {
-      constructor(direction, y = -50) {
-        this.direction = direction;
-        this.x = arrows.indexOf(direction) * 200 + 100;
-        this.y = y;
-        this.hit = false;
-      }
-      draw() {
-        ctx.fillStyle = arrowColors[this.direction];
-        ctx.fillRect(this.x, this.y, arrowSize, arrowSize);
-      }
-      update() {
-        this.y += 4;
-        this.draw();
-      }
+    * {
+      box-sizing: border-box;
     }
 
-    let notes = [];
-    let lastSpawn = 0;
-
-    function spawnNote() {
-      const randomDirection = arrows[Math.floor(Math.random() * arrows.length)];
-      notes.push(new Note(randomDirection));
-    }
-
-    function drawTargets() {
-      arrows.forEach((dir, i) => {
-        ctx.strokeStyle = arrowColors[dir];
-        ctx.lineWidth = 4;
-        ctx.strokeRect(i * 200 + 100, 500, arrowSize, arrowSize);
-      });
-    }
-
-    function gameLoop(timestamp) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawTargets();
-
-      if (timestamp - lastSpawn > 800) {
-        spawnNote();
-        lastSpawn = timestamp;
-      }
-
-      notes.forEach((note, index) => {
-        note.update();
-        if (note.y > 600) notes.splice(index, 1);
-      });
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    window.addEventListener("keydown", (e) => {
-      const dirKey = {
-        ArrowLeft: "left",
-        ArrowDown: "down",
-        ArrowUp: "up",
-        ArrowRight: "right"
-      }[e.key];
-
-      if (dirKey) {
-        notes.forEach((note, index) => {
-          if (
-            note.direction === dirKey &&
-            note.y >= 480 &&
-            note.y <= 520
-          ) {
-            notes.splice(index, 1);
-            score += 100;
-            document.getElementById("score").innerText = "Score: " + score;
-          }
-        });
-      }
-    });
-
-    requestAnimationFrame(gameLoop);
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FNF Clone</title>
-  <style>
     body {
       margin: 0;
       background: #111;
       color: #fff;
       font-family: 'Arial', sans-serif;
-      text-align: center;
+      overflow: hidden;
     }
+
     .menu, .game {
       display: none;
       justify-content: center;
       align-items: center;
       height: 100vh;
       flex-direction: column;
+      text-align: center;
     }
+
     .menu.active, .game.active {
       display: flex;
     }
-    button {
-      padding: 10px 20px;
-      margin-top: 20px;
+
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
       font-size: 20px;
+      z-index: 2;
+    }
+
+    button {
+      padding: 12px 24px;
+      margin-top: 20px;
+      font-size: 18px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       background: #ff4c4c;
       color: white;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #e03c3c;
+    }
+
+    canvas {
+      border: 2px solid #fff;
     }
   </style>
 </head>
 <body>
 
   <!-- Menu Screen -->
-  <div class="menu active" id="menu">
-    <h1>Friday Night Clone 🎤</h1>
-    <button onclick="startGame()">Start Game</button>
+  <div id="menu" class="menu active">
+    <h1>🎤 Friday Night Clone</h1>
+    <button id="startButton">Start Game</button>
   </div>
 
   <!-- Game Screen -->
-  <div class="game" id="game">
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <div id="game" class="game">
+    <div id="score">Score: 0</div>
+    <canvas id="gameCanvas" width="800" height="600">
+      <noscript>Your browser does not support the canvas element. Please enable JavaScript or use a modern browser.</noscript>
+    </canvas>
   </div>
 
+  <!-- Internal Script -->
   <script>
     const menu = document.getElementById("menu");
     const game = document.getElementById("game");
+    const startButton = document.getElementById("startButton");
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreDisplay = document.getElementById("score");
 
-    function startGame() {
+    let score = 0;
+
+    startButton.addEventListener("click", () => {
       menu.classList.remove("active");
       game.classList.add("active");
-      initGame();
-    }
+      startGame();
+    });
 
-    function initGame() {
-      const canvas = document.getElementById("gameCanvas");
-      const ctx = canvas.getContext("2d");
+    function startGame() {
+      // Clear screen
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Game logic goes here...
+      // Show placeholder game state
       ctx.fillStyle = "white";
-      ctx.font = "30px Arial";
+      ctx.font = "32px Arial";
       ctx.fillText("Game Started!", 300, 300);
 
-      // Later: Start music and spawn notes
+      // You can start music and note logic here...
+      // Example score increment
+      setInterval(() => {
+        score += 10;
+        scoreDisplay.innerText = "Score: " + score;
+      }, 1000);
     }
   </script>
+
 </body>
 </html>
