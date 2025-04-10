@@ -1,149 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic-like Game</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #87CEEB; /* Sky blue background */
-        }
-
-        .game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background-color: #87CEEB; /* Sky blue background */
-        }
-
-        .sonic {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: #0080FF; /* Sonic blue */
-            border-radius: 50%;
-            bottom: 20px;
-            left: 50px;
-        }
-
-        .cloud {
-            position: absolute;
-            width: 150px;
-            height: 80px;
-            background-color: white;
-            border-radius: 50%;
-            box-shadow: 50px 20px 0px 0px white, 70px 10px 0px 0px white, 110px 20px 0px 0px white;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FNF Clone</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      overflow: hidden;
+      text-align: center;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #222;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+    }
+  </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="sonic"></div>
-        <!-- Clouds will be added dynamically via JavaScript -->
-    </div>
+  <div id="score">Score: 0</div>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-    <script>
-        // Sonic game logic
-        const sonic = document.querySelector('.sonic');
-        const gameContainer = document.querySelector('.game-container');
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-        let sonicSpeed = 5;
-        let jumpHeight = 15;
-        let isJumping = false;
-        let velocityY = 0;
-        let gravity = 1;
+    const arrowSize = 50;
+    const arrows = ["left", "down", "up", "right"];
+    const arrowColors = {
+      left: "red",
+      down: "yellow",
+      up: "green",
+      right: "blue"
+    };
 
-        // Sonic movement (left and right)
-        let sonicPositionX = 50;
-        let sonicPositionY = gameContainer.clientHeight - 70;
+    let score = 0;
 
-        function moveSonic(e) {
-            if (e.key === 'ArrowRight') {
-                sonicPositionX += sonicSpeed;
-            } else if (e.key === 'ArrowLeft') {
-                sonicPositionX -= sonicSpeed;
-            }
+    class Note {
+      constructor(direction, y = -50) {
+        this.direction = direction;
+        this.x = arrows.indexOf(direction) * 200 + 100;
+        this.y = y;
+        this.hit = false;
+      }
+      draw() {
+        ctx.fillStyle = arrowColors[this.direction];
+        ctx.fillRect(this.x, this.y, arrowSize, arrowSize);
+      }
+      update() {
+        this.y += 4;
+        this.draw();
+      }
+    }
 
-            // Keep Sonic inside the game boundaries
-            if (sonicPositionX < 0) sonicPositionX = 0;
-            if (sonicPositionX > gameContainer.clientWidth - 50) {
-                sonicPositionX = gameContainer.clientWidth - 50;
-            }
+    let notes = [];
+    let lastSpawn = 0;
 
-            sonic.style.left = `${sonicPositionX}px`;
-        }
+    function spawnNote() {
+      const randomDirection = arrows[Math.floor(Math.random() * arrows.length)];
+      notes.push(new Note(randomDirection));
+    }
 
-        // Sonic jump logic
-        function jump() {
-            if (isJumping) return;
-            isJumping = true;
-            velocityY = -jumpHeight;
-        }
+    function drawTargets() {
+      arrows.forEach((dir, i) => {
+        ctx.strokeStyle = arrowColors[dir];
+        ctx.lineWidth = 4;
+        ctx.strokeRect(i * 200 + 100, 500, arrowSize, arrowSize);
+      });
+    }
 
-        // Gravity and jump physics
-        function applyPhysics() {
-            if (isJumping) {
-                velocityY += gravity; // Apply gravity
-                sonicPositionY += velocityY;
+    function gameLoop(timestamp) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawTargets();
 
-                if (sonicPositionY >= gameContainer.clientHeight - 70) {
-                    sonicPositionY = gameContainer.clientHeight - 70;
-                    isJumping = false;
-                }
+      if (timestamp - lastSpawn > 800) {
+        spawnNote();
+        lastSpawn = timestamp;
+      }
 
-                sonic.style.bottom = `${gameContainer.clientHeight - sonicPositionY - 20}px`;
-            }
-        }
+      notes.forEach((note, index) => {
+        note.update();
+        if (note.y > 600) notes.splice(index, 1);
+      });
 
-        // Cloud logic
-        const clouds = [];
-        const cloudSpeed = 0.5;
+      requestAnimationFrame(gameLoop);
+    }
 
-        function createCloud() {
-            const cloud = document.createElement('div');
-            cloud.classList.add('cloud');
-            cloud.style.top = `${Math.random() * 200 + 20}px`; // Random height for each cloud
-            cloud.style.left = `${gameContainer.clientWidth}px`; // Start at the right edge
-            gameContainer.appendChild(cloud);
-            clouds.push(cloud);
-        }
+    window.addEventListener("keydown", (e) => {
+      const dirKey = {
+        ArrowLeft: "left",
+        ArrowDown: "down",
+        ArrowUp: "up",
+        ArrowRight: "right"
+      }[e.key];
 
-        function moveClouds() {
-            clouds.forEach(cloud => {
-                let cloudPositionX = parseFloat(cloud.style.left);
-                cloudPositionX -= cloudSpeed;
-
-                if (cloudPositionX + cloud.offsetWidth <= 0) {
-                    cloud.style.left = `${gameContainer.clientWidth}px`; // Reset cloud to the right edge
-                } else {
-                    cloud.style.left = `${cloudPositionX}px`;
-                }
-            });
-        }
-
-        // Game loop
-        function gameLoop() {
-            applyPhysics();
-            moveClouds();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Event listeners
-        window.addEventListener('keydown', (e) => {
-            moveSonic(e);
-            if (e.key === ' ' || e.key === 'ArrowUp') {
-                jump();
-            }
+      if (dirKey) {
+        notes.forEach((note, index) => {
+          if (
+            note.direction === dirKey &&
+            note.y >= 480 &&
+            note.y <= 520
+          ) {
+            notes.splice(index, 1);
+            score += 100;
+            document.getElementById("score").innerText = "Score: " + score;
+          }
         });
+      }
+    });
 
-        // Create clouds at regular intervals
-        setInterval(createCloud, 3000); // New cloud every 3 seconds
-
-        // Start the game loop
-        gameLoop();
-    </script>
+    requestAnimationFrame(gameLoop);
+  </script>
 </body>
 </html>
