@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Jiggly Gooey Blob with Name</title>
+  <title>RGB Jiggly Gooey Blob</title>
   <style>
     body {
       margin: 0;
@@ -17,66 +17,107 @@
 
     .gooey-container {
       position: relative;
-      width: 400px;
-      height: 400px;
+      width: 500px;
+      height: 500px;
       filter: url(#goo);
     }
 
     .blob {
       position: absolute;
       border-radius: 50%;
-      background: #ff6ec7;
       mix-blend-mode: screen;
       animation: jiggle 3s ease-in-out infinite;
       transform-origin: center;
     }
 
     .blob:nth-child(1) {
-      width: 150px;
-      height: 150px;
-      top: 30px;
-      left: 30px;
+      width: 120px;
+      height: 120px;
+      top: 20px;
+      left: 40px;
+      background: red;
       animation-delay: 0s;
     }
 
     .blob:nth-child(2) {
-      width: 120px;
-      height: 120px;
-      top: 80px;
-      left: 100px;
+      width: 100px;
+      height: 100px;
+      top: 300px;
+      left: 60px;
+      background: lime;
       animation-delay: 0.5s;
     }
 
     .blob:nth-child(3) {
-      width: 100px;
-      height: 100px;
-      top: 130px;
-      left: 60px;
+      width: 110px;
+      height: 110px;
+      top: 100px;
+      left: 300px;
+      background: blue;
       animation-delay: 1s;
     }
 
     .blob:nth-child(4) {
-      width: 140px;
-      height: 140px;
+      width: 130px;
+      height: 130px;
       top: 200px;
-      left: 120px;
+      left: 200px;
+      background: cyan;
       animation-delay: 1.5s;
     }
 
     .blob:nth-child(5) {
-      width: 110px;
-      height: 110px;
-      top: 50px;
-      left: 220px;
+      width: 90px;
+      height: 90px;
+      top: 400px;
+      left: 350px;
+      background: magenta;
       animation-delay: 2s;
     }
 
     .blob:nth-child(6) {
-      width: 130px;
-      height: 130px;
-      top: 170px;
-      left: 200px;
+      width: 100px;
+      height: 100px;
+      top: 50px;
+      left: 380px;
+      background: yellow;
       animation-delay: 2.5s;
+    }
+
+    .blob:nth-child(7) {
+      width: 110px;
+      height: 110px;
+      top: 250px;
+      left: 20px;
+      background: orange;
+      animation-delay: 3s;
+    }
+
+    .blob:nth-child(8) {
+      width: 120px;
+      height: 120px;
+      top: 370px;
+      left: 150px;
+      background: deeppink;
+      animation-delay: 3.5s;
+    }
+
+    .blob:nth-child(9) {
+      width: 100px;
+      height: 100px;
+      top: 160px;
+      left: 410px;
+      background: lightgreen;
+      animation-delay: 4s;
+    }
+
+    .blob:nth-child(10) {
+      width: 90px;
+      height: 90px;
+      top: 320px;
+      left: 260px;
+      background: dodgerblue;
+      animation-delay: 4.5s;
     }
 
     @keyframes jiggle {
@@ -84,13 +125,13 @@
         transform: scale(1) translate(0, 0) rotate(0deg);
       }
       25% {
-        transform: scale(1.05, 0.95) translate(5px, -5px) rotate(3deg);
+        transform: scale(1.05, 0.95) translate(6px, -6px) rotate(3deg);
       }
       50% {
-        transform: scale(0.95, 1.05) translate(-5px, 5px) rotate(-3deg);
+        transform: scale(0.95, 1.05) translate(-6px, 6px) rotate(-3deg);
       }
       75% {
-        transform: scale(1.08, 0.92) translate(8px, -3px) rotate(2deg);
+        transform: scale(1.08, 0.92) translate(10px, -4px) rotate(2deg);
       }
       100% {
         transform: scale(1) translate(0, 0) rotate(0deg);
@@ -100,12 +141,12 @@
     .name {
       position: absolute;
       color: white;
-      font-size: 48px;
+      font-size: 56px;
       font-weight: bold;
       z-index: 10;
       pointer-events: none;
       text-align: center;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
     }
   </style>
 </head>
@@ -113,6 +154,10 @@
   <div class="name">Samuel Valdez</div>
 
   <div class="gooey-container">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
     <div class="blob"></div>
     <div class="blob"></div>
     <div class="blob"></div>
