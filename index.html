@@ -2,23 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Samuel Valdez</title>
+  <title>Soothing Blob Galaxy</title>
   <style>
     body {
       margin: 0;
       background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
       overflow-x: scroll;
       overflow-y: hidden;
-      height: 90vh;
-      width: 300vw;
-      position: relative;
       font-family: 'Segoe UI', sans-serif;
+      width: 300vw;
+      height: 100vh;
+      position: relative;
     }
 
     .gooey-container {
       position: absolute;
       width: 300vw;
-      height: 90vh;
+      height: 100vh;
       filter: url(#goo);
     }
 
@@ -26,48 +26,86 @@
       position: absolute;
       border-radius: 50%;
       mix-blend-mode: normal;
-      animation: jiggle 12s ease-in-out infinite;
+      animation: slow-jiggle 12s ease-in-out infinite;
+      transform-origin: center;
       opacity: 0.6;
       box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
+      transition: opacity 2s ease;
     }
 
-    @keyframes jiggle {
+    @keyframes slow-jiggle {
       0%, 100% { transform: scale(1) rotate(0deg); }
-      50% { transform: scale(1.02, 0.98) rotate(2deg); }
+      50%  { transform: scale(1.02, 0.98) rotate(2deg); }
     }
 
-    .center {
+    .name {
       position: absolute;
-      top: 50%;
+      color: white;
+      font-size: 56px;
+      font-weight: 600;
+      z-index: 10;
+      pointer-events: none;
+      top: 45%;
       left: 150vw;
       transform: translate(-50%, -50%);
-      color: white;
       text-align: center;
-      z-index: 10;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
     }
 
-    .center h1 {
-      font-size: 56px;
-      margin: 0;
-      text-shadow: 0 0 8px rgba(255,255,255,0.6);
-    }
-
-    .center p {
+    .tagline {
+      position: absolute;
+      color: white;
       font-size: 20px;
-      margin: 10px 0 0;
-      text-shadow: 0 0 6px rgba(255,255,255,0.4);
+      font-weight: 300;
+      z-index: 10;
+      pointer-events: none;
+      top: 53%;
+      left: 150vw;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+    }
+
+    .footer-icons {
+      position: absolute;
+      bottom: 20px;
+      width: 100vw;
+      text-align: center;
+      z-index: 20;
+      left: 150vw;
+      transform: translateX(-50%);
+    }
+
+    .footer-icons a {
+      margin: 0 15px;
+      font-size: 28px;
+      color: white;
+      text-decoration: none;
+      text-shadow: 0 0 8px white;
+      transition: transform 0.4s, color 0.4s;
+    }
+
+    .footer-icons a:hover {
+      transform: scale(1.1);
+      color: #80dfff;
+      text-shadow: 0 0 10px #80dfff;
     }
   </style>
 </head>
 <body>
+  <div class="name">Samuel Valdez</div>
+  <div class="tagline">A young developer, swimmer and child.</div>
   <div class="gooey-container" id="container"></div>
 
-  <div class="center">
-    <h1>Samuel Valdez</h1>
-    <p>A young developer, swimmer and child.</p>
+  <div class="footer-icons">
+    <a href="https://github.com" target="_blank" title="GitHub">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="32" height="32" />
+    </a>
+    <a href="https://swimgym.nl" target="_blank" title="Swimgym">🏊</a>
+    <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">🌐</a>
   </div>
 
-  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
     <filter id="goo">
       <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
       <feColorMatrix in="blur" mode="matrix"
@@ -75,7 +113,7 @@
                 0 1 0 0 0  
                 0 0 1 0 0  
                 0 0 0 20 -10" result="goo" />
-      <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
     </filter>
   </svg>
 
@@ -120,13 +158,17 @@
 
     animate();
 
-    window.onload = () => {
+    // Always scroll to the center on load and on resize
+    function scrollToCenter() {
       window.scrollTo({
         left: (document.body.scrollWidth - window.innerWidth) / 2,
         top: 0,
         behavior: 'instant'
       });
-    };
+    }
+
+    window.onload = scrollToCenter;
+    window.onresize = scrollToCenter;
   </script>
 </body>
 </html>
