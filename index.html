@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Orbital Blobs</title>
+  <title>Super Orbit Blobs</title>
   <style>
     body {
       margin: 0;
@@ -82,11 +82,12 @@
     const blobData = [];
 
     groups.forEach((group, gIndex) => {
+      // Inner orbit blobs
       for (let i = 0; i < 10; i++) {
-        const size = 40 + Math.random() * 30;
+        const size = 40 + Math.random() * 20;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 50 + Math.random() * 80;
-        const speed = 0.005 + Math.random() * 0.003;
+        const radius = 50 + Math.random() * 50;
+        const speed = 0.004 + Math.random() * 0.003;
 
         const blob = document.createElement('div');
         blob.className = 'blob';
@@ -100,8 +101,30 @@
           group,
           angle,
           radius,
-          speed,
-          size
+          speed
+        });
+      }
+
+      // Outer orbit blobs (bigger + orbiting farther out)
+      for (let i = 0; i < 5; i++) {
+        const size = 70 + Math.random() * 30;
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 150 + Math.random() * 100;
+        const speed = 0.002 + Math.random() * 0.001;
+
+        const blob = document.createElement('div');
+        blob.className = 'blob';
+        blob.style.width = size + 'px';
+        blob.style.height = size + 'px';
+        blob.style.background = group.color;
+        container.appendChild(blob);
+
+        blobData.push({
+          el: blob,
+          group,
+          angle,
+          radius,
+          speed
         });
       }
     });
