@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>RGB Jiggly Gooey Blob</title>
+  <title>Ultimate RGB Goo Blob Party</title>
   <style>
     body {
       margin: 0;
@@ -17,8 +17,8 @@
 
     .gooey-container {
       position: relative;
-      width: 500px;
-      height: 500px;
+      width: 600px;
+      height: 600px;
       filter: url(#goo);
     }
 
@@ -30,95 +30,27 @@
       transform-origin: center;
     }
 
-    .blob:nth-child(1) {
-      width: 120px;
-      height: 120px;
-      top: 20px;
-      left: 40px;
-      background: red;
-      animation-delay: 0s;
-    }
-
-    .blob:nth-child(2) {
-      width: 100px;
-      height: 100px;
-      top: 300px;
-      left: 60px;
-      background: lime;
-      animation-delay: 0.5s;
-    }
-
-    .blob:nth-child(3) {
-      width: 110px;
-      height: 110px;
-      top: 100px;
-      left: 300px;
-      background: blue;
-      animation-delay: 1s;
-    }
-
-    .blob:nth-child(4) {
-      width: 130px;
-      height: 130px;
-      top: 200px;
-      left: 200px;
-      background: cyan;
-      animation-delay: 1.5s;
-    }
-
-    .blob:nth-child(5) {
-      width: 90px;
-      height: 90px;
-      top: 400px;
-      left: 350px;
-      background: magenta;
-      animation-delay: 2s;
-    }
-
-    .blob:nth-child(6) {
-      width: 100px;
-      height: 100px;
-      top: 50px;
-      left: 380px;
-      background: yellow;
-      animation-delay: 2.5s;
-    }
-
-    .blob:nth-child(7) {
-      width: 110px;
-      height: 110px;
-      top: 250px;
-      left: 20px;
-      background: orange;
-      animation-delay: 3s;
-    }
-
-    .blob:nth-child(8) {
-      width: 120px;
-      height: 120px;
-      top: 370px;
-      left: 150px;
-      background: deeppink;
-      animation-delay: 3.5s;
-    }
-
-    .blob:nth-child(9) {
-      width: 100px;
-      height: 100px;
-      top: 160px;
-      left: 410px;
-      background: lightgreen;
-      animation-delay: 4s;
-    }
-
-    .blob:nth-child(10) {
-      width: 90px;
-      height: 90px;
-      top: 320px;
-      left: 260px;
-      background: dodgerblue;
-      animation-delay: 4.5s;
-    }
+    /* Generate 20 blobs, all different positions and colors */
+    .blob:nth-child(1)  { width: 100px; height: 100px; top: 50px; left: 80px; background: red; animation-delay: 0s; }
+    .blob:nth-child(2)  { width: 90px; height: 90px; top: 400px; left: 30px; background: lime; animation-delay: 0.2s; }
+    .blob:nth-child(3)  { width: 110px; height: 110px; top: 320px; left: 500px; background: blue; animation-delay: 0.4s; }
+    .blob:nth-child(4)  { width: 120px; height: 120px; top: 100px; left: 450px; background: magenta; animation-delay: 0.6s; }
+    .blob:nth-child(5)  { width: 85px; height: 85px; top: 280px; left: 300px; background: cyan; animation-delay: 0.8s; }
+    .blob:nth-child(6)  { width: 130px; height: 130px; top: 220px; left: 100px; background: yellow; animation-delay: 1s; }
+    .blob:nth-child(7)  { width: 100px; height: 100px; top: 50px; left: 300px; background: orange; animation-delay: 1.2s; }
+    .blob:nth-child(8)  { width: 90px; height: 90px; top: 480px; left: 400px; background: hotpink; animation-delay: 1.4s; }
+    .blob:nth-child(9)  { width: 110px; height: 110px; top: 150px; left: 200px; background: lightgreen; animation-delay: 1.6s; }
+    .blob:nth-child(10) { width: 100px; height: 100px; top: 380px; left: 180px; background: dodgerblue; animation-delay: 1.8s; }
+    .blob:nth-child(11) { width: 95px; height: 95px; top: 70px; left: 500px; background: violet; animation-delay: 2s; }
+    .blob:nth-child(12) { width: 115px; height: 115px; top: 200px; left: 20px; background: lightcoral; animation-delay: 2.2s; }
+    .blob:nth-child(13) { width: 105px; height: 105px; top: 470px; left: 250px; background: springgreen; animation-delay: 2.4s; }
+    .blob:nth-child(14) { width: 90px; height: 90px; top: 120px; left: 150px; background: turquoise; animation-delay: 2.6s; }
+    .blob:nth-child(15) { width: 130px; height: 130px; top: 350px; left: 500px; background: orangered; animation-delay: 2.8s; }
+    .blob:nth-child(16) { width: 100px; height: 100px; top: 230px; left: 420px; background: aqua; animation-delay: 3s; }
+    .blob:nth-child(17) { width: 85px; height: 85px; top: 420px; left: 80px; background: tomato; animation-delay: 3.2s; }
+    .blob:nth-child(18) { width: 110px; height: 110px; top: 30px; left: 180px; background: chartreuse; animation-delay: 3.4s; }
+    .blob:nth-child(19) { width: 120px; height: 120px; top: 290px; left: 90px; background: fuchsia; animation-delay: 3.6s; }
+    .blob:nth-child(20) { width: 100px; height: 100px; top: 460px; left: 500px; background: gold; animation-delay: 3.8s; }
 
     @keyframes jiggle {
       0% {
@@ -141,12 +73,12 @@
     .name {
       position: absolute;
       color: white;
-      font-size: 56px;
+      font-size: 60px;
       font-weight: bold;
       z-index: 10;
       pointer-events: none;
       text-align: center;
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
     }
   </style>
 </head>
@@ -154,6 +86,16 @@
   <div class="name">Samuel Valdez</div>
 
   <div class="gooey-container">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
     <div class="blob"></div>
     <div class="blob"></div>
     <div class="blob"></div>
