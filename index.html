@@ -7,13 +7,17 @@
     body {
       margin: 0;
       background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
-      overflow: hidden;
+      overflow-x: scroll;
+      overflow-y: hidden;
       font-family: 'Segoe UI', sans-serif;
+      width: 300vw; /* extended width */
+      height: 100vh;
+      position: relative;
     }
 
     .gooey-container {
-      position: relative;
-      width: 100vw;
+      position: absolute;
+      width: 300vw; /* match body width */
       height: 100vh;
       filter: url(#goo);
     }
@@ -65,9 +69,10 @@
     .footer-icons {
       position: absolute;
       bottom: 20px;
-      width: 100%;
+      width: 100vw;
       text-align: center;
       z-index: 20;
+      left: 0;
     }
 
     .footer-icons a {
@@ -126,7 +131,7 @@
 
     const groups = softColors.map(color => ({
       color,
-      centerX: Math.random() * width,
+      centerX: Math.random() * width * 3, // spread across full width
       centerY: Math.random() * height
     }));
 
