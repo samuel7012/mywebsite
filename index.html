@@ -70,13 +70,27 @@
       z-index: 20;
     }
 
+    .footer-icons a {
+      margin: 0 16px;
+      font-size: 28px;
+      color: white;
+      text-decoration: none;
+      text-shadow: 0 0 8px white;
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .footer-icons a:hover {
+      transform: scale(1.2);
+      color: #80dfff;
+      text-shadow: 0 0 10px #80dfff;
+    }
+
     .footer-icons img {
       width: 32px;
       height: 32px;
-      margin: 0 16px;
+      vertical-align: middle;
       filter: drop-shadow(0 0 6px white);
       transition: transform 0.3s ease, filter 0.3s ease;
-      vertical-align: middle;
     }
 
     .footer-icons a:hover img {
@@ -94,76 +108,12 @@
     <a href="https://github.com" target="_blank" title="GitHub">
       <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub Logo">
     </a>
-    <a href="https://swimgym.nl" target="_blank" title="Swimgym">
-      <img src="https://www.svgrepo.com/show/29003/swimming.svg" alt="Swimmer" style="filter: invert(1);">
-    </a>
-    <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">
-      <img src="https://www.svgrepo.com/show/309861/internet.svg" alt="Globe" style="filter: invert(1);">
-    </a>
+    <a href="https://swimgym.nl" target="_blank" title="Swimgym">🏊‍♂️</a>
+    <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">🌐</a>
   </div>
 
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
     <filter id="goo">
       <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
       <feColorMatrix in="blur" mode="matrix"
-        values="1 0 0 0 0  
-                0 1 0 0 0  
-                0 0 1 0 0  
-                0 0 0 20 -10" result="goo" />
-      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
-    </filter>
-  </svg>
-
-  <script>
-    const container = document.getElementById('container');
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    const softColors = [
-      '#FFC1CC', '#D0F0C0', '#B0E0E6', '#E0BBE4',
-      '#FCD5CE', '#C9E4DE', '#FFDAC1', '#B5EAD7',
-      '#E2F0CB', '#A0CED9'
-    ];
-
-    const blobData = [];
-
-    const groups = softColors.map(color => ({
-      color,
-      centerX: Math.random() * width,
-      centerY: Math.random() * height
-    }));
-
-    groups.forEach(group => {
-      for (let i = 0; i < 6; i++) {
-        const size = 60 + Math.random() * 30;
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 120 + Math.random() * 180;
-        const speed = 0.0005 + Math.random() * 0.0015;
-
-        const blob = document.createElement('div');
-        blob.className = 'blob';
-        blob.style.width = size + 'px';
-        blob.style.height = size + 'px';
-        blob.style.background = group.color;
-        container.appendChild(blob);
-
-        blobData.push({ el: blob, group, angle, radius, speed });
-      }
-    });
-
-    function animate() {
-      blobData.forEach(blob => {
-        blob.angle += blob.speed;
-        const x = blob.group.centerX + Math.cos(blob.angle) * blob.radius;
-        const y = blob.group.centerY + Math.sin(blob.angle) * blob.radius;
-        blob.el.style.left = x + 'px';
-        blob.el.style.top = y + 'px';
-      });
-
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-  </script>
-</body>
-</html>
+        values="1 0 0 0
