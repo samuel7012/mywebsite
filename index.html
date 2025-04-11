@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Soothing Blob Galaxy</title>
+  <title>Samuel Valdez</title>
   <style>
     body {
       margin: 0;
       background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
       overflow-x: scroll;
       overflow-y: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      width: 300vw;
       height: 100vh;
+      width: 300vw;
       position: relative;
+      font-family: 'Segoe UI', sans-serif;
     }
 
     .gooey-container {
@@ -26,86 +26,48 @@
       position: absolute;
       border-radius: 50%;
       mix-blend-mode: normal;
-      animation: slow-jiggle 12s ease-in-out infinite;
-      transform-origin: center;
+      animation: jiggle 12s ease-in-out infinite;
       opacity: 0.6;
       box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
-      transition: opacity 2s ease;
     }
 
-    @keyframes slow-jiggle {
+    @keyframes jiggle {
       0%, 100% { transform: scale(1) rotate(0deg); }
-      50%  { transform: scale(1.02, 0.98) rotate(2deg); }
+      50% { transform: scale(1.02, 0.98) rotate(2deg); }
     }
 
-    .name {
+    .center {
       position: absolute;
+      top: 50%;
+      left: 150vw;
+      transform: translate(-50%, -50%);
       color: white;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .center h1 {
       font-size: 56px;
-      font-weight: 600;
-      z-index: 10;
-      pointer-events: none;
-      top: 45%;
-      left: 150vw;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+      margin: 0;
+      text-shadow: 0 0 8px rgba(255,255,255,0.6);
     }
 
-    .tagline {
-      position: absolute;
-      color: white;
+    .center p {
       font-size: 20px;
-      font-weight: 300;
-      z-index: 10;
-      pointer-events: none;
-      top: 53%;
-      left: 150vw;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
-    }
-
-    .footer-icons {
-      position: absolute;
-      bottom: 20px;
-      width: 100vw;
-      text-align: center;
-      z-index: 20;
-      left: 150vw;
-      transform: translateX(-50%);
-    }
-
-    .footer-icons a {
-      margin: 0 15px;
-      font-size: 28px;
-      color: white;
-      text-decoration: none;
-      text-shadow: 0 0 8px white;
-      transition: transform 0.4s, color 0.4s;
-    }
-
-    .footer-icons a:hover {
-      transform: scale(1.1);
-      color: #80dfff;
-      text-shadow: 0 0 10px #80dfff;
+      margin: 10px 0 0;
+      text-shadow: 0 0 6px rgba(255,255,255,0.4);
     }
   </style>
 </head>
 <body>
-  <div class="name">Samuel Valdez</div>
-  <div class="tagline">A young developer, swimmer and child.</div>
   <div class="gooey-container" id="container"></div>
 
-  <div class="footer-icons">
-    <a href="https://github.com" target="_blank" title="GitHub">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="32" height="32" />
-    </a>
-    <a href="https://swimgym.nl" target="_blank" title="Swimgym">🏊</a>
-    <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">🌐</a>
+  <div class="center">
+    <h1>Samuel Valdez</h1>
+    <p>A young developer, swimmer and child.</p>
   </div>
 
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
     <filter id="goo">
       <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
       <feColorMatrix in="blur" mode="matrix"
@@ -113,7 +75,7 @@
                 0 1 0 0 0  
                 0 0 1 0 0  
                 0 0 0 20 -10" result="goo" />
-      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+      <feComposite in="SourceGraphic" in2="goo" operator="atop" />
     </filter>
   </svg>
 
@@ -122,53 +84,42 @@
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    const softColors = [
-      '#FFC1CC', '#D0F0C0', '#B0E0E6', '#E0BBE4',
-      '#FCD5CE', '#C9E4DE', '#FFDAC1', '#B5EAD7',
-      '#E2F0CB', '#A0CED9'
-    ];
+    const colors = ['#FFC1CC', '#D0F0C0', '#B0E0E6', '#E0BBE4', '#FCD5CE'];
 
     const blobData = [];
 
-    const groups = softColors.map(color => ({
-      color,
-      centerX: Math.random() * width * 3,
-      centerY: Math.random() * height
-    }));
+    for (let i = 0; i < 30; i++) {
+      const size = 40 + Math.random() * 60;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 100 + Math.random() * 200;
+      const speed = 0.001 + Math.random() * 0.0025;
+      const centerX = Math.random() * width * 3;
+      const centerY = Math.random() * height;
 
-    groups.forEach(group => {
-      for (let i = 0; i < 6; i++) {
-        const size = 60 + Math.random() * 30;
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 120 + Math.random() * 180;
-        const speed = 0.001 + Math.random() * 0.0025;
+      const blob = document.createElement('div');
+      blob.className = 'blob';
+      blob.style.width = size + 'px';
+      blob.style.height = size + 'px';
+      blob.style.background = color;
+      container.appendChild(blob);
 
-        const blob = document.createElement('div');
-        blob.className = 'blob';
-        blob.style.width = size + 'px';
-        blob.style.height = size + 'px';
-        blob.style.background = group.color;
-        container.appendChild(blob);
-
-        blobData.push({ el: blob, group, angle, radius, speed });
-      }
-    });
+      blobData.push({ el: blob, angle, radius, speed, centerX, centerY });
+    }
 
     function animate() {
       blobData.forEach(blob => {
         blob.angle += blob.speed;
-        const x = blob.group.centerX + Math.cos(blob.angle) * blob.radius;
-        const y = blob.group.centerY + Math.sin(blob.angle) * blob.radius;
+        const x = blob.centerX + Math.cos(blob.angle) * blob.radius;
+        const y = blob.centerY + Math.sin(blob.angle) * blob.radius;
         blob.el.style.left = x + 'px';
         blob.el.style.top = y + 'px';
       });
-
       requestAnimationFrame(animate);
     }
 
     animate();
 
-    // Scroll to center horizontally only
     window.onload = () => {
       window.scrollTo({
         left: (document.body.scrollWidth - window.innerWidth) / 2,
