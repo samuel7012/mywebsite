@@ -46,10 +46,25 @@
       text-align: center;
       text-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
     }
+
+    .tagline {
+      position: absolute;
+      color: white;
+      font-size: 24px;
+      font-weight: 300;
+      z-index: 10;
+      pointer-events: none;
+      top: 58%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
   </style>
 </head>
 <body>
   <div class="name">Samuel Valdez</div>
+  <div class="tagline">A young developer, swimmer and child.</div>
   <div class="gooey-container" id="container"></div>
 
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
@@ -79,17 +94,15 @@
 
     const groups = colors.map(color => ({
       color,
-      // Spread groups even farther apart across the whole screen
       centerX: Math.random() * width * 1.2 - width * 0.1,
       centerY: Math.random() * height * 1.2 - height * 0.1
     }));
 
     groups.forEach(group => {
-      // INNER BLOBS
       for (let i = 0; i < 10; i++) {
         const size = 30 + Math.random() * 30;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 100 + Math.random() * 150; // Increased radius
+        const radius = 100 + Math.random() * 150;
         const speed = 0.002 + Math.random() * 0.003;
 
         const blob = document.createElement('div');
@@ -102,11 +115,10 @@
         blobData.push({ el: blob, group, angle, radius, speed });
       }
 
-      // OUTER BLOBS
       for (let i = 0; i < 8; i++) {
         const size = 60 + Math.random() * 40;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 220 + Math.random() * 180; // Also increased
+        const radius = 220 + Math.random() * 180;
         const speed = 0.001 + Math.random() * 0.002;
 
         const blob = document.createElement('div');
@@ -123,10 +135,8 @@
     function animate() {
       blobData.forEach(blob => {
         blob.angle += blob.speed;
-
         const x = blob.group.centerX + Math.cos(blob.angle) * blob.radius;
         const y = blob.group.centerY + Math.sin(blob.angle) * blob.radius;
-
         blob.el.style.left = x + 'px';
         blob.el.style.top = y + 'px';
       });
