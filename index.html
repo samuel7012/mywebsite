@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <title>Soothing Blob Galaxy</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
-      overflow-x: scroll;
-      overflow-y: hidden;
-      font-family: 'Segoe UI', sans-serif;
+      padding: 0;
       width: 300vw;
       height: 100vh;
-      position: relative;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
+      font-family: 'Segoe UI', sans-serif;
     }
 
     .gooey-container {
@@ -46,7 +46,7 @@
       z-index: 10;
       pointer-events: none;
       top: 45%;
-      left: 150vw; /* center of 300vw */
+      left: 150vw;
       transform: translate(-50%, -50%);
       text-align: center;
       text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
@@ -168,14 +168,14 @@
 
     animate();
 
-    // Center screen on load
-    window.onload = () => {
+    // Scroll to center on load
+    window.addEventListener('load', () => {
       window.scrollTo({
-        left: (document.body.scrollWidth - window.innerWidth) / 2,
+        left: (document.documentElement.scrollWidth - window.innerWidth) / 2,
         top: 0,
         behavior: 'instant'
       });
-    };
+    });
   </script>
 </body>
 </html>
