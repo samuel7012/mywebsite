@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Blob Universe</title>
+  <title>Galaxy of Blobs</title>
   <style>
     body {
       margin: 0;
@@ -69,25 +69,29 @@
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    const colors = ['red', 'lime', 'blue', 'cyan', 'yellow', 'magenta'];
+    // Massive color pool
+    const colors = [
+      'red', 'lime', 'blue', 'cyan', 'yellow', 'magenta',
+      'orange', 'springgreen', 'deepskyblue', 'hotpink',
+      'gold', 'purple', 'aqua', 'fuchsia'
+    ];
+
     const blobData = [];
 
-    // Place group centers randomly across the page
-    const groups = colors.map((color, i) => {
-      return {
-        color,
-        centerX: Math.random() * width,
-        centerY: Math.random() * height
-      };
-    });
+    // Scatter group centers all over the screen
+    const groups = colors.map(color => ({
+      color,
+      centerX: Math.random() * width,
+      centerY: Math.random() * height
+    }));
 
     groups.forEach(group => {
-      // Inner orbits
-      for (let i = 0; i < 10; i++) {
-        const size = 40 + Math.random() * 20;
+      // INNER BLOBS
+      for (let i = 0; i < 12; i++) {
+        const size = 30 + Math.random() * 30;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 50 + Math.random() * 100;
-        const speed = 0.003 + Math.random() * 0.003;
+        const radius = 40 + Math.random() * 100;
+        const speed = 0.002 + Math.random() * 0.003;
 
         const blob = document.createElement('div');
         blob.className = 'blob';
@@ -96,21 +100,15 @@
         blob.style.background = group.color;
         container.appendChild(blob);
 
-        blobData.push({
-          el: blob,
-          group,
-          angle,
-          radius,
-          speed
-        });
+        blobData.push({ el: blob, group, angle, radius, speed });
       }
 
-      // Outer orbits
-      for (let i = 0; i < 6; i++) {
-        const size = 70 + Math.random() * 40;
+      // OUTER BLOBS
+      for (let i = 0; i < 8; i++) {
+        const size = 60 + Math.random() * 40;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 160 + Math.random() * 180;
-        const speed = 0.0015 + Math.random() * 0.0015;
+        const radius = 140 + Math.random() * 160;
+        const speed = 0.001 + Math.random() * 0.002;
 
         const blob = document.createElement('div');
         blob.className = 'blob';
@@ -119,13 +117,7 @@
         blob.style.background = group.color;
         container.appendChild(blob);
 
-        blobData.push({
-          el: blob,
-          group,
-          angle,
-          radius,
-          speed
-        });
+        blobData.push({ el: blob, group, angle, radius, speed });
       }
     });
 
