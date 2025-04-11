@@ -4,21 +4,21 @@
   <meta charset="UTF-8" />
   <title>Soothing Blob Galaxy</title>
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      width: 300vw;
-      height: 100vh;
-      overflow-x: scroll;
-      overflow-y: hidden;
       background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
+      overflow-x: scroll;
+      overflow-y: scroll;
       font-family: 'Segoe UI', sans-serif;
+      width: 300vw;
+      height: 300vh;
+      position: relative;
     }
 
     .gooey-container {
       position: absolute;
       width: 300vw;
-      height: 100vh;
+      height: 300vh;
       filter: url(#goo);
     }
 
@@ -45,7 +45,7 @@
       font-weight: 600;
       z-index: 10;
       pointer-events: none;
-      top: 45%;
+      top: 50%;
       left: 150vw;
       transform: translate(-50%, -50%);
       text-align: center;
@@ -59,7 +59,7 @@
       font-weight: 300;
       z-index: 10;
       pointer-events: none;
-      top: 53%;
+      top: 58%;
       left: 150vw;
       transform: translate(-50%, -50%);
       text-align: center;
@@ -133,7 +133,7 @@
     const groups = softColors.map(color => ({
       color,
       centerX: Math.random() * width * 3,
-      centerY: Math.random() * height
+      centerY: Math.random() * height * 3
     }));
 
     groups.forEach(group => {
@@ -168,14 +168,14 @@
 
     animate();
 
-    // Scroll to center on load
-    window.addEventListener('load', () => {
-      window.scrollTo({
-        left: (document.documentElement.scrollWidth - window.innerWidth) / 2,
-        top: 0,
+    // Scroll to direct center of the screen
+    window.onload = () => {
+      window.scroll({
+        left: (document.body.scrollWidth - window.innerWidth) / 2,
+        top: (document.body.scrollHeight - window.innerHeight) / 2,
         behavior: 'instant'
       });
-    });
+    };
   </script>
 </body>
 </html>
