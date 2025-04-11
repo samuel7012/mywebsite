@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Galaxy of Blobs</title>
+  <title>Super Spread Blob Galaxy</title>
   <style>
     body {
       margin: 0;
@@ -69,7 +69,6 @@
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    // Massive color pool
     const colors = [
       'red', 'lime', 'blue', 'cyan', 'yellow', 'magenta',
       'orange', 'springgreen', 'deepskyblue', 'hotpink',
@@ -78,19 +77,19 @@
 
     const blobData = [];
 
-    // Scatter group centers all over the screen
     const groups = colors.map(color => ({
       color,
-      centerX: Math.random() * width,
-      centerY: Math.random() * height
+      // Spread groups even farther apart across the whole screen
+      centerX: Math.random() * width * 1.2 - width * 0.1,
+      centerY: Math.random() * height * 1.2 - height * 0.1
     }));
 
     groups.forEach(group => {
       // INNER BLOBS
-      for (let i = 0; i < 12; i++) {
+      for (let i = 0; i < 10; i++) {
         const size = 30 + Math.random() * 30;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 40 + Math.random() * 100;
+        const radius = 100 + Math.random() * 150; // Increased radius
         const speed = 0.002 + Math.random() * 0.003;
 
         const blob = document.createElement('div');
@@ -107,7 +106,7 @@
       for (let i = 0; i < 8; i++) {
         const size = 60 + Math.random() * 40;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 140 + Math.random() * 160;
+        const radius = 220 + Math.random() * 180; // Also increased
         const speed = 0.001 + Math.random() * 0.002;
 
         const blob = document.createElement('div');
