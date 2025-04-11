@@ -10,14 +10,14 @@
       overflow-x: scroll;
       overflow-y: hidden;
       font-family: 'Segoe UI', sans-serif;
-      width: 300vw; /* extended width */
+      width: 300vw;
       height: 100vh;
       position: relative;
     }
 
     .gooey-container {
       position: absolute;
-      width: 300vw; /* match body width */
+      width: 300vw;
       height: 100vh;
       filter: url(#goo);
     }
@@ -46,7 +46,7 @@
       z-index: 10;
       pointer-events: none;
       top: 45%;
-      left: 50%;
+      left: 150vw; /* center of 300vw */
       transform: translate(-50%, -50%);
       text-align: center;
       text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
@@ -60,7 +60,7 @@
       z-index: 10;
       pointer-events: none;
       top: 53%;
-      left: 50%;
+      left: 150vw;
       transform: translate(-50%, -50%);
       text-align: center;
       text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
@@ -72,7 +72,8 @@
       width: 100vw;
       text-align: center;
       z-index: 20;
-      left: 0;
+      left: 150vw;
+      transform: translateX(-50%);
     }
 
     .footer-icons a {
@@ -131,7 +132,7 @@
 
     const groups = softColors.map(color => ({
       color,
-      centerX: Math.random() * width * 3, // spread across full width
+      centerX: Math.random() * width * 3,
       centerY: Math.random() * height
     }));
 
@@ -166,6 +167,15 @@
     }
 
     animate();
+
+    // Center screen on load
+    window.onload = () => {
+      window.scrollTo({
+        left: (document.body.scrollWidth - window.innerWidth) / 2,
+        top: 0,
+        behavior: 'instant'
+      });
+    };
   </script>
 </body>
 </html>
