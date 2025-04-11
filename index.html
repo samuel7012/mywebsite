@@ -17,8 +17,8 @@
 
     .gooey-container {
       position: relative;
-      width: 300px;
-      height: 300px;
+      width: 400px;
+      height: 400px;
       filter: url(#goo);
     }
 
@@ -55,6 +55,30 @@
       animation-delay: 1s;
     }
 
+    .blob:nth-child(4) {
+      width: 140px;
+      height: 140px;
+      top: 200px;
+      left: 120px;
+      animation-delay: 1.5s;
+    }
+
+    .blob:nth-child(5) {
+      width: 110px;
+      height: 110px;
+      top: 50px;
+      left: 220px;
+      animation-delay: 2s;
+    }
+
+    .blob:nth-child(6) {
+      width: 130px;
+      height: 130px;
+      top: 170px;
+      left: 200px;
+      animation-delay: 2.5s;
+    }
+
     @keyframes jiggle {
       0% {
         transform: scale(1) translate(0, 0) rotate(0deg);
@@ -76,11 +100,12 @@
     .name {
       position: absolute;
       color: white;
-      font-size: 24px;
+      font-size: 48px;
       font-weight: bold;
       z-index: 10;
       pointer-events: none;
       text-align: center;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
   </style>
 </head>
@@ -88,6 +113,9 @@
   <div class="name">Samuel Valdez</div>
 
   <div class="gooey-container">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
     <div class="blob"></div>
     <div class="blob"></div>
     <div class="blob"></div>
