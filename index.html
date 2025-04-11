@@ -18,16 +18,12 @@
       filter: url(#goo);
     }
 
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      mix-blend-mode: screen;
-      animation: slow-jiggle 12s ease-in-out infinite;
-      transform-origin: center;
-      opacity: 0.4;
-      transition: opacity 2s ease;
-      box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
-    }
+   .blob {
+  ...
+  opacity: 0.6;
+  mix-blend-mode: normal; /* try 'normal' instead of 'screen' for more contrast */
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
+}
 
     @keyframes slow-jiggle {
       0%, 100% { transform: scale(1) rotate(0deg); }
