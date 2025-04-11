@@ -2,187 +2,87 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>xploding Goo Blobs</title>
+  <title>Super Gooey Blobs</title>
   <style>
     body {
       margin: 0;
+      background: #0c0c0c;
       overflow: hidden;
-      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
 
-    canvas {
-      display: block;
-      image-rendering: pixelated;
+    .gooey-container {
+      width: 400px;
+      height: 400px;
+      position: relative;
+      filter: url(#super-goo);
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      background: radial-gradient(circle at 30% 30%, #00f0ff, #0066ff);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .blob:nth-child(2) {
+      width: 120px;
+      height: 120px;
+      top: 80px;
+      left: 200px;
+      background: radial-gradient(circle at 30% 30%, #ff00c8, #8e00ff);
+      animation-delay: 2s;
+    }
+
+    .blob:nth-child(3) {
+      width: 90px;
+      height: 90px;
+      top: 220px;
+      left: 120px;
+      background: radial-gradient(circle at 30% 30%, #fff000, #ffaa00);
+      animation-delay: 4s;
+    }
+
+    .blob:nth-child(1) {
+      width: 140px;
+      height: 140px;
+      top: 130px;
+      left: 80px;
+      background: radial-gradient(circle at 30% 30%, #00ffc3, #00b894);
+      animation-delay: 0s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+      }
+      50% {
+        transform: translate(-20px, 30px) scale(1.2);
+      }
     }
   </style>
 </head>
 <body>
-<canvas id="gooCanvas"></canvas>
+  <div class="gooey-container">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
 
-<script>
-const canvas = document.getElementById('gooCanvas');
-const ctx = canvas.getContext('2d');
-let width = window.innerWidth;
-let height = window.innerHeight;
-canvas.width = width;
-canvas.height = height;
-
-// Goo Blob Code -----------------------------------
-class Node {
-  constructor(x, y, angle, radius, center) {
-    this.center = center;
-    this.angle = angle;
-    this.baseRadius = radius;
-    this.x = x;
-    this.y = y;
-    this.vx = 0;
-    this.vy = 0;
-  }
-
-  update(time) {
-    const wobble = Math.sin(time * 0.004 + this.angle * 3) * 4;
-    const r = this.baseRadius + wobble;
-    const tx = this.center.x + Math.cos(this.angle) * r;
-    const ty = this.center.y + Math.sin(this.angle) * r;
-
-    this.vx += (tx - this.x) * 0.2;
-    this.vy += (ty - this.y) * 0.2;
-
-    this.vx *= 0.7;
-    this.vy *= 0.7;
-
-    this.x += this.vx;
-    this.y += this.vy;
-  }
-}
-
-class Blob {
-  constructor(x, y, color = '#00bfff') {
-    this.x = x;
-    this.y = y;
-    this.vx = (Math.random() - 0.5) * 2;
-    this.vy = (Math.random() - 0.5) * 2;
-    this.radius = 50 + Math.random() * 20;
-    this.color = color;
-    this.nodes = [];
-
-    const nodeCount = 32;
-    for (let i = 0; i < nodeCount; i++) {
-      let angle = (Math.PI * 2 / nodeCount) * i;
-      let nx = x + Math.cos(angle) * this.radius;
-      let ny = y + Math.sin(angle) * this.radius;
-      this.nodes.push(new Node(nx, ny, angle, this.radius, this));
-    }
-  }
-
-  applyStickyOrBounce(other) {
-    const dx = other.x - this.x;
-    const dy = other.y - this.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const minDist = (this.radius + other.radius) * 0.85;
-
-    if (dist < minDist && dist > 0) {
-      const rvx = other.vx - this.vx;
-      const rvy = other.vy - this.vy;
-      const relSpeed = Math.sqrt(rvx * rvx + rvy * rvy);
-
-      if (relSpeed > 2.5) {
-        const force = 0.05;
-        const ax = (dx / dist) * force;
-        const ay = (dy / dist) * force;
-
-        this.vx -= ax * 5;
-        this.vy -= ay * 5;
-        other.vx += ax * 5;
-        other.vy += ay * 5;
-      } else {
-        const force = (minDist - dist) * 0.015;
-        const ax = (dx / dist) * force;
-        const ay = (dy / dist) * force;
-
-        this.vx -= ax;
-        this.vy -= ay;
-        other.vx += ax;
-        other.vy += ay;
-      }
-    }
-  }
-
-  update(time) {
-    this.x += this.vx;
-    this.y += this.vy;
-
-    if (this.x - this.radius < 0 || this.x + this.radius > width) this.vx *= -1;
-    if (this.y - this.radius < 0 || this.y + this.radius > height) this.vy *= -1;
-
-    for (let node of this.nodes) {
-      node.center = this;
-      node.update(time);
-    }
-  }
-
-  draw(ctx) {
-    ctx.save();
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.moveTo(this.nodes[0].x, this.nodes[0].y);
-    for (let i = 1; i < this.nodes.length; i++) {
-      const curr = this.nodes[i];
-      const prev = this.nodes[i - 1];
-      const cx = (prev.x + curr.x) / 2;
-      const cy = (prev.y + curr.y) / 2;
-      ctx.quadraticCurveTo(prev.x, prev.y, cx, cy);
-    }
-    const first = this.nodes[0];
-    const last = this.nodes[this.nodes.length - 1];
-    const cx = (last.x + first.x) / 2;
-    const cy = (last.y + first.y) / 2;
-    ctx.quadraticCurveTo(last.x, last.y, cx, cy);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-  }
-}
-
-// Create blobs after canvas is ready
-const blobs = [];
-const blobCount = 7;
-function initBlobs() {
-  blobs.length = 0;
-  for (let i = 0; i < blobCount; i++) {
-    const margin = 100;
-    const x = margin + Math.random() * (width - margin * 2);
-    const y = margin + Math.random() * (height - margin * 2);
-    blobs.push(new Blob(x, y));
-  }
-}
-initBlobs();
-
-function animate(time) {
-  ctx.clearRect(0, 0, width, height);
-
-  for (let i = 0; i < blobs.length; i++) {
-    for (let j = i + 1; j < blobs.length; j++) {
-      blobs[i].applyStickyOrBounce(blobs[j]);
-    }
-  }
-
-  for (let blob of blobs) {
-    blob.update(time);
-    blob.draw(ctx);
-  }
-
-  requestAnimationFrame(animate);
-}
-
-animate();
-
-// Resize support
-window.addEventListener('resize', () => {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-  initBlobs(); // regenerate blobs to stay visible
-});
-</script>
+    <svg>
+      <filter id="super-goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur" />
+        <feColorMatrix in="blur" mode="matrix"
+          values="1 0 0 0 0  
+                  0 1 0 0 0  
+                  0 0 1 0 0  
+                  0 0 0 40 -20" result="gooeyness"/>
+        <feComposite in="SourceGraphic" in2="gooeyness" operator="atop"/>
+      </filter>
+    </svg>
+  </div>
 </body>
 </html>
