@@ -4,26 +4,25 @@
   <meta charset="UTF-8" />
   <title>Soothing Blob Galaxy</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
-      overflow-x: scroll;
-      overflow-y: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      width: 300vw;
+      padding: 0;
+      overflow: hidden;
+      width: 100vw;
       height: 100vh;
-      position: relative;
+      background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
+      font-family: 'Segoe UI', sans-serif;
     }
 
     .gooey-container {
-      position: absolute;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
-      left: 0;
-      top: 0;
-      overflow: hidden;
       filter: url(#goo);
       pointer-events: none;
+      z-index: 1;
     }
 
     .blob {
@@ -32,7 +31,7 @@
       mix-blend-mode: normal;
       animation: slow-jiggle 12s ease-in-out infinite;
       transform-origin: center;
-      opacity: 0.4;
+      opacity: 0.6;
       box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
       transition: opacity 2s ease;
     }
@@ -48,12 +47,12 @@
       font-size: 56px;
       font-weight: 600;
       z-index: 10;
-      pointer-events: none;
-      top: 42%;
-      left: 150vw;
+      top: 45%;
+      left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
       text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+      pointer-events: none;
     }
 
     .tagline {
@@ -62,22 +61,22 @@
       font-size: 20px;
       font-weight: 300;
       z-index: 10;
-      pointer-events: none;
-      top: 51%;
-      left: 150vw;
+      top: 53%;
+      left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
       text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+      pointer-events: none;
     }
 
     .footer-icons {
       position: absolute;
       bottom: 20px;
-      width: 100vw;
-      text-align: center;
-      z-index: 20;
-      left: 150vw;
+      left: 50%;
       transform: translateX(-50%);
+      width: auto;
+      text-align: center;
+      z-index: 10;
     }
 
     .footer-icons a {
@@ -123,8 +122,8 @@
 
   <script>
     const container = document.getElementById('container');
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     const softColors = [
       '#FFC1CC', '#D0F0C0', '#B0E0E6', '#E0BBE4',
@@ -136,16 +135,16 @@
 
     const groups = softColors.map(color => ({
       color,
-      centerX: screenW * 1.5 + (Math.random() * screenW) - screenW / 2,
-      centerY: Math.random() * screenH
+      centerX: width / 2 + (Math.random() * 400 - 200), // stay near center
+      centerY: height / 2 + (Math.random() * 400 - 200)
     }));
 
     groups.forEach(group => {
       for (let i = 0; i < 6; i++) {
         const size = 60 + Math.random() * 30;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 120 + Math.random() * 180;
-        const speed = 0.001 + Math.random() * 0.0025;
+        const radius = 100 + Math.random() * 80;
+        const speed = 0.001 + Math.random() * 0.002;
 
         const blob = document.createElement('div');
         blob.className = 'blob';
@@ -166,20 +165,10 @@
         blob.el.style.left = x + 'px';
         blob.el.style.top = y + 'px';
       });
-
       requestAnimationFrame(animate);
     }
 
     animate();
-
-    // Center screen on load
-    window.onload = () => {
-      window.scrollTo({
-        left: screenW * 1.5 - screenW / 2,
-        top: 0,
-        behavior: 'instant'
-      });
-    };
   </script>
 </body>
 </html>
