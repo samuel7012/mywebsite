@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Gooey Blobs</title>
+  <meta charset="UTF-8" />
+  <title>MAX BLOB PHYSICS</title>
   <style>
     body {
       margin: 0;
       background: #0e0e0e;
       overflow: hidden;
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
     }
 
     .gooey-container {
@@ -27,17 +27,16 @@
     }
 
     @keyframes jiggle {
-      0%   { transform: scale(1) translate(0, 0) rotate(0deg); }
-      25%  { transform: scale(1.05, 0.95) translate(5px, -5px) rotate(3deg); }
-      50%  { transform: scale(0.95, 1.05) translate(-5px, 5px) rotate(-3deg); }
-      75%  { transform: scale(1.08, 0.92) translate(8px, -3px) rotate(2deg); }
-      100% { transform: scale(1) translate(0, 0) rotate(0deg); }
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25%  { transform: scale(1.05, 0.95) rotate(3deg); }
+      50%  { transform: scale(0.95, 1.05) rotate(-2deg); }
+      75%  { transform: scale(1.02, 0.98) rotate(2deg); }
     }
 
     .name {
       position: absolute;
       color: white;
-      font-size: 60px;
+      font-size: 64px;
       font-weight: bold;
       z-index: 10;
       pointer-events: none;
@@ -45,40 +44,17 @@
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
     }
   </style>
 </head>
 <body>
   <div class="name">Samuel Valdez</div>
+  <div class="gooey-container" id="container"></div>
 
-  <div class="gooey-container" id="container">
-    <!-- 20 blobs -->
-    <div class="blob" style="width:100px; height:100px; background:red;"></div>
-    <div class="blob" style="width:90px; height:90px; background:lime;"></div>
-    <div class="blob" style="width:110px; height:110px; background:blue;"></div>
-    <div class="blob" style="width:120px; height:120px; background:magenta;"></div>
-    <div class="blob" style="width:85px; height:85px; background:cyan;"></div>
-    <div class="blob" style="width:130px; height:130px; background:yellow;"></div>
-    <div class="blob" style="width:100px; height:100px; background:orange;"></div>
-    <div class="blob" style="width:90px; height:90px; background:hotpink;"></div>
-    <div class="blob" style="width:110px; height:110px; background:lightgreen;"></div>
-    <div class="blob" style="width:100px; height:100px; background:dodgerblue;"></div>
-    <div class="blob" style="width:95px; height:95px; background:violet;"></div>
-    <div class="blob" style="width:115px; height:115px; background:lightcoral;"></div>
-    <div class="blob" style="width:105px; height:105px; background:springgreen;"></div>
-    <div class="blob" style="width:90px; height:90px; background:turquoise;"></div>
-    <div class="blob" style="width:130px; height:130px; background:orangered;"></div>
-    <div class="blob" style="width:100px; height:100px; background:aqua;"></div>
-    <div class="blob" style="width:85px; height:85px; background:tomato;"></div>
-    <div class="blob" style="width:110px; height:110px; background:chartreuse;"></div>
-    <div class="blob" style="width:120px; height:120px; background:fuchsia;"></div>
-    <div class="blob" style="width:100px; height:100px; background:gold;"></div>
-  </div>
-
-  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display:none;">
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
     <filter id="goo">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
       <feColorMatrix in="blur" mode="matrix"
         values="1 0 0 0 0  
                 0 1 0 0 0  
@@ -89,57 +65,105 @@
   </svg>
 
   <script>
-    const blobs = Array.from(document.querySelectorAll('.blob'));
     const container = document.getElementById('container');
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    // Initialize positions and velocities
-    const blobData = blobs.map(blob => {
-      return {
-        el: blob,
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: 0,
-        vy: 0
-      };
+    const groupColors = ['red', 'lime', 'blue'];
+    const groups = [
+      { color: groupColors[0], center: [width * 0.25, height * 0.35] },
+      { color: groupColors[1], center: [width * 0.75, height * 0.35] },
+      { color: groupColors[2], center: [width * 0.5, height * 0.7] },
+    ];
+
+    const blobData = [];
+    const numPerGroup = 20;
+    const blobRadius = 40;
+
+    groups.forEach((group, gIndex) => {
+      for (let i = 0; i < numPerGroup; i++) {
+        const size = 60 + Math.random() * 40;
+        const blob = document.createElement('div');
+        blob.className = 'blob';
+        blob.style.width = size + 'px';
+        blob.style.height = size + 'px';
+        blob.style.background = group.color;
+        container.appendChild(blob);
+
+        const angle = Math.random() * 2 * Math.PI;
+        const radius = 100 + Math.random() * 150;
+
+        blobData.push({
+          el: blob,
+          group: gIndex,
+          mass: size / 50,
+          radius: size / 2,
+          x: group.center[0] + Math.cos(angle) * radius,
+          y: group.center[1] + Math.sin(angle) * radius,
+          vx: 0,
+          vy: 0
+        });
+      }
     });
 
     function animate() {
-      const G = 0.001; // gravitational constant-like factor
-      const maxSpeed = 1;
+      const G_same = 0.002;
+      const G_diff = 0.0004;
+      const repelForce = 4000;
+      const maxSpeed = 3;
 
       for (let i = 0; i < blobData.length; i++) {
         const a = blobData[i];
+
         for (let j = i + 1; j < blobData.length; j++) {
           const b = blobData[j];
 
           let dx = b.x - a.x;
           let dy = b.y - a.y;
           let distSq = dx * dx + dy * dy;
-          if (distSq < 1000) distSq = 1000; // prevent singularity
+          let dist = Math.sqrt(distSq);
+          if (dist === 0) continue;
 
-          const force = G / distSq;
+          // Attraction
+          const attract = a.group === b.group ? G_same : G_diff;
+          const f = attract / distSq;
 
-          const fx = force * dx;
-          const fy = force * dy;
+          const fx = f * dx;
+          const fy = f * dy;
 
-          a.vx += fx;
-          a.vy += fy;
-          b.vx -= fx;
-          b.vy -= fy;
+          a.vx += fx / a.mass;
+          a.vy += fy / a.mass;
+          b.vx -= fx / b.mass;
+          b.vy -= fy / b.mass;
+
+          // Collision repulsion (basic overlap check)
+          const minDist = a.radius + b.radius;
+          if (dist < minDist) {
+            const overlap = minDist - dist;
+            const repelX = (dx / dist) * overlap * 0.5;
+            const repelY = (dy / dist) * overlap * 0.5;
+            a.vx -= repelX / a.mass;
+            a.vy -= repelY / a.mass;
+            b.vx += repelX / b.mass;
+            b.vy += repelY / b.mass;
+          }
         }
       }
 
       blobData.forEach(blob => {
-        blob.vx *= 0.95;
-        blob.vy *= 0.95;
-        blob.vx = Math.max(Math.min(blob.vx, maxSpeed), -maxSpeed);
-        blob.vy = Math.max(Math.min(blob.vy, maxSpeed), -maxSpeed);
+        blob.vx *= 0.96;
+        blob.vy *= 0.96;
+
+        blob.vx = Math.max(-maxSpeed, Math.min(maxSpeed, blob.vx));
+        blob.vy = Math.max(-maxSpeed, Math.min(maxSpeed, blob.vy));
+
         blob.x += blob.vx;
         blob.y += blob.vy;
 
-        // Keep blobs inside screen bounds
+        // Bounce off walls
+        if (blob.x <= 0 || blob.x >= width) blob.vx *= -1;
+        if (blob.y <= 0 || blob.y >= height) blob.vy *= -1;
+
         blob.x = Math.max(0, Math.min(width, blob.x));
         blob.y = Math.max(0, Math.min(height, blob.y));
 
