@@ -70,19 +70,18 @@
       z-index: 20;
     }
 
-    .footer-icons a {
-      margin: 0 15px;
-      font-size: 28px;
-      color: white;
-      text-decoration: none;
-      text-shadow: 0 0 8px white;
-      transition: transform 0.4s, color 0.4s;
+    .footer-icons img {
+      width: 32px;
+      height: 32px;
+      margin: 0 16px;
+      filter: drop-shadow(0 0 6px white);
+      transition: transform 0.3s ease, filter 0.3s ease;
+      vertical-align: middle;
     }
 
-    .footer-icons a:hover {
-      transform: scale(1.1);
-      color: #80dfff;
-      text-shadow: 0 0 10px #80dfff;
+    .footer-icons a:hover img {
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 10px #80dfff);
     }
   </style>
 </head>
@@ -92,9 +91,15 @@
   <div class="gooey-container" id="container"></div>
 
   <div class="footer-icons">
-    <a href="https://github.com" target="_blank" title="GitHub">🐙</a>
-    <a href="https://swimgym.nl" target="_blank" title="Swimgym">🏊‍♂️</a>
-    <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">🌐</a>
+    <a href="https://github.com" target="_blank" title="GitHub">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub Logo">
+    </a>
+    <a href="https://swimgym.nl" target="_blank" title="Swimgym">
+      <img src="https://www.svgrepo.com/show/29003/swimming.svg" alt="Swimmer" style="filter: invert(1);">
+    </a>
+    <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">
+      <img src="https://www.svgrepo.com/show/309861/internet.svg" alt="Globe" style="filter: invert(1);">
+    </a>
   </div>
 
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
