@@ -2,87 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Super Gooey Blobs</title>
+  <title>Interactive Gooey Blobs</title>
   <style>
     body {
       margin: 0;
       background: #0c0c0c;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
     }
 
-    .gooey-container {
-      width: 400px;
-      height: 400px;
-      position: relative;
-      filter: url(#super-goo);
+    svg {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
     }
 
     .blob {
       position: absolute;
+      width: 100px;
+      height: 100px;
+      background: #00f0ff;
       border-radius: 50%;
-      mix-blend-mode: screen;
-      background: radial-gradient(circle at 30% 30%, #00f0ff, #0066ff);
-      animation: float 6s ease-in-out infinite;
+      filter: url(#goo);
+      cursor: grab;
+      transition: background 0.3s;
     }
 
-    .blob:nth-child(2) {
-      width: 120px;
-      height: 120px;
-      top: 80px;
-      left: 200px;
-      background: radial-gradient(circle at 30% 30%, #ff00c8, #8e00ff);
-      animation-delay: 2s;
-    }
-
-    .blob:nth-child(3) {
-      width: 90px;
-      height: 90px;
-      top: 220px;
-      left: 120px;
-      background: radial-gradient(circle at 30% 30%, #fff000, #ffaa00);
-      animation-delay: 4s;
-    }
-
-    .blob:nth-child(1) {
-      width: 140px;
-      height: 140px;
-      top: 130px;
-      left: 80px;
-      background: radial-gradient(circle at 30% 30%, #00ffc3, #00b894);
-      animation-delay: 0s;
-    }
-
-    @keyframes float {
-      0%, 100% {
-        transform: translate(0, 0) scale(1);
-      }
-      50% {
-        transform: translate(-20px, 30px) scale(1.2);
-      }
+    .blob:active {
+      cursor: grabbing;
     }
   </style>
 </head>
 <body>
-  <div class="gooey-container">
-    <div class="blob"></div>
-    <div class="blob"></div>
-    <div class="blob"></div>
 
-    <svg>
-      <filter id="super-goo">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur" />
+  <div class="blob" id="blob1" style="left: 40vw; top: 40vh;"></div>
+  <div class="blob" id="blob2" style="left: 50vw; top: 50vh;"></div>
+
+  <svg>
+    <defs>
+      <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
         <feColorMatrix in="blur" mode="matrix"
           values="1 0 0 0 0  
                   0 1 0 0 0  
                   0 0 1 0 0  
-                  0 0 0 40 -20" result="gooeyness"/>
-        <feComposite in="SourceGraphic" in2="gooeyness" operator="atop"/>
+                  0 0 0 30 -15" result="goo" />
+        <feComposite in="SourceGraphic" in2="goo" operator="atop" />
       </filter>
-    </svg>
-  </div>
+    </defs>
+  </svg>
+
+  <script>
+    const blob1 = document.getElementById('blob1');
+    const blob2 = document.getElementById('blob2');
+
+    let dragging = null;
+
+    document.addEventListener('mousedown', (e) => {
+      if (e.target.classList.contains('blob')) {
+        dragging = e.target;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      dragging = null;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (dragging) {
+        dragging.style.left = `${e.clientX - 50}px`;
+        dragging.style.top = `${e.clientY - 50}px`;
+
+        // Check distance between blobs
+        const r1 = blob1.getBoundingClientRect();
+        const r2 = blob2.getBoundingClientRect();
+        const dx = r1.left - r2.left;
+        const dy = r1.top - r2.top;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > 200) {
+          // Too far? Split them!
+          dragging.style.background = '#ff007a'; // Color changes when split
+          dragging.style.transition = 'background 0.5s ease';
+          // Optionally: duplicate or "clone" new blobs here for more chaos
+        } else {
+          dragging.style.background = '#00f0ff';
+        }
+      }
+    });
+  </script>
 </body>
 </html>
