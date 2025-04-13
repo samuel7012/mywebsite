@@ -7,97 +7,134 @@
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    body {
-      background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
-    }
-
-    .wrapper {
-      display: flex;
-      width: 200vw;
-      height: 100vh;
-      overflow-x: scroll;
+      overflow-x: auto;
       overflow-y: hidden;
+      font-family: 'Segoe UI', sans-serif;
       scroll-behavior: smooth;
     }
 
-    .section {
-      flex: 0 0 100vw;
+    body {
+      width: 200vw; /* Two horizontal sections */
       height: 100vh;
+      background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
       position: relative;
+    }
+
+    .section {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      float: left;
     }
 
     .gooey-container {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      filter: url(#goo);
       top: 0;
       left: 0;
+      width: 200vw;
+      height: 100vh;
+      filter: url(#goo);
+      pointer-events: none;
     }
 
     .blob {
       position: absolute;
       border-radius: 50%;
+      mix-blend-mode: normal;
       animation: slow-jiggle 12s ease-in-out infinite;
+      transform-origin: center;
       opacity: 0.6;
       box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
     }
 
     @keyframes slow-jiggle {
       0%, 100% { transform: scale(1) rotate(0deg); }
-      50% { transform: scale(1.02, 0.98) rotate(2deg); }
-    }
-
-    .name, .tagline {
-      position: absolute;
-      width: 100%;
-      text-align: center;
-      color: white;
-      z-index: 10;
-      pointer-events: none;
+      50%  { transform: scale(1.02, 0.98) rotate(2deg); }
     }
 
     .name {
-      top: 45%;
+      position: absolute;
+      color: white;
       font-size: 56px;
       font-weight: 600;
+      z-index: 10;
+      pointer-events: none;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
     }
 
     .tagline {
-      top: 53%;
+      position: absolute;
+      color: white;
       font-size: 20px;
       font-weight: 300;
+      z-index: 10;
+      pointer-events: none;
+      top: 53%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
     }
 
-    .projects {
-      background: white;
-      color: #0b1d2e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      font-weight: bold;
-      height: 100%;
+    .footer-icons {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      text-align: center;
+    }
+
+    .footer-icons a {
+      margin: 0 15px;
+      font-size: 28px;
+      color: white;
+      text-decoration: none;
+      text-shadow: 0 0 8px white;
+      transition: transform 0.4s, color 0.4s;
+    }
+
+    .footer-icons a:hover {
+      transform: scale(1.1);
+      color: #80dfff;
+      text-shadow: 0 0 10px #80dfff;
+    }
+
+    /* Optional: Hide scrollbar for aesthetic */
+    ::-webkit-scrollbar {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <div class="section">
-      <div class="name">Samuel Valdez</div>
-      <div class="tagline">A young developer, swimmer and child.</div>
-      <div class="gooey-container" id="container"></div>
-    </div>
 
-    <div class="section projects">
-      Projects
+  <!-- Section 1 -->
+  <div class="section">
+    <div class="name">Samuel Valdez</div>
+    <div class="tagline">A young developer, swimmer and child.</div>
+    <div class="footer-icons">
+      <a href="https://github.com" target="_blank" title="GitHub">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="32" height="32" />
+      </a>
+      <a href="https://swimgym.nl" target="_blank" title="Swimgym">🏊</a>
+      <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">🌐</a>
     </div>
   </div>
 
+  <!-- Section 2 -->
+  <div class="section">
+    <div class="name">Projects</div>
+    <div class="tagline">A collection of my work and creations.</div>
+  </div>
+
+  <!-- Gooey Blobs -->
+  <div class="gooey-container" id="container"></div>
+
+  <!-- SVG Filter -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
     <filter id="goo">
       <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
@@ -110,9 +147,10 @@
     </filter>
   </svg>
 
+  <!-- Blob Script -->
   <script>
     const container = document.getElementById('container');
-    const width = window.innerWidth;
+    const width = window.innerWidth * 2; // cover 200vw
     const height = window.innerHeight;
 
     const softColors = [
@@ -130,11 +168,11 @@
     }));
 
     groups.forEach(group => {
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         const size = 60 + Math.random() * 30;
         const angle = Math.random() * Math.PI * 2;
-        const radius = 100 + Math.random() * 100;
-        const speed = 0.001 + Math.random() * 0.002;
+        const radius = 120 + Math.random() * 180;
+        const speed = 0.001 + Math.random() * 0.0025;
 
         const blob = document.createElement('div');
         blob.className = 'blob';
@@ -152,9 +190,8 @@
         blob.angle += blob.speed;
         const x = blob.group.centerX + Math.cos(blob.angle) * blob.radius;
         const y = blob.group.centerY + Math.sin(blob.angle) * blob.radius;
-
-        blob.el.style.left = Math.min(Math.max(x, 0), width - 60) + 'px';
-        blob.el.style.top = Math.min(Math.max(y, 0), height - 60) + 'px';
+        blob.el.style.left = x + 'px';
+        blob.el.style.top = y + 'px';
       });
 
       requestAnimationFrame(animate);
@@ -162,9 +199,13 @@
 
     animate();
 
-    // Scroll to first section on load
+    // Center screen on load
     window.onload = () => {
-      document.querySelector('.wrapper').scrollLeft = 0;
+      window.scrollTo({
+        left: window.innerWidth,
+        top: 0,
+        behavior: 'smooth'
+      });
     };
   </script>
 </body>
