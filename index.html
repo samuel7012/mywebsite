@@ -4,15 +4,40 @@
   <meta charset="UTF-8" />
   <title>Soothing Blob Galaxy</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
-      overflow-y: scroll;
-      overflow-x: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      width: 100vw;
+      padding: 0;
       height: 200vh;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
+      overflow-x: hidden;
+    }
+
+    .intro-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
       position: relative;
+      z-index: 10;
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .name {
+      color: white;
+      font-size: 56px;
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+    }
+
+    .tagline {
+      color: white;
+      font-size: 20px;
+      font-weight: 300;
+      margin-top: 10px;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
     }
 
     .gooey-container {
@@ -21,6 +46,7 @@
       width: 100vw;
       height: 100vh;
       filter: url(#goo);
+      z-index: 0;
     }
 
     .blob {
@@ -37,31 +63,6 @@
     @keyframes slow-jiggle {
       0%, 100% { transform: scale(1) rotate(0deg); }
       50%  { transform: scale(1.02, 0.98) rotate(2deg); }
-    }
-
-    .intro {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .name {
-      color: white;
-      font-size: 56px;
-      font-weight: 600;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-    }
-
-    .tagline {
-      color: white;
-      font-size: 20px;
-      font-weight: 300;
-      text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
-      margin-top: 10px;
     }
 
     .footer-icons {
@@ -87,9 +88,8 @@
       text-shadow: 0 0 10px #80dfff;
     }
 
-    /* Projects Section */
     .projects-section {
-      position: absolute;
+      position: relative;
       top: 100vh;
       width: 100vw;
       height: 100vh;
@@ -131,7 +131,7 @@
   </style>
 </head>
 <body>
-  <div class="intro">
+  <div class="intro-wrapper">
     <div class="name">Samuel Valdez</div>
     <div class="tagline">A young developer, swimmer and child.</div>
   </div>
