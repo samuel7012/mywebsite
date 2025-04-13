@@ -4,39 +4,23 @@
   <meta charset="UTF-8" />
   <title>Soothing Blob Galaxy</title>
   <style>
-    html, body {
-  margin: 0;
-  background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
-  overflow-y: scroll;
-  overflow-x: hidden;
-  font-family: 'Segoe UI', sans-serif;
-  width: 100vw;
-  height: 200vh; /* two vertical sections */
-  position: relative;
-}
-
     body {
-      width: 200vw; /* Two horizontal sections */
-      height: 100vh;
+      margin: 0;
       background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
-      position: relative;
-    }
-
-    .section {
-      position: relative;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      font-family: 'Segoe UI', sans-serif;
       width: 100vw;
-      height: 100vh;
-      float: left;
+      height: 200vh;
+      position: relative;
     }
 
     .gooey-container {
       position: absolute;
       top: 0;
-      left: 0;
-      width: 200vw;
+      width: 100vw;
       height: 100vh;
       filter: url(#goo);
-      pointer-events: none;
     }
 
     .blob {
@@ -47,6 +31,7 @@
       transform-origin: center;
       opacity: 0.6;
       box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
+      transition: opacity 2s ease;
     }
 
     @keyframes slow-jiggle {
@@ -85,10 +70,9 @@
     .footer-icons {
       position: absolute;
       bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 20;
+      width: 100vw;
       text-align: center;
+      z-index: 20;
     }
 
     .footer-icons a {
@@ -106,37 +90,76 @@
       text-shadow: 0 0 10px #80dfff;
     }
 
-    /* Optional: Hide scrollbar for aesthetic */
-    ::-webkit-scrollbar {
-      display: none;
+    /* Projects Section */
+    .projects-section {
+      position: absolute;
+      top: 100vh;
+      width: 100vw;
+      height: 100vh;
+      background: white;
+      color: #0b1d2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+
+    .projects-section h1 {
+      font-size: 48px;
+      margin-bottom: 30px;
+    }
+
+    .project-list {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .project-card {
+      background: #f1f1f1;
+      padding: 20px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      max-width: 300px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-5px);
     }
   </style>
 </head>
 <body>
+  <div class="name">Samuel Valdez</div>
+  <div class="tagline">A young developer, swimmer and child.</div>
+  <div class="gooey-container" id="container"></div>
 
-  <!-- Section 1 -->
-  <div class="section">
-    <div class="name">Samuel Valdez</div>
-    <div class="tagline">A young developer, swimmer and child.</div>
-    <div class="footer-icons">
-      <a href="https://github.com" target="_blank" title="GitHub">
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="32" height="32" />
-      </a>
-      <a href="https://swimgym.nl" target="_blank" title="Swimgym">🏊</a>
-      <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">🌐</a>
+  <div class="footer-icons">
+    <a href="https://github.com" target="_blank" title="GitHub">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="32" height="32" />
+    </a>
+    <a href="https://swimgym.nl" target="_blank" title="Swimgym">🏊</a>
+    <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">🌐</a>
+  </div>
+
+  <div class="projects-section">
+    <h1>Projects</h1>
+    <div class="project-list">
+      <div class="project-card">
+        <h2>Blob Galaxy</h2>
+        <p>A soothing animated background made with JavaScript and CSS.</p>
+      </div>
+      <div class="project-card">
+        <h2>Coming Soon</h2>
+        <p>More fun creations on the way 🚀</p>
+      </div>
     </div>
   </div>
 
-  <!-- Section 2 -->
-  <div class="section">
-    <div class="name">Projects</div>
-    <div class="tagline">A collection of my work and creations.</div>
-  </div>
-
-  <!-- Gooey Blobs -->
-  <div class="gooey-container" id="container"></div>
-
-  <!-- SVG Filter -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
     <filter id="goo">
       <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
@@ -149,10 +172,9 @@
     </filter>
   </svg>
 
-  <!-- Blob Script -->
   <script>
     const container = document.getElementById('container');
-    const width = window.innerWidth * 2; // cover 200vw
+    const width = window.innerWidth;
     const height = window.innerHeight;
 
     const softColors = [
@@ -200,15 +222,6 @@
     }
 
     animate();
-
-    // Center screen on load
-    window.onload = () => {
-      window.scrollTo({
-        left: window.innerWidth,
-        top: 0,
-        behavior: 'smooth'
-      });
-    };
   </script>
 </body>
 </html>
