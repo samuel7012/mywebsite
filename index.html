@@ -6,19 +6,27 @@
   <style>
     html, body {
       margin: 0;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
       font-family: 'Segoe UI', sans-serif;
+      overflow-x: scroll;
+      overflow-y: scroll;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      width: 300vw;
+      height: 200vh; /* Extra height for scroll down */
       background: linear-gradient(to bottom right, #0b1d2e, #1a2e3b);
+      position: relative;
     }
 
     .gooey-container {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      width: 300vw;
+      height: 100vh;
       filter: url(#goo);
-      overflow: hidden;
+      top: 0;
+      left: 0;
+      z-index: 1;
     }
 
     .blob {
@@ -45,7 +53,7 @@
       z-index: 10;
       pointer-events: none;
       top: 45%;
-      left: 50%;
+      left: 150vw;
       transform: translate(-50%, -50%);
       text-align: center;
       text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
@@ -59,7 +67,7 @@
       z-index: 10;
       pointer-events: none;
       top: 53%;
-      left: 50%;
+      left: 150vw;
       transform: translate(-50%, -50%);
       text-align: center;
       text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
@@ -68,11 +76,11 @@
     .footer-icons {
       position: absolute;
       bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
+      width: 100vw;
       text-align: center;
       z-index: 20;
+      left: 150vw;
+      transform: translateX(-50%);
     }
 
     .footer-icons a {
@@ -89,6 +97,27 @@
       color: #80dfff;
       text-shadow: 0 0 10px #80dfff;
     }
+
+    .projects-section {
+      position: absolute;
+      top: 100vh;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: white;
+      z-index: 5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .projects-title {
+      font-size: 42px;
+      font-weight: bold;
+      margin-top: 60px;
+      color: #111;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +131,10 @@
     </a>
     <a href="https://swimgym.nl" target="_blank" title="Swimgym">🏊</a>
     <a href="https://efrenvaldez.pro" target="_blank" title="efrenvaldez.pro">🌐</a>
+  </div>
+
+  <div class="projects-section">
+    <div class="projects-title">Projects</div>
   </div>
 
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
@@ -131,8 +164,8 @@
 
     const groups = softColors.map(color => ({
       color,
-      centerX: width / 2 + (Math.random() * 1200 - 600),
-      centerY: height / 2 + (Math.random() * 800 - 400)
+      centerX: Math.random() * width * 3,
+      centerY: Math.random() * height
     }));
 
     groups.forEach(group => {
@@ -161,11 +194,17 @@
         blob.el.style.left = x + 'px';
         blob.el.style.top = y + 'px';
       });
-
       requestAnimationFrame(animate);
     }
 
     animate();
+
+    window.onload = () => {
+      window.scrollTo({
+        left: (document.body.scrollWidth - window.innerWidth) / 2,
+        top: 0
+      });
+    };
   </script>
 </body>
 </html>
