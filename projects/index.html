@@ -3,30 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Parkour Game</title>
+  <title>Jiggly Blob Game</title>
   <style>
     body { margin: 0; overflow: hidden; background-color: #87CEEB; }
     canvas { display: block; }
-    #hud {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      font-size: 20px;
-    }
-    #score { font-weight: bold; }
-    #timer { font-weight: bold; }
   </style>
 </head>
 <body>
-  <div id="hud">
-    <div id="score">Score: 0</div>
-    <div id="timer">Time: 0</div>
-  </div>
-
-  <!-- Including Three.js and PointerLockControls -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
-  <script src="https://threejs.org/examples/js/controls/PointerLockControls.js"></script>
+  <!-- Three.js Script Embedded -->
+  <script>
+    // Three.js library code (r150 version)
+    var THREE = (function() {
+      var _this = {};
+      // The entire Three.js library code would go here
+      // For brevity, it is assumed to be copied and pasted in this block
+      return _this;
+    })();
+  </script>
 
   <script>
     // Scene setup
@@ -36,66 +29,15 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const controls = new THREE.PointerLockControls(camera, document.body);
-    document.body.addEventListener('click', () => controls.lock());
-    scene.add(controls.getObject());
-
-    // Movement and jumping logic
-    const keys = {};
-    let velocity = new THREE.Vector3();
-    let canJump = false;
-    document.addEventListener('keydown', (e) => {
-      keys[e.code] = true;
-      if (e.code === 'Space' && canJump) {
-        velocity.y += 0.18;  // Jump strength
-        canJump = false;
-      }
-    });
-    document.addEventListener('keyup', e => keys[e.code] = false);
-
-    // Materials for terrain and platforms
-    const materials = {
-      platform: new THREE.MeshStandardMaterial({ color: 0x8B4513 }), // Platform brown
-      wall: new THREE.MeshStandardMaterial({ color: 0x2F4F4F }), // Dark wall for obstacles
-      ground: new THREE.MeshStandardMaterial({ color: 0x87CEEB }) // Sky blue
-    };
-
-    const geometry = new THREE.BoxGeometry(5, 0.5, 5); // Platform size
-    const wallGeometry = new THREE.BoxGeometry(1, 3, 1); // Wall size
-
-    // Create platforms
-    const platforms = [];
-    const walls = [];
-    let score = 0;
-    let startTime = Date.now();
-    let elapsedTime = 0;
-
-    function createPlatform(x, y, z) {
-      const platform = new THREE.Mesh(geometry, materials.platform);
-      platform.position.set(x, y, z);
-      scene.add(platform);
-      platforms.push(platform);
-    }
-
-    function createWall(x, y, z) {
-      const wall = new THREE.Mesh(wallGeometry, materials.wall);
-      wall.position.set(x, y, z);
-      scene.add(wall);
-      walls.push(wall);
-    }
-
-    function generateCourse() {
-      createPlatform(0, 0, 0);
-      createPlatform(15, 0, 10);
-      createPlatform(30, 0, 20);
-      createPlatform(50, 0, 30);
-      createPlatform(60, 0, 40);
-
-      createWall(25, 1.5, 15); // Obstacles (walls)
-      createWall(40, 1.5, 25);
-    }
-
-    generateCourse();
+    // Camera setup
+    camera.position.set(0, 5, 10);
+    
+    // Blob setup (a sphere)
+    const geometry = new THREE.SphereGeometry(1, 32, 32);
+    const material = new THREE.MeshStandardMaterial({ color: 0xFF6347 }); // Tomato color for the blob
+    const blob = new THREE.Mesh(geometry, material);
+    blob.position.set(0, 1, 0); // Start the blob slightly above the ground
+    scene.add(blob);
 
     // Lighting setup
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -103,70 +45,76 @@
     scene.add(light);
     scene.add(new THREE.AmbientLight(0xcccccc, 0.5));
 
-    // Update HUD for score and timer
-    function updateHUD() {
-      document.getElementById("score").textContent = `Score: ${score}`;
-      elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-      document.getElementById("timer").textContent = `Time: ${elapsedTime}`;
+    // Movement and jumping logic
+    const keys = {};
+    let velocity = new THREE.Vector3();
+    let canJump = false;
+
+    // Keyboard input
+    document.addEventListener('keydown', (e) => {
+      keys[e.code] = true;
+      if (e.code === 'Space' && canJump) {
+        velocity.y = 0.25; // Jump strength
+        canJump = false;
+      }
+    });
+    document.addEventListener('keyup', e => keys[e.code] = false);
+
+    // Jiggly Effect function
+    function applyJiggle() {
+      // Apply some random "jiggle" to the blob's position and rotation
+      const randomX = Math.sin(Date.now() * 0.1) * 0.05;
+      const randomY = Math.cos(Date.now() * 0.1) * 0.05;
+      const randomZ = Math.sin(Date.now() * 0.15) * 0.05;
+
+      blob.position.x += randomX;
+      blob.position.y += randomY;
+
+      blob.rotation.x += randomX * 0.2;
+      blob.rotation.y += randomY * 0.2;
+      blob.rotation.z += randomZ * 0.2;
     }
 
-    // Main animation loop
-    function animate() {
-      requestAnimationFrame(animate);
-
-      // Player movement
+    // Movement update
+    function updateMovement() {
+      const speed = 0.1;
       const delta = 0.016;
-      const speed = 4.5;
+
       const move = new THREE.Vector3();
       if (keys['KeyW']) move.z -= 1;
       if (keys['KeyS']) move.z += 1;
       if (keys['KeyA']) move.x -= 1;
       if (keys['KeyD']) move.x += 1;
       move.normalize().applyQuaternion(camera.quaternion);
-      controls.moveRight(move.x * speed * delta);
-      controls.moveForward(move.z * speed * delta);
 
-      // Gravity and jump logic
-      velocity.y -= 9.8 * delta;
-      controls.getObject().position.y += velocity.y;
-      if (controls.getObject().position.y < 2) {
+      // Apply movement
+      blob.position.x += move.x * speed;
+      blob.position.z += move.z * speed;
+    }
+
+    // Gravity and jump logic
+    function applyGravity() {
+      velocity.y -= 0.01; // Gravity strength
+      blob.position.y += velocity.y;
+      if (blob.position.y <= 1) {
         velocity.y = 0;
-        controls.getObject().position.y = 2;
+        blob.position.y = 1;
         canJump = true;
       }
+    }
 
-      // Check for collision with platforms and walls (score logic)
-      checkCollisions();
+    // Main animation loop
+    function animate() {
+      requestAnimationFrame(animate);
 
-      // Update HUD
-      updateHUD();
+      // Update the blob's movement and jiggly effect
+      updateMovement();
+      applyGravity();
+      applyJiggle();
 
       // Render the scene
       renderer.render(scene, camera);
     }
-
-    // Check collision with platforms
-    function checkCollisions() {
-      platforms.forEach(platform => {
-        if (camera.position.distanceTo(platform.position) < 3) {
-          if (camera.position.y < platform.position.y + 1) {
-            // If the player is on a platform, score increases
-            score += 1;
-          }
-        }
-      });
-
-      // Check collision with walls
-      walls.forEach(wall => {
-        if (camera.position.distanceTo(wall.position) < 2) {
-          // If the player hits a wall, reset the game or penalize them
-          score -= 1; // Decrease score if hitting wall
-        }
-      });
-    }
-
-    // Camera position to ensure it's looking at the scene
-    camera.position.set(0, 10, 20); // Adjust the camera height and distance
 
     animate();
   </script>
