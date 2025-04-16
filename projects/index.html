@@ -2,11 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Minecraft Terrain World</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Terrain Game</title>
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { margin: 0; overflow: hidden; background-color: #87CEEB; }
     canvas { display: block; }
-    #hud { position: absolute; top: 10px; left: 10px; color: white; font-size: 20px; }
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 20px;
+    }
     #health, #hunger { font-weight: bold; }
   </style>
 </head>
@@ -16,9 +23,12 @@
     <div id="hunger">Hunger: 100</div>
   </div>
 
+  <!-- Including Three.js and PointerLockControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
   <script src="https://threejs.org/examples/js/controls/PointerLockControls.js"></script>
+
   <script>
+    // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
@@ -29,6 +39,7 @@
     document.body.addEventListener('click', () => controls.lock());
     scene.add(controls.getObject());
 
+    // Movement and jumping logic
     const keys = {};
     let velocity = new THREE.Vector3();
     let canJump = false;
@@ -41,6 +52,7 @@
     });
     document.addEventListener('keyup', e => keys[e.code] = false);
 
+    // Materials for terrain
     const materials = {
       grass: new THREE.MeshStandardMaterial({ color: 0x228B22 }),
       dirt: new THREE.MeshStandardMaterial({ color: 0x8B4513 }),
@@ -51,7 +63,7 @@
 
     const geometry = new THREE.BoxGeometry(1, 1, 1);
 
-    // Generate Terrain with Trees
+    // Terrain generation with trees
     const worldWidth = 40, worldDepth = 40;
     function generateTerrain() {
       for (let x = -worldWidth / 2; x < worldWidth / 2; x++) {
@@ -65,6 +77,7 @@
             scene.add(block);
           }
 
+          // Trees generation
           if (height > 6 && Math.random() < 0.05) {
             for (let t = 0; t < 3; t++) {
               const trunk = new THREE.Mesh(geometry, materials.wood);
@@ -72,29 +85,25 @@
               scene.add(trunk);
             }
             for (let lx = -1; lx <= 1; lx++) {
-              for (let lz = -1; lz <= 1; lz++) {
-                for (let ly = 0; ly <= 1; ly++) {
-                  const leaves = new THREE.Mesh(geometry, materials.leaves);
-                  leaves.position.set(x + lx, height + 3 + ly, z + lz);
-                  scene.add(leaves);
-                }
+              for (let lz = -1; lz <= 1; ly++) {
+                const leaves = new THREE.Mesh(geometry, materials.leaves);
+                leaves.position.set(x + lx, height + 3 + ly, z + lz);
+                scene.add(leaves);
               }
             }
           }
         }
       }
     }
-
     generateTerrain();
 
-    // Lighting
-    let day = true;
+    // Lighting setup
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(10, 20, 10);
     scene.add(light);
     scene.add(new THREE.AmbientLight(0xcccccc, 0.5));
 
-    // Skybox to simulate day/night
+    // Day-night cycle: changes sky color and light intensity
     let skyColor = new THREE.Color(0x87CEEB); // Day color
     function updateDayNight() {
       const time = (Date.now() / 1000) % 24;
@@ -108,11 +117,11 @@
       scene.background = skyColor;
     }
 
-    // Health & Hunger Variables
+    // Health and Hunger bars
     let health = 100, hunger = 100;
     const maxHealth = 100, maxHunger = 100;
 
-    // Animal AI: Randomly spawn and wander
+    // Animal AI: Randomly spawn animals
     function spawnAnimals() {
       if (Math.random() < 0.02) {
         const animal = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0xFFFFFF }));
@@ -122,24 +131,24 @@
       }
     }
 
-    // Update HUD
+    // Update HUD for health and hunger
     function updateHUD() {
       document.getElementById("health").textContent = `Health: ${health}`;
       document.getElementById("hunger").textContent = `Hunger: ${hunger}`;
     }
 
-    // Animations
+    // Main animation loop
     function animate() {
       requestAnimationFrame(animate);
 
-      // Update time
+      // Update time of day and lighting
       updateDayNight();
 
       // Update hunger (decreases over time)
       hunger = Math.max(0, hunger - 0.05);
       if (hunger <= 0) health -= 0.1; // Decrease health when hunger is 0
 
-      // Move player
+      // Player movement
       const delta = 0.016;
       const speed = 4.5;
       const move = new THREE.Vector3();
@@ -151,7 +160,7 @@
       controls.moveRight(move.x * speed * delta);
       controls.moveForward(move.z * speed * delta);
 
-      // Update velocity for jump and gravity
+      // Gravity and jump logic
       velocity.y -= 9.8 * delta;
       controls.getObject().position.y += velocity.y;
       if (controls.getObject().position.y < 2) {
@@ -166,6 +175,7 @@
       // Randomly spawn animals
       spawnAnimals();
 
+      // Render the scene
       renderer.render(scene, camera);
     }
 
