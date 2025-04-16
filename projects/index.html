@@ -3,30 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moving Circle Game</title>
+  <title>Moving Red Circle Game</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
   </style>
 </head>
 <body>
-  <!-- Three.js script included inline -->
-  <script>
-    // Three.js library code starts here
-    (function() {
-      var THREE = {};
-
-      if (typeof module === 'object' && module.exports) {
-        module.exports = THREE;
-      }
-
-      // Your Three.js core functions would go here, but it's too big to include inline
-      // For the sake of the example, you can either import it from an external source or
-      // directly inject all the required code here (too long to fit here, unfortunately).
-      // Just know that this is a simplified explanation.
-    })();
-  </script>
-
   <script>
     // Scene setup
     const scene = new THREE.Scene();
@@ -40,7 +23,7 @@
 
     // Circle setup (2D Circle)
     const geometry = new THREE.CircleGeometry(1, 32); // Create a circle with radius 1 and 32 segments
-    const material = new THREE.MeshBasicMaterial({ color: 0xFF6347 }); // Color the circle tomato red
+    const material = new THREE.MeshBasicMaterial({ color: 0xFF0000 }); // Set color to red (pure red)
     const circle = new THREE.Mesh(geometry, material);
     scene.add(circle);
 
