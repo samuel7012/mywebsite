@@ -1,53 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Red Circle Movement</title>
+  <meta charset="UTF-8">
+  <title>Move the Circle</title>
   <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    #gameArea {
+      width: 100vw;
+      height: 100vh;
+      background-color: #f0f0f0;
+      position: relative;
+    }
+    #circle {
+      width: 50px;
+      height: 50px;
+      background-color: #3498db;
+      border-radius: 50%;
+      position: absolute;
+      top: 100px;
+      left: 100px;
+    }
   </style>
 </head>
 <body>
-  <!-- Include Three.js from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
+  <div id="gameArea">
+    <div id="circle"></div>
+  </div>
+
   <script>
-    // Basic setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75, window.innerWidth / window.innerHeight, 0.1, 1000
-    );
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const circle = document.getElementById("circle");
+    let x = 100;
+    let y = 100;
+    const step = 10;
 
-    // Red circle
-    const geometry = new THREE.CircleGeometry(1, 32);
-    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const circle = new THREE.Mesh(geometry, material);
-    scene.add(circle);
-
-    camera.position.z = 5;
-
-    // Controls
-    const keys = {};
-    document.addEventListener("keydown", (e) => keys[e.code] = true);
-    document.addEventListener("keyup", (e) => keys[e.code] = false);
-
-    function animate() {
-      requestAnimationFrame(animate);
-
-      const speed = 0.05;
-      if (keys["KeyW"]) circle.position.y += speed;
-      if (keys["KeyS"]) circle.position.y -= speed;
-      if (keys["KeyA"]) circle.position.x -= speed;
-      if (keys["KeyD"]) circle.position.x += speed;
-
-      renderer.render(scene, camera);
-    }
-
-    animate();
+    document.addEventListener("keydown", (e) => {
+      switch (e.key) {
+        case "ArrowUp":
+          y -= step;
+          break;
+        case "ArrowDown":
+          y += step;
+          break;
+        case "ArrowLeft":
+          x -= step;
+          break;
+        case "ArrowRight":
+          x += step;
+          break;
+      }
+      circle.style.left = x + "px";
+      circle.style.top = y + "px";
+    });
   </script>
 </body>
 </html>
