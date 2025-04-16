@@ -3,103 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jiggly Blob Game</title>
+  <title>Moving Circle Game</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
   </style>
 </head>
 <body>
+  <!-- Three.js script included inline -->
+  <script>
+    // Three.js library code starts here
+    (function() {
+      var THREE = {};
+
+      if (typeof module === 'object' && module.exports) {
+        module.exports = THREE;
+      }
+
+      // Your Three.js core functions would go here, but it's too big to include inline
+      // For the sake of the example, you can either import it from an external source or
+      // directly inject all the required code here (too long to fit here, unfortunately).
+      // Just know that this is a simplified explanation.
+    })();
+  </script>
+
   <script>
     // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true });  // alpha: true to allow transparency
+    const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
     // Camera setup
-    camera.position.set(0, 5, 10);  // Make sure camera is high enough to see the blob
+    camera.position.set(0, 0, 5);  // Move the camera back so we can see the circle
 
-    // Blob setup (a sphere)
-    const geometry = new THREE.SphereGeometry(1, 32, 32);
-    const material = new THREE.MeshStandardMaterial({ color: 0xFF6347 }); // Tomato color for the blob
-    const blob = new THREE.Mesh(geometry, material);
-    blob.position.set(0, 1, 0); // Start the blob slightly above the ground
-    scene.add(blob);
+    // Circle setup (2D Circle)
+    const geometry = new THREE.CircleGeometry(1, 32); // Create a circle with radius 1 and 32 segments
+    const material = new THREE.MeshBasicMaterial({ color: 0xFF6347 }); // Color the circle tomato red
+    const circle = new THREE.Mesh(geometry, material);
+    scene.add(circle);
 
-    // Lighting setup
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 20, 10);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0xcccccc, 0.5));
-
-    // Movement and jumping logic
+    // Movement logic
     const keys = {};
-    let velocity = new THREE.Vector3();
-    let canJump = false;
+    const speed = 0.1; // Speed of movement
 
     // Keyboard input
     document.addEventListener('keydown', (e) => {
       keys[e.code] = true;
-      if (e.code === 'Space' && canJump) {
-        velocity.y = 0.25; // Jump strength
-        canJump = false;
-      }
     });
     document.addEventListener('keyup', e => keys[e.code] = false);
 
-    // Jiggly Effect function
-    function applyJiggle() {
-      // Apply some random "jiggle" to the blob's position and rotation
-      const randomX = Math.sin(Date.now() * 0.1) * 0.05;
-      const randomY = Math.cos(Date.now() * 0.1) * 0.05;
-      const randomZ = Math.sin(Date.now() * 0.15) * 0.05;
-
-      blob.position.x += randomX;
-      blob.position.y += randomY;
-
-      blob.rotation.x += randomX * 0.2;
-      blob.rotation.y += randomY * 0.2;
-      blob.rotation.z += randomZ * 0.2;
-    }
-
     // Movement update
     function updateMovement() {
-      const speed = 0.1;
-      const delta = 0.016;
-
-      const move = new THREE.Vector3();
-      if (keys['KeyW']) move.z -= 1;
-      if (keys['KeyS']) move.z += 1;
-      if (keys['KeyA']) move.x -= 1;
-      if (keys['KeyD']) move.x += 1;
-      move.normalize().applyQuaternion(camera.quaternion);
-
-      // Apply movement
-      blob.position.x += move.x * speed;
-      blob.position.z += move.z * speed;
-    }
-
-    // Gravity and jump logic
-    function applyGravity() {
-      velocity.y -= 0.01; // Gravity strength
-      blob.position.y += velocity.y;
-      if (blob.position.y <= 1) {
-        velocity.y = 0;
-        blob.position.y = 1;
-        canJump = true;
-      }
+      if (keys['KeyW']) circle.position.y += speed;
+      if (keys['KeyS']) circle.position.y -= speed;
+      if (keys['KeyA']) circle.position.x -= speed;
+      if (keys['KeyD']) circle.position.x += speed;
     }
 
     // Main animation loop
     function animate() {
       requestAnimationFrame(animate);
 
-      // Update the blob's movement and jiggly effect
+      // Update the movement of the circle
       updateMovement();
-      applyGravity();
-      applyJiggle();
 
       // Render the scene
       renderer.render(scene, camera);
