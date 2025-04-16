@@ -1,1 +1,175 @@
-hello
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Minecraft Terrain World</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+    #hud { position: absolute; top: 10px; left: 10px; color: white; font-size: 20px; }
+    #health, #hunger { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <div id="health">Health: 100</div>
+    <div id="hunger">Hunger: 100</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
+  <script src="https://threejs.org/examples/js/controls/PointerLockControls.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new THREE.PointerLockControls(camera, document.body);
+    document.body.addEventListener('click', () => controls.lock());
+    scene.add(controls.getObject());
+
+    const keys = {};
+    let velocity = new THREE.Vector3();
+    let canJump = false;
+    document.addEventListener('keydown', (e) => {
+      keys[e.code] = true;
+      if (e.code === 'Space' && canJump) {
+        velocity.y += 0.18;
+        canJump = false;
+      }
+    });
+    document.addEventListener('keyup', e => keys[e.code] = false);
+
+    const materials = {
+      grass: new THREE.MeshStandardMaterial({ color: 0x228B22 }),
+      dirt: new THREE.MeshStandardMaterial({ color: 0x8B4513 }),
+      stone: new THREE.MeshStandardMaterial({ color: 0x708090 }),
+      wood: new THREE.MeshStandardMaterial({ color: 0x654321 }),
+      leaves: new THREE.MeshStandardMaterial({ color: 0x32CD32 }),
+    };
+
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+
+    // Generate Terrain with Trees
+    const worldWidth = 40, worldDepth = 40;
+    function generateTerrain() {
+      for (let x = -worldWidth / 2; x < worldWidth / 2; x++) {
+        for (let z = -worldDepth / 2; z < worldDepth / 2; z++) {
+          let height = Math.floor(6 + Math.sin(x * 0.2) * 3 + Math.cos(z * 0.2) * 3);
+          for (let y = 0; y <= height; y++) {
+            let material = y === height ? materials.grass : y >= height - 2 ? materials.dirt : materials.stone;
+            const block = new THREE.Mesh(geometry, material);
+            block.position.set(x, y - 1, z);
+            block.userData.isBlock = true;
+            scene.add(block);
+          }
+
+          if (height > 6 && Math.random() < 0.05) {
+            for (let t = 0; t < 3; t++) {
+              const trunk = new THREE.Mesh(geometry, materials.wood);
+              trunk.position.set(x, height + t, z);
+              scene.add(trunk);
+            }
+            for (let lx = -1; lx <= 1; lx++) {
+              for (let lz = -1; lz <= 1; lz++) {
+                for (let ly = 0; ly <= 1; ly++) {
+                  const leaves = new THREE.Mesh(geometry, materials.leaves);
+                  leaves.position.set(x + lx, height + 3 + ly, z + lz);
+                  scene.add(leaves);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    generateTerrain();
+
+    // Lighting
+    let day = true;
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(10, 20, 10);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0xcccccc, 0.5));
+
+    // Skybox to simulate day/night
+    let skyColor = new THREE.Color(0x87CEEB); // Day color
+    function updateDayNight() {
+      const time = (Date.now() / 1000) % 24;
+      if (time < 12) {
+        skyColor.set(0x87CEEB); // Daytime
+        light.intensity = 1;
+      } else {
+        skyColor.set(0x2c3e50); // Nighttime
+        light.intensity = 0.5;
+      }
+      scene.background = skyColor;
+    }
+
+    // Health & Hunger Variables
+    let health = 100, hunger = 100;
+    const maxHealth = 100, maxHunger = 100;
+
+    // Animal AI: Randomly spawn and wander
+    function spawnAnimals() {
+      if (Math.random() < 0.02) {
+        const animal = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0xFFFFFF }));
+        animal.position.set(Math.random() * worldWidth - worldWidth / 2, 2, Math.random() * worldDepth - worldDepth / 2);
+        animal.userData.isAnimal = true;
+        scene.add(animal);
+      }
+    }
+
+    // Update HUD
+    function updateHUD() {
+      document.getElementById("health").textContent = `Health: ${health}`;
+      document.getElementById("hunger").textContent = `Hunger: ${hunger}`;
+    }
+
+    // Animations
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Update time
+      updateDayNight();
+
+      // Update hunger (decreases over time)
+      hunger = Math.max(0, hunger - 0.05);
+      if (hunger <= 0) health -= 0.1; // Decrease health when hunger is 0
+
+      // Move player
+      const delta = 0.016;
+      const speed = 4.5;
+      const move = new THREE.Vector3();
+      if (keys['KeyW']) move.z -= 1;
+      if (keys['KeyS']) move.z += 1;
+      if (keys['KeyA']) move.x -= 1;
+      if (keys['KeyD']) move.x += 1;
+      move.normalize().applyQuaternion(camera.quaternion);
+      controls.moveRight(move.x * speed * delta);
+      controls.moveForward(move.z * speed * delta);
+
+      // Update velocity for jump and gravity
+      velocity.y -= 9.8 * delta;
+      controls.getObject().position.y += velocity.y;
+      if (controls.getObject().position.y < 2) {
+        velocity.y = 0;
+        controls.getObject().position.y = 2;
+        canJump = true;
+      }
+
+      // Update HUD
+      updateHUD();
+
+      // Randomly spawn animals
+      spawnAnimals();
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
