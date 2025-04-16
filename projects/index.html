@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minecraft Terrain Game</title>
+  <title>Cool 3D Explorer Game</title>
   <style>
     body { margin: 0; overflow: hidden; background-color: #87CEEB; }
     canvas { display: block; }
@@ -14,13 +14,12 @@
       color: white;
       font-size: 20px;
     }
-    #health, #hunger { font-weight: bold; }
+    #score { font-weight: bold; }
   </style>
 </head>
 <body>
   <div id="hud">
-    <div id="health">Health: 100</div>
-    <div id="hunger">Hunger: 100</div>
+    <div id="score">Score: 0</div>
   </div>
 
   <!-- Including Three.js and PointerLockControls -->
@@ -35,14 +34,6 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Ensure canvas resizes with window
-    window.addEventListener('resize', () => {
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-    });
-
-    // PointerLockControls
     const controls = new THREE.PointerLockControls(camera, document.body);
     document.body.addEventListener('click', () => controls.lock());
     scene.add(controls.getObject());
@@ -67,16 +58,20 @@
       stone: new THREE.MeshStandardMaterial({ color: 0x708090 }),
       wood: new THREE.MeshStandardMaterial({ color: 0x654321 }),
       leaves: new THREE.MeshStandardMaterial({ color: 0x32CD32 }),
+      crystal: new THREE.MeshStandardMaterial({ color: 0xFF00FF }),
     };
 
     const geometry = new THREE.BoxGeometry(1, 1, 1);
 
-    // Terrain generation with trees
+    // Terrain generation with trees and caves
     const worldWidth = 40, worldDepth = 40;
+    let score = 0;
+
     function generateTerrain() {
       for (let x = -worldWidth / 2; x < worldWidth / 2; x++) {
         for (let z = -worldDepth / 2; z < worldDepth / 2; z++) {
           let height = Math.floor(6 + Math.sin(x * 0.2) * 3 + Math.cos(z * 0.2) * 3);
+
           for (let y = 0; y <= height; y++) {
             let material = y === height ? materials.grass : y >= height - 2 ? materials.dirt : materials.stone;
             const block = new THREE.Mesh(geometry, material);
@@ -100,9 +95,18 @@
               }
             }
           }
+
+          // Crystals spawning randomly
+          if (height > 6 && Math.random() < 0.02) {
+            const crystal = new THREE.Mesh(geometry, materials.crystal);
+            crystal.position.set(x, height + 1, z);
+            crystal.userData.isCollectible = true;
+            scene.add(crystal);
+          }
         }
       }
     }
+
     generateTerrain();
 
     // Lighting setup
@@ -125,24 +129,9 @@
       scene.background = skyColor;
     }
 
-    // Health and Hunger bars
-    let health = 100, hunger = 100;
-    const maxHealth = 100, maxHunger = 100;
-
-    // Animal AI: Randomly spawn animals
-    function spawnAnimals() {
-      if (Math.random() < 0.02) {
-        const animal = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0xFFFFFF }));
-        animal.position.set(Math.random() * worldWidth - worldWidth / 2, 2, Math.random() * worldDepth - worldDepth / 2);
-        animal.userData.isAnimal = true;
-        scene.add(animal);
-      }
-    }
-
-    // Update HUD for health and hunger
+    // Update HUD for score
     function updateHUD() {
-      document.getElementById("health").textContent = `Health: ${health}`;
-      document.getElementById("hunger").textContent = `Hunger: ${hunger}`;
+      document.getElementById("score").textContent = `Score: ${score}`;
     }
 
     // Main animation loop
@@ -151,10 +140,6 @@
 
       // Update time of day and lighting
       updateDayNight();
-
-      // Update hunger (decreases over time)
-      hunger = Math.max(0, hunger - 0.05);
-      if (hunger <= 0) health -= 0.1; // Decrease health when hunger is 0
 
       // Player movement
       const delta = 0.016;
@@ -177,14 +162,25 @@
         canJump = true;
       }
 
+      // Check for collision with crystals (collectibles)
+      checkForCollectibles();
+
       // Update HUD
       updateHUD();
 
-      // Randomly spawn animals
-      spawnAnimals();
-
       // Render the scene
       renderer.render(scene, camera);
+    }
+
+    // Collectibles (Crystals)
+    function checkForCollectibles() {
+      const objects = scene.children.filter(obj => obj.userData.isCollectible);
+      objects.forEach(obj => {
+        if (camera.position.distanceTo(obj.position) < 2) {
+          scene.remove(obj);
+          score += 10; // Increase score when collecting crystal
+        }
+      });
     }
 
     // Camera position to ensure it's looking at the scene
