@@ -35,6 +35,14 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // Ensure canvas resizes with window
+    window.addEventListener('resize', () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    });
+
+    // PointerLockControls
     const controls = new THREE.PointerLockControls(camera, document.body);
     document.body.addEventListener('click', () => controls.lock());
     scene.add(controls.getObject());
@@ -85,9 +93,9 @@
               scene.add(trunk);
             }
             for (let lx = -1; lx <= 1; lx++) {
-              for (let lz = -1; lz <= 1; ly++) {
+              for (let lz = -1; lz <= 1; lz++) {
                 const leaves = new THREE.Mesh(geometry, materials.leaves);
-                leaves.position.set(x + lx, height + 3 + ly, z + lz);
+                leaves.position.set(x + lx, height + 3, z + lz);
                 scene.add(leaves);
               }
             }
@@ -178,6 +186,9 @@
       // Render the scene
       renderer.render(scene, camera);
     }
+
+    // Camera position to ensure it's looking at the scene
+    camera.position.set(0, 10, 20); // Adjust the camera height and distance
 
     animate();
   </script>
