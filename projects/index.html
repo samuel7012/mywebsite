@@ -10,17 +10,6 @@
   </style>
 </head>
 <body>
-  <!-- Three.js Script Embedded -->
-  <script>
-    // Three.js library code (r150 version)
-    var THREE = (function() {
-      var _this = {};
-      // The entire Three.js library code would go here
-      // For brevity, it is assumed to be copied and pasted in this block
-      return _this;
-    })();
-  </script>
-
   <script>
     // Scene setup
     const scene = new THREE.Scene();
@@ -30,8 +19,8 @@
     document.body.appendChild(renderer.domElement);
 
     // Camera setup
-    camera.position.set(0, 5, 10);
-    
+    camera.position.set(0, 5, 10);  // Make sure camera is high enough to see the blob
+
     // Blob setup (a sphere)
     const geometry = new THREE.SphereGeometry(1, 32, 32);
     const material = new THREE.MeshStandardMaterial({ color: 0xFF6347 }); // Tomato color for the blob
