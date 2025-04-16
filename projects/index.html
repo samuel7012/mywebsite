@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cool 3D Explorer Game</title>
+  <title>Parkour Game</title>
   <style>
     body { margin: 0; overflow: hidden; background-color: #87CEEB; }
     canvas { display: block; }
@@ -15,11 +15,13 @@
       font-size: 20px;
     }
     #score { font-weight: bold; }
+    #timer { font-weight: bold; }
   </style>
 </head>
 <body>
   <div id="hud">
     <div id="score">Score: 0</div>
+    <div id="timer">Time: 0</div>
   </div>
 
   <!-- Including Three.js and PointerLockControls -->
@@ -45,69 +47,55 @@
     document.addEventListener('keydown', (e) => {
       keys[e.code] = true;
       if (e.code === 'Space' && canJump) {
-        velocity.y += 0.18;
+        velocity.y += 0.18;  // Jump strength
         canJump = false;
       }
     });
     document.addEventListener('keyup', e => keys[e.code] = false);
 
-    // Materials for terrain
+    // Materials for terrain and platforms
     const materials = {
-      grass: new THREE.MeshStandardMaterial({ color: 0x228B22 }),
-      dirt: new THREE.MeshStandardMaterial({ color: 0x8B4513 }),
-      stone: new THREE.MeshStandardMaterial({ color: 0x708090 }),
-      wood: new THREE.MeshStandardMaterial({ color: 0x654321 }),
-      leaves: new THREE.MeshStandardMaterial({ color: 0x32CD32 }),
-      crystal: new THREE.MeshStandardMaterial({ color: 0xFF00FF }),
+      platform: new THREE.MeshStandardMaterial({ color: 0x8B4513 }), // Platform brown
+      wall: new THREE.MeshStandardMaterial({ color: 0x2F4F4F }), // Dark wall for obstacles
+      ground: new THREE.MeshStandardMaterial({ color: 0x87CEEB }) // Sky blue
     };
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const geometry = new THREE.BoxGeometry(5, 0.5, 5); // Platform size
+    const wallGeometry = new THREE.BoxGeometry(1, 3, 1); // Wall size
 
-    // Terrain generation with trees and caves
-    const worldWidth = 40, worldDepth = 40;
+    // Create platforms
+    const platforms = [];
+    const walls = [];
     let score = 0;
+    let startTime = Date.now();
+    let elapsedTime = 0;
 
-    function generateTerrain() {
-      for (let x = -worldWidth / 2; x < worldWidth / 2; x++) {
-        for (let z = -worldDepth / 2; z < worldDepth / 2; z++) {
-          let height = Math.floor(6 + Math.sin(x * 0.2) * 3 + Math.cos(z * 0.2) * 3);
-
-          for (let y = 0; y <= height; y++) {
-            let material = y === height ? materials.grass : y >= height - 2 ? materials.dirt : materials.stone;
-            const block = new THREE.Mesh(geometry, material);
-            block.position.set(x, y - 1, z);
-            block.userData.isBlock = true;
-            scene.add(block);
-          }
-
-          // Trees generation
-          if (height > 6 && Math.random() < 0.05) {
-            for (let t = 0; t < 3; t++) {
-              const trunk = new THREE.Mesh(geometry, materials.wood);
-              trunk.position.set(x, height + t, z);
-              scene.add(trunk);
-            }
-            for (let lx = -1; lx <= 1; lx++) {
-              for (let lz = -1; lz <= 1; lz++) {
-                const leaves = new THREE.Mesh(geometry, materials.leaves);
-                leaves.position.set(x + lx, height + 3, z + lz);
-                scene.add(leaves);
-              }
-            }
-          }
-
-          // Crystals spawning randomly
-          if (height > 6 && Math.random() < 0.02) {
-            const crystal = new THREE.Mesh(geometry, materials.crystal);
-            crystal.position.set(x, height + 1, z);
-            crystal.userData.isCollectible = true;
-            scene.add(crystal);
-          }
-        }
-      }
+    function createPlatform(x, y, z) {
+      const platform = new THREE.Mesh(geometry, materials.platform);
+      platform.position.set(x, y, z);
+      scene.add(platform);
+      platforms.push(platform);
     }
 
-    generateTerrain();
+    function createWall(x, y, z) {
+      const wall = new THREE.Mesh(wallGeometry, materials.wall);
+      wall.position.set(x, y, z);
+      scene.add(wall);
+      walls.push(wall);
+    }
+
+    function generateCourse() {
+      createPlatform(0, 0, 0);
+      createPlatform(15, 0, 10);
+      createPlatform(30, 0, 20);
+      createPlatform(50, 0, 30);
+      createPlatform(60, 0, 40);
+
+      createWall(25, 1.5, 15); // Obstacles (walls)
+      createWall(40, 1.5, 25);
+    }
+
+    generateCourse();
 
     // Lighting setup
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -115,31 +103,16 @@
     scene.add(light);
     scene.add(new THREE.AmbientLight(0xcccccc, 0.5));
 
-    // Day-night cycle: changes sky color and light intensity
-    let skyColor = new THREE.Color(0x87CEEB); // Day color
-    function updateDayNight() {
-      const time = (Date.now() / 1000) % 24;
-      if (time < 12) {
-        skyColor.set(0x87CEEB); // Daytime
-        light.intensity = 1;
-      } else {
-        skyColor.set(0x2c3e50); // Nighttime
-        light.intensity = 0.5;
-      }
-      scene.background = skyColor;
-    }
-
-    // Update HUD for score
+    // Update HUD for score and timer
     function updateHUD() {
       document.getElementById("score").textContent = `Score: ${score}`;
+      elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+      document.getElementById("timer").textContent = `Time: ${elapsedTime}`;
     }
 
     // Main animation loop
     function animate() {
       requestAnimationFrame(animate);
-
-      // Update time of day and lighting
-      updateDayNight();
 
       // Player movement
       const delta = 0.016;
@@ -162,8 +135,8 @@
         canJump = true;
       }
 
-      // Check for collision with crystals (collectibles)
-      checkForCollectibles();
+      // Check for collision with platforms and walls (score logic)
+      checkCollisions();
 
       // Update HUD
       updateHUD();
@@ -172,13 +145,22 @@
       renderer.render(scene, camera);
     }
 
-    // Collectibles (Crystals)
-    function checkForCollectibles() {
-      const objects = scene.children.filter(obj => obj.userData.isCollectible);
-      objects.forEach(obj => {
-        if (camera.position.distanceTo(obj.position) < 2) {
-          scene.remove(obj);
-          score += 10; // Increase score when collecting crystal
+    // Check collision with platforms
+    function checkCollisions() {
+      platforms.forEach(platform => {
+        if (camera.position.distanceTo(platform.position) < 3) {
+          if (camera.position.y < platform.position.y + 1) {
+            // If the player is on a platform, score increases
+            score += 1;
+          }
+        }
+      });
+
+      // Check collision with walls
+      walls.forEach(wall => {
+        if (camera.position.distanceTo(wall.position) < 2) {
+          // If the player hits a wall, reset the game or penalize them
+          score -= 1; // Decrease score if hitting wall
         }
       });
     }
