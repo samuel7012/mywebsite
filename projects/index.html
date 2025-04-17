@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rotating Axe Extended</title>
+  <title>Rotating Axe On Circle</title>
   <style>
     body {
       margin: 0;
@@ -27,13 +27,13 @@
     }
     #axe {
       width: 12px;
-      height: 140px; /* Made longer */
+      height: 140px;
       background-color: brown;
       position: absolute;
       top: 50%;
       left: 50%;
       transform-origin: bottom center;
-      transform: translate(-50%, -240%) rotate(0deg); /* Push out more */
+      transform: translate(-50%, -100%) rotate(0deg); /* Moved closer to center */
       z-index: 1;
     }
     #axe::after {
@@ -60,7 +60,7 @@
     const step = 10;
 
     function updateAxeRotation() {
-      axe.style.transform = `translate(-50%, -240%) rotate(${angle}deg)`; // Match translate with height
+      axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
     }
 
     document.addEventListener("keydown", (e) => {
