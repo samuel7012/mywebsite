@@ -111,7 +111,7 @@
     function getGunTipPosition(a = angle) {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      const rad = a * Math.PI / 180;
+      const rad = (a - 90) * Math.PI / 180;
       const length = 60;
 
       return {
@@ -127,7 +127,7 @@
       bullet.style.left = `${pos.x - 4}px`;
       bullet.style.top = `${pos.y - 4}px`;
 
-      const rad = angle * Math.PI / 180;
+      const rad = (angle - 90) * Math.PI / 180;
       const speed = 10;
       const vx = Math.cos(rad) * speed;
       const vy = Math.sin(rad) * speed;
@@ -180,22 +180,10 @@
       let x, y;
 
       switch (edge) {
-        case 0: // top
-          x = Math.random() * window.innerWidth;
-          y = -50;
-          break;
-        case 1: // bottom
-          x = Math.random() * window.innerWidth;
-          y = window.innerHeight + 50;
-          break;
-        case 2: // left
-          x = -50;
-          y = Math.random() * window.innerHeight;
-          break;
-        case 3: // right
-          x = window.innerWidth + 50;
-          y = Math.random() * window.innerHeight;
-          break;
+        case 0: x = Math.random() * window.innerWidth; y = -50; break;
+        case 1: x = Math.random() * window.innerWidth; y = window.innerHeight + 50; break;
+        case 2: x = -50; y = Math.random() * window.innerHeight; break;
+        case 3: x = window.innerWidth + 50; y = Math.random() * window.innerHeight; break;
       }
 
       ob.style.left = `${x}px`;
@@ -242,7 +230,6 @@
       }
     });
 
-    // Start game with a few obstacles
     for (let i = 0; i < 3; i++) spawnFlyingObstacle();
   </script>
 </body>
