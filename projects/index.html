@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Random Axe Smashing with Guaranteed Hits</title>
+  <title>Flying Obstacles Axe Game</title>
   <style>
     body {
       margin: 0;
@@ -100,110 +100,121 @@
 
     function updateAxeRotation() {
       axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
-      checkCollision();
     }
 
     function getAxeTipPosition(a = angle) {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
       const rad = a * Math.PI / 180;
-
       return {
         x: centerX + Math.cos(rad) * axeLength,
         y: centerY + Math.sin(rad) * axeLength
       };
     }
 
-    function getRandomAxeAngle() {
-      return Math.floor(Math.random() * 360);
-    }
-
-    function getRandomShape() {
-      const shapes = ['square', 'circle', 'triangle', 'rectangle'];
-      return shapes[Math.floor(Math.random() * shapes.length)];
-    }
-
-    // Spawning obstacle at the exact angle of the axe's tip
-    function spawnObstacleAtAxeTip() {
-      const tip = getAxeTipPosition(angle);  // Get the axe tip position
+    function spawnFlyingObstacle() {
       const ob = document.createElement("div");
       ob.className = "obstacle";
-      const shape = getRandomShape();
-      ob.classList.add(shape);
+      const size = 30 + Math.random() * 40;
+      ob.style.width = `${size}px`;
+      ob.style.height = `${size}px`;
+      ob.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
 
-      switch(shape) {
-        case 'square':
-          ob.style.width = '50px';
-          ob.style.height = '50px';
-          ob.style.borderRadius = '0'; // Square
-          break;
-        case 'circle':
-          ob.style.width = '50px';
-          ob.style.height = '50px';
-          ob.style.borderRadius = '50%'; // Circle
-          break;
-        case 'triangle':
-          ob.style.width = '0';
-          ob.style.height = '0';
-          ob.style.borderLeft = '25px solid transparent';
-          ob.style.borderRight = '25px solid transparent';
-          ob.style.borderBottom = '50px solid #e74c3c'; // Triangle
-          break;
-        case 'rectangle':
-          ob.style.width = '80px';
-          ob.style.height = '50px';
-          ob.style.borderRadius = '0'; // Rectangle
-          break;
+      // Spawn at edge
+      const side = Math.floor(Math.random() * 4);
+      let x, y;
+      if (side === 0) {
+        x = Math.random() * window.innerWidth;
+        y = -size;
+      } else if (side === 1) {
+        x = Math.random() * window.innerWidth;
+        y = window.innerHeight + size;
+      } else if (side === 2) {
+        x = -size;
+        y = Math.random() * window.innerHeight;
+      } else {
+        x = window.innerWidth + size;
+        y = Math.random() * window.innerHeight;
       }
 
-      ob.style.left = `${tip.x - 25}px`;
-      ob.style.top = `${tip.y - 25}px`; // Ensure the obstacle is centered at the axe's tip
+      ob.style.left = `${x}px`;
+      ob.style.top = `${y}px`;
       gameArea.appendChild(ob);
-    }
 
-    function checkCollision() {
-      const tip = getAxeTipPosition();
-      const obstacles = document.querySelectorAll(".obstacle");
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const dx = centerX - x;
+      const dy = centerY - y;
+      const dist = Math.hypot(dx, dy);
+      const speed = 2 + Math.random() * 2;
+      const vx = (dx / dist) * speed;
+      const vy = (dy / dist) * speed;
 
-      obstacles.forEach(ob => {
-        if (ob.dataset.flying === "true") return;
+      let rot = 0;
+      const spin = (Math.random() - 0.5) * 6;
 
+      function animate() {
+        if (ob.dataset.hit === "true") return;
+
+        x += vx;
+        y += vy;
+        rot += spin;
+
+        ob.style.left = `${x}px`;
+        ob.style.top = `${y}px`;
+        ob.style.transform = `rotate(${rot}deg)`;
+
+        const tip = getAxeTipPosition();
         const rect = ob.getBoundingClientRect();
+
         if (
           tip.x > rect.left &&
           tip.x < rect.right &&
           tip.y > rect.top &&
           tip.y < rect.bottom
         ) {
+          ob.dataset.hit = "true";
           launchObstacle(ob, angle);
-          score += 1; // Increase score on hit
+          score += 1;
           scoreDisplay.textContent = `Score: ${score}`;
+          spawnFlyingObstacle();
+          return;
         }
-      });
+
+        if (
+          x < -100 || x > window.innerWidth + 100 ||
+          y < -100 || y > window.innerHeight + 100
+        ) {
+          ob.remove();
+          spawnFlyingObstacle();
+          return;
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
     }
 
     function launchObstacle(el, hitAngle) {
       el.dataset.flying = "true";
-
-      let vx = Math.cos(hitAngle * Math.PI / 180) * 20;  // Increase initial horizontal velocity
-      let vy = -30; // Increase upward velocity
+      let vx = Math.cos(hitAngle * Math.PI / 180) * 20;
+      let vy = -30;
       let rot = 0;
-      let rotationSpeed = (Math.random() - 0.5) * 15; // Increase spin speed
+      let rotationSpeed = (Math.random() - 0.5) * 15;
 
       function animate() {
         const rect = el.getBoundingClientRect();
         let x = rect.left + vx;
         let y = rect.top + vy;
 
-        vy += 1.2; // gravity effect
-
+        vy += 1.2;
         rot += rotationSpeed;
 
         el.style.left = `${x}px`;
         el.style.top = `${y}px`;
         el.style.transform = `rotate(${rot}deg)`;
 
-        // Continue animation as long as the obstacle is visible
         if (y < window.innerHeight && x < window.innerWidth && y > -200) {
           requestAnimationFrame(animate);
         }
@@ -211,32 +222,20 @@
 
       animate();
 
-      // Spawn new obstacle immediately after hitting the current one
-      spawnObstacleAtAxeTip();
-
-      // Trigger screen shake effect
       gameArea.classList.add("shake");
-
-      // Remove shake effect after animation
       setTimeout(() => {
         gameArea.classList.remove("shake");
       }, 300);
     }
 
     document.addEventListener("keydown", (e) => {
-      switch (e.key) {
-        case "ArrowLeft":
-          angle -= step;
-          break;
-        case "ArrowRight":
-          angle += step;
-          break;
-      }
+      if (e.key === "ArrowLeft") angle -= step;
+      if (e.key === "ArrowRight") angle += step;
       updateAxeRotation();
     });
 
-    // Initial obstacle to get things going
-    spawnObstacleAtAxeTip();
+    // Start the first obstacle
+    spawnFlyingObstacle();
   </script>
 </body>
 </html>
