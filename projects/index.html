@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cool Ray Gun Blaster</title>
+  <title>Ray Gun Shooter</title>
   <style>
     body {
       margin: 0;
@@ -28,11 +28,11 @@
       z-index: 1;
     }
 
-    #gun {
-      width: 28px;
-      height: 80px;
+    #rayGun {
+      width: 50px;
+      height: 20px;
       background: linear-gradient(to bottom, #1fffe6, #0d1d2a);
-      border-radius: 14px;
+      border-radius: 10px;
       position: absolute;
       top: 50%;
       left: 50%;
@@ -43,7 +43,18 @@
       overflow: visible;
     }
 
-    #gun .handle {
+    #rayGun .barrel {
+      width: 30px;
+      height: 12px;
+      background-color: #00ffe0;
+      border-radius: 6px;
+      position: absolute;
+      top: -12px;
+      left: 10px;
+      box-shadow: 0 0 15px #00ffe0;
+    }
+
+    #rayGun .handle {
       width: 20px;
       height: 40px;
       background: linear-gradient(to bottom, #222, #555);
@@ -99,29 +110,30 @@
 <body>
   <div id="gameArea">
     <div id="circle"></div>
-    <div id="gun">
+    <div id="rayGun">
+      <div class="barrel"></div>
       <div class="handle"></div>
     </div>
     <div id="score">Score: 0</div>
   </div>
 
   <script>
-    const gun = document.getElementById("gun");
+    const rayGun = document.getElementById("rayGun");
     const gameArea = document.getElementById("gameArea");
     const scoreDisplay = document.getElementById("score");
 
     let angle = 0;
     let score = 0;
 
-    function updateGunRotation() {
-      gun.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
+    function updateRayGunRotation() {
+      rayGun.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
     }
 
-    function getGunTipPosition(a = angle) {
+    function getRayGunTipPosition(a = angle) {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
       const rad = a * Math.PI / 180;
-      const gunLength = 80; // Length of the gun barrel
+      const gunLength = 40; // Length of the ray gun barrel
 
       return {
         x: centerX + Math.cos(rad) * gunLength,
@@ -133,7 +145,7 @@
       const bullet = document.createElement("div");
       bullet.className = "bullet";
 
-      const tip = getGunTipPosition();
+      const tip = getRayGunTipPosition();
       bullet.style.left = `${tip.x - 4}px`; // Center bullet at the tip
       bullet.style.top = `${tip.y - 4}px`;
 
@@ -247,11 +259,11 @@
       } else if (e.key === " ") {
         shootBullet();
       }
-      updateGunRotation();
+      updateRayGunRotation();
     });
 
     // Init
-    updateGunRotation();
+    updateRayGunRotation();
     setInterval(spawnObstacle, 1000);
   </script>
 </body>
