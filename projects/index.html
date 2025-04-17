@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ray Gun Shooter</title>
+  <title>UFO Defense</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background-color: #111;
+      background: radial-gradient(ellipse at center, #000 0%, #111 100%);
     }
 
     #gameArea {
@@ -16,34 +16,61 @@
       position: relative;
     }
 
-    #circle {
-      width: 80px;
-      height: 80px;
-      background-color: #3498db;
-      border-radius: 50%;
+    /* UFO Base */
+    #ufo {
       position: absolute;
+      width: 120px;
+      height: 40px;
+      background: silver;
+      border-radius: 50%;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 1;
+      z-index: 2;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
     }
 
-    #rayGun {
+    /* UFO Dome */
+    #ufo::before {
+      content: '';
+      position: absolute;
+      width: 70px;
+      height: 40px;
+      background: rgba(0, 255, 255, 0.3);
+      border-radius: 50% 50% 0 0;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 2px solid #00ffff;
+      box-shadow: inset 0 0 10px #00ffff;
+    }
+
+    /* Alien eyes */
+    #ufo::after {
+      content: '👽 👽';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      color: #0ff;
+    }
+
+    #turret {
       width: 50px;
       height: 20px;
       background: linear-gradient(to bottom, #1fffe6, #0d1d2a);
       border-radius: 10px;
       position: absolute;
-      top: 50%;
+      top: -20px;
       left: 50%;
       transform-origin: bottom center;
       transform: translate(-50%, -100%) rotate(0deg);
       z-index: 3;
       box-shadow: 0 0 25px #00ffe0, inset 0 0 10px #1affff;
-      overflow: visible;
     }
 
-    #rayGun .barrel {
+    #turret .barrel {
       width: 30px;
       height: 12px;
       background-color: #00ffe0;
@@ -52,19 +79,6 @@
       top: -12px;
       left: 10px;
       box-shadow: 0 0 15px #00ffe0;
-    }
-
-    #rayGun .handle {
-      width: 20px;
-      height: 40px;
-      background: linear-gradient(to bottom, #222, #555);
-      border-radius: 4px;
-      position: absolute;
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%) rotate(25deg);
-      box-shadow: 0 0 10px #000;
-      z-index: -1;
     }
 
     .bullet {
@@ -109,35 +123,37 @@
 </head>
 <body>
   <div id="gameArea">
-    <div id="circle"></div>
-    <div id="rayGun">
-      <div class="barrel"></div>
-      <div class="handle"></div>
+    <div id="ufo">
+      <div id="turret">
+        <div class="barrel"></div>
+      </div>
     </div>
     <div id="score">Score: 0</div>
   </div>
 
   <script>
-    const rayGun = document.getElementById("rayGun");
     const gameArea = document.getElementById("gameArea");
+    const ufo = document.getElementById("ufo");
+    const turret = document.getElementById("turret");
     const scoreDisplay = document.getElementById("score");
 
     let angle = 0;
     let score = 0;
 
-    function updateRayGunRotation() {
-      rayGun.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
+    function updateTurretRotation() {
+      turret.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
     }
 
-    function getRayGunTipPosition(a = angle) {
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
+    function getGunTipPosition(a = angle) {
+      const rect = ufo.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top;
       const rad = a * Math.PI / 180;
-      const gunLength = 40; // Length of the ray gun barrel
+      const length = 45;
 
       return {
-        x: centerX + Math.cos(rad) * gunLength,
-        y: centerY + Math.sin(rad) * gunLength
+        x: centerX + Math.cos(rad) * length,
+        y: centerY + Math.sin(rad) * length
       };
     }
 
@@ -145,8 +161,8 @@
       const bullet = document.createElement("div");
       bullet.className = "bullet";
 
-      const tip = getRayGunTipPosition();
-      bullet.style.left = `${tip.x - 4}px`; // Center bullet at the tip
+      const tip = getGunTipPosition();
+      bullet.style.left = `${tip.x - 4}px`;
       bullet.style.top = `${tip.y - 4}px`;
 
       gameArea.appendChild(bullet);
@@ -179,7 +195,6 @@
           }
         });
 
-        // Remove bullet if it goes out of bounds
         if (
           rect.top < 0 || rect.left < 0 ||
           rect.bottom > window.innerHeight || rect.right > window.innerWidth
@@ -202,40 +217,40 @@
       let x, y;
 
       switch(edge) {
-        case 0: x = Math.random() * window.innerWidth; y = 0; break; // top
-        case 1: x = window.innerWidth; y = Math.random() * window.innerHeight; break; // right
-        case 2: x = Math.random() * window.innerWidth; y = window.innerHeight; break; // bottom
-        case 3: x = 0; y = Math.random() * window.innerHeight; break; // left
+        case 0: x = Math.random() * window.innerWidth; y = 0; break;
+        case 1: x = window.innerWidth; y = Math.random() * window.innerHeight; break;
+        case 2: x = Math.random() * window.innerWidth; y = window.innerHeight; break;
+        case 3: x = 0; y = Math.random() * window.innerHeight; break;
       }
 
       ob.style.left = `${x}px`;
       ob.style.top = `${y}px`;
       gameArea.appendChild(ob);
 
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
-      const speed = 2;
+      const ufoRect = ufo.getBoundingClientRect();
+      const centerX = ufoRect.left + ufoRect.width / 2;
+      const centerY = ufoRect.top + ufoRect.height / 2;
 
       const dx = centerX - x;
       const dy = centerY - y;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const vx = (dx / dist) * speed;
-      const vy = (dy / dist) * speed;
+      const vx = (dx / dist) * 2;
+      const vy = (dy / dist) * 2;
 
       function moveObstacle() {
         const rect = ob.getBoundingClientRect();
         ob.style.left = `${rect.left + vx}px`;
         ob.style.top = `${rect.top + vy}px`;
 
-        const centerRect = document.getElementById("circle").getBoundingClientRect();
+        const uRect = ufo.getBoundingClientRect();
         if (
-          rect.left < centerRect.right &&
-          rect.right > centerRect.left &&
-          rect.top < centerRect.bottom &&
-          rect.bottom > centerRect.top
+          rect.left < uRect.right &&
+          rect.right > uRect.left &&
+          rect.top < uRect.bottom &&
+          rect.bottom > uRect.top
         ) {
           ob.remove();
-          shakeScreen(); // 👈 Add screen shake on impact
+          shakeScreen();
         } else {
           requestAnimationFrame(moveObstacle);
         }
@@ -259,11 +274,11 @@
       } else if (e.key === " ") {
         shootBullet();
       }
-      updateRayGunRotation();
+      updateTurretRotation();
     });
 
     // Init
-    updateRayGunRotation();
+    updateTurretRotation();
     setInterval(spawnObstacle, 1000);
   </script>
 </body>
