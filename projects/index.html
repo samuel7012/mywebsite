@@ -2,19 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Flying Axe with Trails</title>
+  <title>Ray Gun Defender</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
+      background-color: #111;
     }
 
     #gameArea {
       width: 100vw;
       height: 100vh;
-      background-color: #111;
       position: relative;
-      overflow: hidden;
     }
 
     #circle {
@@ -29,59 +28,57 @@
       z-index: 2;
     }
 
-    #axe {
-      width: 12px;
-      height: 140px;
-      background-color: brown;
+    #gun {
+      width: 16px;
+      height: 60px;
+      background-color: limegreen;
+      border-radius: 8px;
       position: absolute;
       top: 50%;
       left: 50%;
       transform-origin: bottom center;
       transform: translate(-50%, -100%) rotate(0deg);
-      z-index: 1;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+      z-index: 3;
+      box-shadow: 0 0 10px limegreen;
     }
 
-    #axe::after {
+    #gun::after {
       content: "";
       position: absolute;
-      top: -15px;
-      left: -15px;
-      width: 40px;
+      top: -10px;
+      left: -10px;
+      width: 36px;
       height: 20px;
-      background-color: gray;
-      border-radius: 5px;
+      background-color: greenyellow;
+      border-radius: 50% 50% 30% 30%;
+    }
+
+    .bullet {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: yellow;
+      border-radius: 50%;
+      z-index: 2;
+      box-shadow: 0 0 8px yellow;
     }
 
     .obstacle {
       position: absolute;
       background-color: #e74c3c;
-      z-index: 0;
+      z-index: 1;
       box-shadow: 0 0 20px rgba(255, 50, 50, 0.7);
       filter: blur(0.5px);
     }
 
-    .trail {
+    #score {
       position: absolute;
-      width: 8px;
-      height: 8px;
-      background-color: white;
-      border-radius: 50%;
-      opacity: 0.5;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .obstacle-trail {
-      width: 6px;
-      height: 6px;
-      background-color: #ff5e5e;
-      opacity: 0.3;
-    }
-
-    @keyframes fadeOut {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.8); }
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      font-family: Arial, sans-serif;
+      color: white;
+      z-index: 10;
     }
 
     @keyframes shake {
@@ -95,58 +92,92 @@
     .shake {
       animation: shake 0.3s ease-out;
     }
-
-    #score {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      font-size: 24px;
-      font-family: Arial, sans-serif;
-      color: white;
-      z-index: 10;
-    }
   </style>
 </head>
 <body>
   <div id="gameArea">
     <div id="circle"></div>
-    <div id="axe"></div>
+    <div id="gun"></div>
     <div id="score">Score: 0</div>
   </div>
 
   <script>
-    const axe = document.getElementById("axe");
     const gameArea = document.getElementById("gameArea");
     const scoreDisplay = document.getElementById("score");
+    const gun = document.getElementById("gun");
 
     let angle = 0;
     const step = 15;
-    const axeLength = 140;
     let score = 0;
 
-    function updateAxeRotation() {
-      axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
-      createTrail(getAxeTipPosition(), 'trail');
+    const gunLength = 60;
+
+    function updateGunRotation() {
+      gun.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
     }
 
-    function getAxeTipPosition(a = angle) {
+    function getGunTipPosition() {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      const rad = a * Math.PI / 180;
+      const rad = angle * Math.PI / 180;
       return {
-        x: centerX + Math.cos(rad) * axeLength,
-        y: centerY + Math.sin(rad) * axeLength
+        x: centerX + Math.cos(rad) * gunLength,
+        y: centerY + Math.sin(rad) * gunLength
       };
     }
 
-    function createTrail(pos, className) {
-      const t = document.createElement("div");
-      t.className = className;
-      t.style.left = `${pos.x}px`;
-      t.style.top = `${pos.y}px`;
-      t.style.animation = `fadeOut 0.6s forwards`;
-      gameArea.appendChild(t);
-      setTimeout(() => t.remove(), 600);
+    function shootBullet() {
+      const pos = getGunTipPosition();
+      const bullet = document.createElement("div");
+      bullet.className = "bullet";
+      bullet.style.left = `${pos.x - 3}px`;
+      bullet.style.top = `${pos.y - 3}px`;
+
+      const rad = angle * Math.PI / 180;
+      const vx = Math.cos(rad) * 8;
+      const vy = Math.sin(rad) * 8;
+
+      gameArea.appendChild(bullet);
+
+      function moveBullet() {
+        const x = parseFloat(bullet.style.left);
+        const y = parseFloat(bullet.style.top);
+        const newX = x + vx;
+        const newY = y + vy;
+        bullet.style.left = `${newX}px`;
+        bullet.style.top = `${newY}px`;
+
+        // Collision check
+        const obstacles = document.querySelectorAll(".obstacle");
+        obstacles.forEach(ob => {
+          const rect = ob.getBoundingClientRect();
+          if (
+            newX >= rect.left &&
+            newX <= rect.right &&
+            newY >= rect.top &&
+            newY <= rect.bottom
+          ) {
+            ob.remove();
+            bullet.remove();
+            score += 1;
+            scoreDisplay.textContent = `Score: ${score}`;
+            spawnFlyingObstacle();
+          }
+        });
+
+        // Out of bounds
+        if (
+          newX < 0 || newX > window.innerWidth ||
+          newY < 0 || newY > window.innerHeight
+        ) {
+          bullet.remove();
+          return;
+        }
+
+        requestAnimationFrame(moveBullet);
+      }
+
+      moveBullet();
     }
 
     function spawnFlyingObstacle() {
@@ -173,40 +204,28 @@
       const dx = centerX - x;
       const dy = centerY - y;
       const dist = Math.hypot(dx, dy);
-      const speed = 2 + Math.random() * 2;
+      const speed = 1.5 + Math.random() * 1.5;
       const vx = (dx / dist) * speed;
       const vy = (dy / dist) * speed;
 
-      let rot = 0;
-      const spin = (Math.random() - 0.5) * 6;
-
       function animate() {
-        if (ob.dataset.hit === "true") return;
-
         x += vx;
         y += vy;
-        rot += spin;
-
         ob.style.left = `${x}px`;
         ob.style.top = `${y}px`;
-        ob.style.transform = `rotate(${rot}deg)`;
 
-        createTrail({ x: x + size / 2, y: y + size / 2 }, 'trail obstacle-trail');
-
-        const tip = getAxeTipPosition();
+        const circle = document.getElementById("circle").getBoundingClientRect();
         const rect = ob.getBoundingClientRect();
         if (
-          tip.x > rect.left &&
-          tip.x < rect.right &&
-          tip.y > rect.top &&
-          tip.y < rect.bottom
+          rect.left < circle.right &&
+          rect.right > circle.left &&
+          rect.top < circle.bottom &&
+          rect.bottom > circle.top
         ) {
-          ob.dataset.hit = "true";
-          launchObstacle(ob, angle);
-          score += 1;
-          scoreDisplay.textContent = `Score: ${score}`;
+          gameArea.classList.add("shake");
+          setTimeout(() => gameArea.classList.remove("shake"), 300);
+          ob.remove();
           spawnFlyingObstacle();
-          return;
         }
 
         if (
@@ -224,45 +243,15 @@
       animate();
     }
 
-    function launchObstacle(el, hitAngle) {
-      el.dataset.flying = "true";
-      let vx = Math.cos(hitAngle * Math.PI / 180) * 20;
-      let vy = -30;
-      let rot = 0;
-      let rotationSpeed = (Math.random() - 0.5) * 15;
-
-      function animate() {
-        const rect = el.getBoundingClientRect();
-        let x = rect.left + vx;
-        let y = rect.top + vy;
-
-        vy += 1.2;
-        rot += rotationSpeed;
-
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
-        el.style.transform = `rotate(${rot}deg)`;
-
-        if (y < window.innerHeight && x < window.innerWidth && y > -200) {
-          requestAnimationFrame(animate);
-        }
-      }
-
-      animate();
-
-      gameArea.classList.add("shake");
-      setTimeout(() => {
-        gameArea.classList.remove("shake");
-      }, 300);
-    }
-
     document.addEventListener("keydown", (e) => {
       if (e.key === "ArrowLeft") angle -= step;
       if (e.key === "ArrowRight") angle += step;
-      updateAxeRotation();
+      if (e.key === " ") shootBullet();
+      updateGunRotation();
     });
 
-    // First flying obstacle
+    // Init
+    updateGunRotation();
     spawnFlyingObstacle();
   </script>
 </body>
