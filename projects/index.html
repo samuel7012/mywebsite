@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rotating Axe On Circle</title>
+  <title>Axe Physics Obstacle Hit</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
     }
+
     #gameArea {
       width: 100vw;
       height: 100vh;
       background-color: #f0f0f0;
       position: relative;
+      overflow: hidden;
     }
+
     #circle {
       width: 80px;
       height: 80px;
@@ -25,6 +28,7 @@
       transform: translate(-50%, -50%);
       z-index: 2;
     }
+
     #axe {
       width: 12px;
       height: 140px;
@@ -33,9 +37,10 @@
       top: 50%;
       left: 50%;
       transform-origin: bottom center;
-      transform: translate(-50%, -100%) rotate(0deg); /* Moved closer to center */
+      transform: translate(-50%, -100%) rotate(0deg);
       z-index: 1;
     }
+
     #axe::after {
       content: "";
       position: absolute;
@@ -46,21 +51,100 @@
       background-color: gray;
       border-radius: 5px;
     }
+
+    .obstacle {
+      position: absolute;
+      background-color: #e74c3c;
+      border-radius: 4px;
+    }
+
+    .ob1 { width: 50px; height: 200px; top: 200px; left: 400px; }
+    .ob2 { width: 150px; height: 50px; top: 450px; left: 650px; }
   </style>
 </head>
 <body>
   <div id="gameArea">
     <div id="circle"></div>
     <div id="axe"></div>
+    <div class="obstacle ob1"></div>
+    <div class="obstacle ob2"></div>
   </div>
 
   <script>
     const axe = document.getElementById("axe");
+    const obstacles = document.querySelectorAll(".obstacle");
+    const axeBlade = {
+      width: 40,
+      height: 20
+    };
+
     let angle = 0;
-    const step = 10;
+    const step = 15;
 
     function updateAxeRotation() {
       axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
+      checkCollision();
+    }
+
+    function getAxeTipPosition() {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const radius = 140; // axe length
+      const rad = angle * Math.PI / 180;
+
+      return {
+        x: centerX + Math.cos(rad) * radius,
+        y: centerY + Math.sin(rad) * radius
+      };
+    }
+
+    function checkCollision() {
+      const tip = getAxeTipPosition();
+
+      obstacles.forEach(ob => {
+        if (ob.dataset.flying === "true") return; // skip already flying
+
+        const rect = ob.getBoundingClientRect();
+        if (
+          tip.x > rect.left &&
+          tip.x < rect.right &&
+          tip.y > rect.top &&
+          tip.y < rect.bottom
+        ) {
+          launchObstacle(ob, angle);
+        }
+      });
+    }
+
+    function launchObstacle(el, angle) {
+      el.dataset.flying = "true";
+
+      let vx = Math.cos(angle * Math.PI / 180) * 10;
+      let vy = -15;
+      let rot = 0;
+      let rotationSpeed = (Math.random() - 0.5) * 10;
+
+      function animate() {
+        const rect = el.getBoundingClientRect();
+        let x = rect.left + vx;
+        let y = rect.top + vy;
+
+        // Gravity
+        vy += 0.8;
+
+        rot += rotationSpeed;
+
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.style.transform = `rotate(${rot}deg)`;
+
+        // Stop animation if off screen
+        if (y < window.innerHeight && x < window.innerWidth && y > -200) {
+          requestAnimationFrame(animate);
+        }
+      }
+
+      animate();
     }
 
     document.addEventListener("keydown", (e) => {
