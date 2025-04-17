@@ -121,7 +121,7 @@
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
       const rad = a * Math.PI / 180;
-      const gunLength = 80;
+      const gunLength = 80; // Length of the gun barrel
 
       return {
         x: centerX + Math.cos(rad) * gunLength,
@@ -134,7 +134,7 @@
       bullet.className = "bullet";
 
       const tip = getGunTipPosition();
-      bullet.style.left = `${tip.x - 4}px`;
+      bullet.style.left = `${tip.x - 4}px`; // Center bullet at the tip
       bullet.style.top = `${tip.y - 4}px`;
 
       gameArea.appendChild(bullet);
@@ -167,6 +167,7 @@
           }
         });
 
+        // Remove bullet if it goes out of bounds
         if (
           rect.top < 0 || rect.left < 0 ||
           rect.bottom > window.innerHeight || rect.right > window.innerWidth
