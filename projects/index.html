@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Random Axe Smashing with Score & Screen Shake</title>
+  <title>Random Axe Smashing with Random Shapes</title>
   <style>
     body {
       margin: 0;
@@ -55,9 +55,7 @@
     .obstacle {
       position: absolute;
       background-color: #e74c3c;
-      border-radius: 4px;
-      width: 50px;
-      height: 50px;
+      z-index: 0;
     }
 
     @keyframes shake {
@@ -120,14 +118,47 @@
       return Math.floor(Math.random() * 360);
     }
 
+    function getRandomShape() {
+      const shapes = ['square', 'circle', 'triangle', 'rectangle'];
+      return shapes[Math.floor(Math.random() * shapes.length)];
+    }
+
     function spawnObstacleAtRandomAngle() {
       const randAngle = getRandomAxeAngle();
       const tip = getAxeTipPosition(randAngle);
 
       const ob = document.createElement("div");
       ob.className = "obstacle";
-      ob.style.left = `${tip.x - 25}px`;
-      ob.style.top = `${tip.y - 25}px`;
+      const shape = getRandomShape();
+      ob.classList.add(shape);
+      
+      switch(shape) {
+        case 'square':
+          ob.style.width = '50px';
+          ob.style.height = '50px';
+          ob.style.borderRadius = '0'; // Square
+          break;
+        case 'circle':
+          ob.style.width = '50px';
+          ob.style.height = '50px';
+          ob.style.borderRadius = '50%'; // Circle
+          break;
+        case 'triangle':
+          ob.style.width = '0';
+          ob.style.height = '0';
+          ob.style.borderLeft = '25px solid transparent';
+          ob.style.borderRight = '25px solid transparent';
+          ob.style.borderBottom = '50px solid #e74c3c'; // Triangle
+          break;
+        case 'rectangle':
+          ob.style.width = '80px';
+          ob.style.height = '50px';
+          ob.style.borderRadius = '0'; // Rectangle
+          break;
+      }
+
+      ob.style.left = `${tip.x - (shape === 'triangle' ? 25 : 25)}px`;
+      ob.style.top = `${tip.y - (shape === 'triangle' ? 50 : 25)}px`;
       gameArea.appendChild(ob);
     }
 
