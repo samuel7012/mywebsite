@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Axe Physics Obstacle Hit</title>
+  <title>Guaranteed Axe Hit</title>
   <style>
     body {
       margin: 0;
@@ -57,29 +57,22 @@
       background-color: #e74c3c;
       border-radius: 4px;
     }
-
-    .ob1 { width: 50px; height: 200px; top: 200px; left: 400px; }
-    .ob2 { width: 150px; height: 50px; top: 450px; left: 650px; }
   </style>
 </head>
 <body>
   <div id="gameArea">
     <div id="circle"></div>
     <div id="axe"></div>
-    <div class="obstacle ob1"></div>
-    <div class="obstacle ob2"></div>
+    <!-- Obstacle will be spawned by script -->
   </div>
 
   <script>
     const axe = document.getElementById("axe");
-    const obstacles = document.querySelectorAll(".obstacle");
-    const axeBlade = {
-      width: 40,
-      height: 20
-    };
+    const gameArea = document.getElementById("gameArea");
 
     let angle = 0;
     const step = 15;
+    const axeLength = 140;
 
     function updateAxeRotation() {
       axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
@@ -89,20 +82,37 @@
     function getAxeTipPosition() {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      const radius = 140; // axe length
       const rad = angle * Math.PI / 180;
 
       return {
-        x: centerX + Math.cos(rad) * radius,
-        y: centerY + Math.sin(rad) * radius
+        x: centerX + Math.cos(rad) * axeLength,
+        y: centerY + Math.sin(rad) * axeLength
       };
+    }
+
+    function spawnObstacleAtAngle(degrees) {
+      const rad = degrees * Math.PI / 180;
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const x = cx + Math.cos(rad) * axeLength - 25; // obstacle centered
+      const y = cy + Math.sin(rad) * axeLength - 25;
+
+      const ob = document.createElement("div");
+      ob.className = "obstacle";
+      ob.style.width = "50px";
+      ob.style.height = "50px";
+      ob.style.left = `${x}px`;
+      ob.style.top = `${y}px`;
+
+      gameArea.appendChild(ob);
     }
 
     function checkCollision() {
       const tip = getAxeTipPosition();
+      const obstacles = document.querySelectorAll(".obstacle");
 
       obstacles.forEach(ob => {
-        if (ob.dataset.flying === "true") return; // skip already flying
+        if (ob.dataset.flying === "true") return;
 
         const rect = ob.getBoundingClientRect();
         if (
@@ -129,16 +139,13 @@
         let x = rect.left + vx;
         let y = rect.top + vy;
 
-        // Gravity
-        vy += 0.8;
-
+        vy += 0.8; // gravity
         rot += rotationSpeed;
 
         el.style.left = `${x}px`;
         el.style.top = `${y}px`;
         el.style.transform = `rotate(${rot}deg)`;
 
-        // Stop animation if off screen
         if (y < window.innerHeight && x < window.innerWidth && y > -200) {
           requestAnimationFrame(animate);
         }
@@ -158,6 +165,9 @@
       }
       updateAxeRotation();
     });
+
+    // Spawn obstacle directly in axe path (e.g. at 45 degrees)
+    spawnObstacleAtAngle(45);
   </script>
 </body>
 </html>
