@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cool Ray Gun Blaster</title>
+  <title>Ray Gun Blaster</title>
   <style>
     body {
       margin: 0;
@@ -43,7 +43,6 @@
       overflow: visible;
     }
 
-    /* Gun handle */
     #gun .handle {
       width: 20px;
       height: 40px;
@@ -64,6 +63,7 @@
       border-radius: 50%;
       position: absolute;
       box-shadow: 0 0 10px #00ffe0;
+      z-index: 2;
     }
 
     .obstacle {
@@ -72,6 +72,7 @@
       border-radius: 50%;
       width: 40px;
       height: 40px;
+      z-index: 0;
     }
 
     #score {
@@ -86,10 +87,10 @@
 
     @keyframes shake {
       0% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
-      100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(10px); }
     }
 
     .shake {
@@ -110,6 +111,7 @@
     const gun = document.getElementById("gun");
     const gameArea = document.getElementById("gameArea");
     const scoreDisplay = document.getElementById("score");
+    const circle = document.getElementById("circle");
 
     let angle = 0;
     let score = 0;
@@ -153,115 +155,4 @@
         // Collision with obstacle
         const obstacles = document.querySelectorAll(".obstacle");
         obstacles.forEach(ob => {
-          const oRect = ob.getBoundingClientRect();
-          if (
-            rect.left < oRect.right &&
-            rect.right > oRect.left &&
-            rect.top < oRect.bottom &&
-            rect.bottom > oRect.top
-          ) {
-            ob.remove();
-            bullet.remove();
-            score += 1;
-            scoreDisplay.textContent = `Score: ${score}`;
-            gameArea.classList.add("shake");
-            setTimeout(() => gameArea.classList.remove("shake"), 300);
-          }
-        });
-
-        // If offscreen, remove bullet
-        if (
-          rect.top < 0 || rect.left < 0 ||
-          rect.bottom > window.innerHeight || rect.right > window.innerWidth
-        ) {
-          bullet.remove();
-          return;
-        }
-
-        requestAnimationFrame(moveBullet);
-      }
-
-      moveBullet();
-    }
-
-    function spawnObstacle() {
-      const ob = document.createElement("div");
-      ob.className = "obstacle";
-
-      const edge = Math.floor(Math.random() * 4);
-      let x, y;
-
-      switch(edge) {
-        case 0: // top
-          x = Math.random() * window.innerWidth;
-          y = 0;
-          break;
-        case 1: // right
-          x = window.innerWidth;
-          y = Math.random() * window.innerHeight;
-          break;
-        case 2: // bottom
-          x = Math.random() * window.innerWidth;
-          y = window.innerHeight;
-          break;
-        case 3: // left
-          x = 0;
-          y = Math.random() * window.innerHeight;
-          break;
-      }
-
-      ob.style.left = `${x}px`;
-      ob.style.top = `${y}px`;
-      gameArea.appendChild(ob);
-
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
-      const speed = 2;
-
-      const dx = centerX - x;
-      const dy = centerY - y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const vx = (dx / dist) * speed;
-      const vy = (dy / dist) * speed;
-
-      function moveObstacle() {
-        const rect = ob.getBoundingClientRect();
-        ob.style.left = `${rect.left + vx}px`;
-        ob.style.top = `${rect.top + vy}px`;
-
-        const centerRect = document.getElementById("circle").getBoundingClientRect();
-        if (
-          rect.left < centerRect.right &&
-          rect.right > centerRect.left &&
-          rect.top < centerRect.bottom &&
-          rect.bottom > centerRect.top
-        ) {
-          ob.remove();
-          // You could also handle "game over" here
-        } else {
-          requestAnimationFrame(moveObstacle);
-        }
-      }
-
-      moveObstacle();
-    }
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft") {
-        angle -= 10;
-      } else if (e.key === "ArrowRight") {
-        angle += 10;
-      } else if (e.key === " ") {
-        shootBullet();
-      }
-      updateGunRotation();
-    });
-
-    // Initial rotation
-    updateGunRotation();
-
-    // Keep spawning obstacles
-    setInterval(spawnObstacle, 1000);
-  </script>
-</body>
-</html>
+          const
