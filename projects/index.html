@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Random Axe Smashing with Flying and Piled Obstacles</title>
+  <title>Random Axe Smashing with Instant Reaction</title>
   <style>
     body {
       margin: 0;
@@ -56,7 +56,6 @@
       position: absolute;
       background-color: #e74c3c;
       z-index: 0;
-      transition: all 0.2s ease;
     }
 
     @keyframes shake {
@@ -98,10 +97,6 @@
     const step = 15;
     const axeLength = 140;
     let score = 0;
-
-    // For keeping track of where to stack obstacles on the ground
-    let pileX = 0;
-    const groundY = window.innerHeight - 60; // Just above the bottom of the screen
 
     function updateAxeRotation() {
       axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
@@ -196,7 +191,6 @@
       let rot = 0;
       let rotationSpeed = (Math.random() - 0.5) * 10;
 
-      // Simulate the obstacle flying and then stopping on the ground
       function animate() {
         const rect = el.getBoundingClientRect();
         let x = rect.left + vx;
@@ -209,22 +203,15 @@
         el.style.top = `${y}px`;
         el.style.transform = `rotate(${rot}deg)`;
 
-        // When the obstacle hits the ground, stop it and stack it
-        if (y >= groundY) {
-          el.style.top = `${groundY}px`;
-          el.style.left = `${x}px`; // Keep the original hit position
-
-          // Increment pileX for stacking horizontally after landing
-          pileX += 60;
-
-          el.dataset.flying = "false";
-          return;
+        if (y < window.innerHeight && x < window.innerWidth && y > -200) {
+          requestAnimationFrame(animate);
         }
-
-        requestAnimationFrame(animate);
       }
 
       animate();
+
+      // Spawn new obstacle immediately after hitting the current one
+      spawnObstacleAtRandomAngle();
 
       // Trigger screen shake effect
       gameArea.classList.add("shake");
@@ -233,9 +220,6 @@
       setTimeout(() => {
         gameArea.classList.remove("shake");
       }, 300);
-
-      // Spawn new obstacle immediately after hitting the current one
-      spawnObstacleAtRandomAngle();
     }
 
     document.addEventListener("keydown", (e) => {
