@@ -131,7 +131,7 @@
       ob.className = "obstacle";
       const shape = getRandomShape();
       ob.classList.add(shape);
-      
+
       switch(shape) {
         case 'square':
           ob.style.width = '50px';
@@ -186,23 +186,25 @@
     function launchObstacle(el, hitAngle) {
       el.dataset.flying = "true";
 
-      let vx = Math.cos(hitAngle * Math.PI / 180) * 10;
-      let vy = -15;
+      let vx = Math.cos(hitAngle * Math.PI / 180) * 20;  // Increase initial horizontal velocity
+      let vy = -30; // Increase upward velocity
       let rot = 0;
-      let rotationSpeed = (Math.random() - 0.5) * 10;
+      let rotationSpeed = (Math.random() - 0.5) * 15; // Increase spin speed
 
       function animate() {
         const rect = el.getBoundingClientRect();
         let x = rect.left + vx;
         let y = rect.top + vy;
 
-        vy += 0.8; // gravity
+        vy += 1.2; // gravity effect
+
         rot += rotationSpeed;
 
         el.style.left = `${x}px`;
         el.style.top = `${y}px`;
         el.style.transform = `rotate(${rot}deg)`;
 
+        // Continue animation as long as the obstacle is visible
         if (y < window.innerHeight && x < window.innerWidth && y > -200) {
           requestAnimationFrame(animate);
         }
