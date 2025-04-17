@@ -212,9 +212,9 @@
         // When the obstacle hits the ground, stop it and stack it
         if (y >= groundY) {
           el.style.top = `${groundY}px`;
-          el.style.left = `${pileX}px`; // Stack obstacle horizontally
-          
-          // Increment pileX for stacking
+          el.style.left = `${x}px`; // Keep the original hit position
+
+          // Increment pileX for stacking horizontally after landing
           pileX += 60;
 
           el.dataset.flying = "false";
