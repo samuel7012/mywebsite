@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Flying Obstacles Axe Game</title>
+  <title>Flying Axe with Trails</title>
   <style>
     body {
       margin: 0;
@@ -12,7 +12,7 @@
     #gameArea {
       width: 100vw;
       height: 100vh;
-      background-color: #f0f0f0;
+      background-color: #111;
       position: relative;
       overflow: hidden;
     }
@@ -39,6 +39,7 @@
       transform-origin: bottom center;
       transform: translate(-50%, -100%) rotate(0deg);
       z-index: 1;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
     }
 
     #axe::after {
@@ -56,6 +57,31 @@
       position: absolute;
       background-color: #e74c3c;
       z-index: 0;
+      box-shadow: 0 0 20px rgba(255, 50, 50, 0.7);
+      filter: blur(0.5px);
+    }
+
+    .trail {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: white;
+      border-radius: 50%;
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .obstacle-trail {
+      width: 6px;
+      height: 6px;
+      background-color: #ff5e5e;
+      opacity: 0.3;
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.8); }
     }
 
     @keyframes shake {
@@ -76,7 +102,7 @@
       left: 20px;
       font-size: 24px;
       font-family: Arial, sans-serif;
-      color: black;
+      color: white;
       z-index: 10;
     }
   </style>
@@ -100,6 +126,7 @@
 
     function updateAxeRotation() {
       axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
+      createTrail(getAxeTipPosition(), 'trail');
     }
 
     function getAxeTipPosition(a = angle) {
@@ -112,6 +139,16 @@
       };
     }
 
+    function createTrail(pos, className) {
+      const t = document.createElement("div");
+      t.className = className;
+      t.style.left = `${pos.x}px`;
+      t.style.top = `${pos.y}px`;
+      t.style.animation = `fadeOut 0.6s forwards`;
+      gameArea.appendChild(t);
+      setTimeout(() => t.remove(), 600);
+    }
+
     function spawnFlyingObstacle() {
       const ob = document.createElement("div");
       ob.className = "obstacle";
@@ -120,22 +157,12 @@
       ob.style.height = `${size}px`;
       ob.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
 
-      // Spawn at edge
       const side = Math.floor(Math.random() * 4);
       let x, y;
-      if (side === 0) {
-        x = Math.random() * window.innerWidth;
-        y = -size;
-      } else if (side === 1) {
-        x = Math.random() * window.innerWidth;
-        y = window.innerHeight + size;
-      } else if (side === 2) {
-        x = -size;
-        y = Math.random() * window.innerHeight;
-      } else {
-        x = window.innerWidth + size;
-        y = Math.random() * window.innerHeight;
-      }
+      if (side === 0) { x = Math.random() * window.innerWidth; y = -size; }
+      else if (side === 1) { x = Math.random() * window.innerWidth; y = window.innerHeight + size; }
+      else if (side === 2) { x = -size; y = Math.random() * window.innerHeight; }
+      else { x = window.innerWidth + size; y = Math.random() * window.innerHeight; }
 
       ob.style.left = `${x}px`;
       ob.style.top = `${y}px`;
@@ -164,9 +191,10 @@
         ob.style.top = `${y}px`;
         ob.style.transform = `rotate(${rot}deg)`;
 
+        createTrail({ x: x + size / 2, y: y + size / 2 }, 'trail obstacle-trail');
+
         const tip = getAxeTipPosition();
         const rect = ob.getBoundingClientRect();
-
         if (
           tip.x > rect.left &&
           tip.x < rect.right &&
@@ -234,7 +262,7 @@
       updateAxeRotation();
     });
 
-    // Start the first obstacle
+    // First flying obstacle
     spawnFlyingObstacle();
   </script>
 </body>
