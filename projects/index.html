@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Move the Circle</title>
+  <title>Circle with Rotating Axe</title>
   <style>
     body {
       margin: 0;
@@ -15,44 +15,85 @@
       position: relative;
     }
     #circle {
-      width: 50px;
-      height: 50px;
+      width: 80px;
+      height: 80px;
       background-color: #3498db;
       border-radius: 50%;
       position: absolute;
-      top: 100px;
-      left: 100px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+    #axe {
+      width: 10px;
+      height: 40px;
+      background-color: brown;
+      position: absolute;
+      transform-origin: bottom center;
+      z-index: 0;
+    }
+    #axe::after {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 30px;
+      height: 15px;
+      background-color: gray;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
   <div id="gameArea">
     <div id="circle"></div>
+    <div id="axe"></div>
   </div>
 
   <script>
-    const circle = document.getElementById("circle");
-    let x = 100;
-    let y = 100;
+    const axe = document.getElementById("axe");
+
+    // Circle center
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+
+    // Axe offset from center
+    let offsetX = 60;
+    let offsetY = 0;
     const step = 10;
+
+    function updateAxePosition() {
+      const axeX = centerX + offsetX;
+      const axeY = centerY + offsetY;
+
+      // Position axe
+      axe.style.left = (axeX - 5) + "px"; // center of axe
+      axe.style.top = (axeY - 40) + "px"; // align bottom of axe
+
+      // Calculate angle from center to axe
+      const angle = Math.atan2(offsetY, offsetX) * (180 / Math.PI);
+      axe.style.transform = `rotate(${angle}deg)`;
+    }
+
+    updateAxePosition();
 
     document.addEventListener("keydown", (e) => {
       switch (e.key) {
         case "ArrowUp":
-          y -= step;
+          offsetY -= step;
           break;
         case "ArrowDown":
-          y += step;
+          offsetY += step;
           break;
         case "ArrowLeft":
-          x -= step;
+          offsetX -= step;
           break;
         case "ArrowRight":
-          x += step;
+          offsetX += step;
           break;
       }
-      circle.style.left = x + "px";
-      circle.style.top = y + "px";
+      updateAxePosition();
     });
   </script>
 </body>
