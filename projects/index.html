@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Guaranteed Axe Hit</title>
+  <title>Random Axe Smashing</title>
   <style>
     body {
       margin: 0;
@@ -56,6 +56,8 @@
       position: absolute;
       background-color: #e74c3c;
       border-radius: 4px;
+      width: 50px;
+      height: 50px;
     }
   </style>
 </head>
@@ -63,7 +65,6 @@
   <div id="gameArea">
     <div id="circle"></div>
     <div id="axe"></div>
-    <!-- Obstacle will be spawned by script -->
   </div>
 
   <script>
@@ -79,10 +80,10 @@
       checkCollision();
     }
 
-    function getAxeTipPosition() {
+    function getAxeTipPosition(a = angle) {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      const rad = angle * Math.PI / 180;
+      const rad = a * Math.PI / 180;
 
       return {
         x: centerX + Math.cos(rad) * axeLength,
@@ -90,20 +91,18 @@
       };
     }
 
-    function spawnObstacleAtAngle(degrees) {
-      const rad = degrees * Math.PI / 180;
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      const x = cx + Math.cos(rad) * axeLength - 25; // obstacle centered
-      const y = cy + Math.sin(rad) * axeLength - 25;
+    function getRandomAxeAngle() {
+      return Math.floor(Math.random() * 360);
+    }
+
+    function spawnObstacleAtRandomAngle() {
+      const randAngle = getRandomAxeAngle();
+      const tip = getAxeTipPosition(randAngle);
 
       const ob = document.createElement("div");
       ob.className = "obstacle";
-      ob.style.width = "50px";
-      ob.style.height = "50px";
-      ob.style.left = `${x}px`;
-      ob.style.top = `${y}px`;
-
+      ob.style.left = `${tip.x - 25}px`;
+      ob.style.top = `${tip.y - 25}px`;
       gameArea.appendChild(ob);
     }
 
@@ -126,10 +125,10 @@
       });
     }
 
-    function launchObstacle(el, angle) {
+    function launchObstacle(el, hitAngle) {
       el.dataset.flying = "true";
 
-      let vx = Math.cos(angle * Math.PI / 180) * 10;
+      let vx = Math.cos(hitAngle * Math.PI / 180) * 10;
       let vy = -15;
       let rot = 0;
       let rotationSpeed = (Math.random() - 0.5) * 10;
@@ -152,6 +151,11 @@
       }
 
       animate();
+
+      // Spawn new obstacle in random axe path
+      setTimeout(() => {
+        spawnObstacleAtRandomAngle();
+      }, 300);
     }
 
     document.addEventListener("keydown", (e) => {
@@ -166,8 +170,8 @@
       updateAxeRotation();
     });
 
-    // Spawn obstacle directly in axe path (e.g. at 45 degrees)
-    spawnObstacleAtAngle(45);
+    // Initial obstacle to get things going
+    spawnObstacleAtRandomAngle();
   </script>
 </body>
 </html>
