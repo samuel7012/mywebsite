@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UFO Defense</title>
+  <title>UFO Ray Gun with Spring Coil</title>
   <style>
     body {
       margin: 0;
@@ -56,29 +56,50 @@
       color: #0ff;
     }
 
+    /* Turret base */
     #turret {
-      width: 50px;
-      height: 20px;
-      background: linear-gradient(to bottom, #1fffe6, #0d1d2a);
-      border-radius: 10px;
       position: absolute;
       top: -20px;
       left: 50%;
+      width: 4px;
+      height: 60px;
+      background-color: #00ffe0;
       transform-origin: bottom center;
-      transform: translate(-50%, -100%) rotate(0deg);
-      z-index: 3;
-      box-shadow: 0 0 25px #00ffe0, inset 0 0 10px #1affff;
+      transform: translate(-50%, 0) rotate(0deg);
+      z-index: 5;
     }
 
-    #turret .barrel {
-      width: 30px;
-      height: 12px;
-      background-color: #00ffe0;
-      border-radius: 6px;
+    /* Spring Coil */
+    #spring {
       position: absolute;
-      top: -12px;
-      left: 10px;
-      box-shadow: 0 0 15px #00ffe0;
+      width: 16px;
+      height: 30px;
+      border: 2px dashed #00ffff;
+      border-radius: 50%;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: spin 2s linear infinite;
+      z-index: 6;
+    }
+
+    @keyframes spin {
+      0% { transform: translateX(-50%) rotate(0deg); }
+      100% { transform: translateX(-50%) rotate(360deg); }
+    }
+
+    /* Dot at ray tip */
+    #tipDot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #00ffff;
+      border-radius: 50%;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+      z-index: 7;
     }
 
     .bullet {
@@ -125,7 +146,8 @@
   <div id="gameArea">
     <div id="ufo">
       <div id="turret">
-        <div class="barrel"></div>
+        <div id="spring"></div>
+        <div id="tipDot"></div>
       </div>
     </div>
     <div id="score">Score: 0</div>
@@ -135,25 +157,26 @@
     const gameArea = document.getElementById("gameArea");
     const ufo = document.getElementById("ufo");
     const turret = document.getElementById("turret");
+    const tipDot = document.getElementById("tipDot");
     const scoreDisplay = document.getElementById("score");
 
     let angle = 0;
     let score = 0;
 
     function updateTurretRotation() {
-      turret.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
+      turret.style.transform = `translate(-50%, 0) rotate(${angle}deg)`;
     }
 
-    function getGunTipPosition(a = angle) {
-      const rect = ufo.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top;
+    function getRayTipPosition(a = angle) {
+      const turretRect = turret.getBoundingClientRect();
+      const baseX = turretRect.left + turretRect.width / 2;
+      const baseY = turretRect.top + turretRect.height;
       const rad = a * Math.PI / 180;
-      const length = 45;
+      const length = 60;
 
       return {
-        x: centerX + Math.cos(rad) * length,
-        y: centerY + Math.sin(rad) * length
+        x: baseX + Math.cos(rad) * length,
+        y: baseY + Math.sin(rad) * length
       };
     }
 
@@ -161,7 +184,7 @@
       const bullet = document.createElement("div");
       bullet.className = "bullet";
 
-      const tip = getGunTipPosition();
+      const tip = getRayTipPosition();
       bullet.style.left = `${tip.x - 4}px`;
       bullet.style.top = `${tip.y - 4}px`;
 
@@ -177,7 +200,6 @@
         bullet.style.left = `${rect.left + vx}px`;
         bullet.style.top = `${rect.top + vy}px`;
 
-        // Check collision with obstacles
         const obstacles = document.querySelectorAll(".obstacle");
         obstacles.forEach(ob => {
           const oRect = ob.getBoundingClientRect();
@@ -266,19 +288,16 @@
       }, 300);
     }
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft") {
-        angle -= 10;
-      } else if (e.key === "ArrowRight") {
-        angle += 10;
-      } else if (e.key === " ") {
-        shootBullet();
-      }
+    // Auto rotate and shoot
+    setInterval(() => {
+      angle = (angle + 2) % 360;
       updateTurretRotation();
-    });
+    }, 30);
 
-    // Init
-    updateTurretRotation();
+    setInterval(() => {
+      shootBullet();
+    }, 250);
+
     setInterval(spawnObstacle, 1000);
   </script>
 </body>
