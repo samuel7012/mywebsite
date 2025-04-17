@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Random Axe Smashing with Random Shapes</title>
+  <title>Random Axe Smashing with Flying and Piled Obstacles</title>
   <style>
     body {
       margin: 0;
@@ -56,6 +56,7 @@
       position: absolute;
       background-color: #e74c3c;
       z-index: 0;
+      transition: all 0.2s ease;
     }
 
     @keyframes shake {
@@ -97,6 +98,10 @@
     const step = 15;
     const axeLength = 140;
     let score = 0;
+
+    // For keeping track of where to stack obstacles on the ground
+    let pileX = 0;
+    const groundY = window.innerHeight - 60; // Just above the bottom of the screen
 
     function updateAxeRotation() {
       axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
@@ -177,6 +182,8 @@
           tip.y < rect.bottom
         ) {
           launchObstacle(ob, angle);
+          score += 1; // Increase score on hit
+          scoreDisplay.textContent = `Score: ${score}`;
         }
       });
     }
@@ -189,6 +196,7 @@
       let rot = 0;
       let rotationSpeed = (Math.random() - 0.5) * 10;
 
+      // Simulate the obstacle flying and then stopping on the ground
       function animate() {
         const rect = el.getBoundingClientRect();
         let x = rect.left + vx;
@@ -201,21 +209,22 @@
         el.style.top = `${y}px`;
         el.style.transform = `rotate(${rot}deg)`;
 
-        if (y < window.innerHeight && x < window.innerWidth && y > -200) {
-          requestAnimationFrame(animate);
+        // When the obstacle hits the ground, stop it and stack it
+        if (y >= groundY) {
+          el.style.top = `${groundY}px`;
+          el.style.left = `${pileX}px`; // Stack obstacle horizontally
+          
+          // Increment pileX for stacking
+          pileX += 60;
+
+          el.dataset.flying = "false";
+          return;
         }
+
+        requestAnimationFrame(animate);
       }
 
       animate();
-
-      // Spawn new obstacle in random axe path
-      setTimeout(() => {
-        spawnObstacleAtRandomAngle();
-      }, 300);
-
-      // Increase score
-      score += 1;
-      scoreDisplay.textContent = `Score: ${score}`;
 
       // Trigger screen shake effect
       gameArea.classList.add("shake");
@@ -224,6 +233,9 @@
       setTimeout(() => {
         gameArea.classList.remove("shake");
       }, 300);
+
+      // Spawn new obstacle immediately after hitting the current one
+      spawnObstacleAtRandomAngle();
     }
 
     document.addEventListener("keydown", (e) => {
