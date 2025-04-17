@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Random Axe Smashing with Instant Reaction</title>
+  <title>Random Axe Smashing with Guaranteed Hits</title>
   <style>
     body {
       margin: 0;
@@ -123,10 +123,9 @@
       return shapes[Math.floor(Math.random() * shapes.length)];
     }
 
-    function spawnObstacleAtRandomAngle() {
-      const randAngle = getRandomAxeAngle();
-      const tip = getAxeTipPosition(randAngle);
-
+    // Spawning obstacle at the exact angle of the axe's tip
+    function spawnObstacleAtAxeTip() {
+      const tip = getAxeTipPosition(angle);  // Get the axe tip position
       const ob = document.createElement("div");
       ob.className = "obstacle";
       const shape = getRandomShape();
@@ -157,8 +156,8 @@
           break;
       }
 
-      ob.style.left = `${tip.x - (shape === 'triangle' ? 25 : 25)}px`;
-      ob.style.top = `${tip.y - (shape === 'triangle' ? 50 : 25)}px`;
+      ob.style.left = `${tip.x - 25}px`;
+      ob.style.top = `${tip.y - 25}px`; // Ensure the obstacle is centered at the axe's tip
       gameArea.appendChild(ob);
     }
 
@@ -213,7 +212,7 @@
       animate();
 
       // Spawn new obstacle immediately after hitting the current one
-      spawnObstacleAtRandomAngle();
+      spawnObstacleAtAxeTip();
 
       // Trigger screen shake effect
       gameArea.classList.add("shake");
@@ -237,7 +236,7 @@
     });
 
     // Initial obstacle to get things going
-    spawnObstacleAtRandomAngle();
+    spawnObstacleAtAxeTip();
   </script>
 </body>
 </html>
