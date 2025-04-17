@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>UFO Ray Gun with Spring Coil</title>
+  <meta charset="UTF-8" />
+  <title>UFO Fixed Ray Gun</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
+      background: radial-gradient(#000 0%, #111 100%);
       overflow: hidden;
-      background: radial-gradient(ellipse at center, #000 0%, #111 100%);
+      height: 100vh;
     }
 
     #gameArea {
+      position: relative;
       width: 100vw;
       height: 100vh;
-      position: relative;
     }
 
-    /* UFO Base */
     #ufo {
       position: absolute;
       width: 120px;
@@ -30,7 +30,6 @@
       box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
     }
 
-    /* UFO Dome */
     #ufo::before {
       content: '';
       position: absolute;
@@ -45,7 +44,6 @@
       box-shadow: inset 0 0 10px #00ffff;
     }
 
-    /* Alien eyes */
     #ufo::after {
       content: '👽 👽';
       position: absolute;
@@ -53,53 +51,17 @@
       left: 50%;
       transform: translateX(-50%);
       font-size: 18px;
-      color: #0ff;
     }
 
-    /* Turret base */
     #turret {
       position: absolute;
-      top: -20px;
-      left: 50%;
       width: 4px;
       height: 60px;
-      background-color: #00ffe0;
-      transform-origin: bottom center;
-      transform: translate(-50%, 0) rotate(0deg);
-      z-index: 5;
-    }
-
-    /* Spring Coil */
-    #spring {
-      position: absolute;
-      width: 16px;
-      height: 30px;
-      border: 2px dashed #00ffff;
-      border-radius: 50%;
-      top: 10px;
+      background: #00ffe0;
+      top: -60px;
       left: 50%;
       transform: translateX(-50%);
-      animation: spin 2s linear infinite;
-      z-index: 6;
-    }
-
-    @keyframes spin {
-      0% { transform: translateX(-50%) rotate(0deg); }
-      100% { transform: translateX(-50%) rotate(360deg); }
-    }
-
-    /* Dot at ray tip */
-    #tipDot {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #00ffff;
-      border-radius: 50%;
-      top: 0;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
-      z-index: 7;
+      z-index: 3;
     }
 
     .bullet {
@@ -119,12 +81,23 @@
       height: 40px;
     }
 
+    .tractor-beam {
+      position: absolute;
+      width: 4px;
+      background: rgba(0, 255, 255, 0.2);
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      pointer-events: none;
+      box-shadow: 0 0 10px #00ffff;
+    }
+
     #score {
       position: absolute;
       top: 20px;
       left: 20px;
       font-size: 24px;
-      font-family: Arial, sans-serif;
       color: white;
       z-index: 10;
     }
@@ -145,10 +118,7 @@
 <body>
   <div id="gameArea">
     <div id="ufo">
-      <div id="turret">
-        <div id="spring"></div>
-        <div id="tipDot"></div>
-      </div>
+      <div id="turret"></div>
     </div>
     <div id="score">Score: 0</div>
   </div>
@@ -156,44 +126,36 @@
   <script>
     const gameArea = document.getElementById("gameArea");
     const ufo = document.getElementById("ufo");
-    const turret = document.getElementById("turret");
-    const tipDot = document.getElementById("tipDot");
     const scoreDisplay = document.getElementById("score");
 
-    let angle = 0;
     let score = 0;
+    let holding = false;
+    let beam;
 
-    function updateTurretRotation() {
-      turret.style.transform = `translate(-50%, 0) rotate(${angle}deg)`;
-    }
-
-    function getRayTipPosition(a = angle) {
-      const turretRect = turret.getBoundingClientRect();
-      const baseX = turretRect.left + turretRect.width / 2;
-      const baseY = turretRect.top + turretRect.height;
-      const rad = a * Math.PI / 180;
-      const length = 60;
-
+    function getUfoGunTip() {
+      const rect = ufo.getBoundingClientRect();
       return {
-        x: baseX + Math.cos(rad) * length,
-        y: baseY + Math.sin(rad) * length
+        x: rect.left + rect.width / 2,
+        y: rect.top // gun is at top center
       };
     }
 
-    function shootBullet() {
+    function shootBulletTo(x, y) {
       const bullet = document.createElement("div");
       bullet.className = "bullet";
 
-      const tip = getRayTipPosition();
-      bullet.style.left = `${tip.x - 4}px`;
-      bullet.style.top = `${tip.y - 4}px`;
+      const from = getUfoGunTip();
+      bullet.style.left = `${from.x - 4}px`;
+      bullet.style.top = `${from.y - 4}px`;
 
       gameArea.appendChild(bullet);
 
+      const dx = x - from.x;
+      const dy = y - from.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
       const speed = 10;
-      const rad = angle * Math.PI / 180;
-      const vx = Math.cos(rad) * speed;
-      const vy = Math.sin(rad) * speed;
+      const vx = (dx / dist) * speed;
+      const vy = (dy / dist) * speed;
 
       function moveBullet() {
         const rect = bullet.getBoundingClientRect();
@@ -249,12 +211,9 @@
       ob.style.top = `${y}px`;
       gameArea.appendChild(ob);
 
-      const ufoRect = ufo.getBoundingClientRect();
-      const centerX = ufoRect.left + ufoRect.width / 2;
-      const centerY = ufoRect.top + ufoRect.height / 2;
-
-      const dx = centerX - x;
-      const dy = centerY - y;
+      const center = getUfoGunTip();
+      const dx = center.x - x;
+      const dy = center.y - y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       const vx = (dx / dist) * 2;
       const vy = (dy / dist) * 2;
@@ -273,6 +232,18 @@
         ) {
           ob.remove();
           shakeScreen();
+        } else if (holding) {
+          const beamRect = beam?.getBoundingClientRect();
+          if (beamRect &&
+              rect.left < beamRect.right &&
+              rect.right > beamRect.left &&
+              rect.top < beamRect.bottom &&
+              rect.bottom > beamRect.top) {
+            ob.remove();
+            score += 1;
+            scoreDisplay.textContent = `Score: ${score}`;
+            shakeScreen();
+          }
         } else {
           requestAnimationFrame(moveObstacle);
         }
@@ -288,17 +259,28 @@
       }, 300);
     }
 
-    // Auto rotate and shoot
-    setInterval(() => {
-      angle = (angle + 2) % 360;
-      updateTurretRotation();
-    }, 30);
+    document.addEventListener("click", (e) => {
+      if (!holding) shootBulletTo(e.clientX, e.clientY);
+    });
 
-    setInterval(() => {
-      shootBullet();
-    }, 250);
+    document.addEventListener("mousedown", () => {
+      holding = true;
+      beam = document.createElement("div");
+      beam.className = "tractor-beam";
 
-    setInterval(spawnObstacle, 1000);
+      const from = getUfoGunTip();
+      beam.style.height = `${window.innerHeight - from.y}px`;
+      beam.style.top = `${from.y}px`;
+
+      gameArea.appendChild(beam);
+    });
+
+    document.addEventListener("mouseup", () => {
+      holding = false;
+      if (beam) beam.remove();
+    });
+
+    setInterval(spawnObstacle, 1200);
   </script>
 </body>
 </html>
