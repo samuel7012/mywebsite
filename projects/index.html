@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ray Gun Defender</title>
+  <title>Sci-Fi Ray Gun Game</title>
   <style>
     body {
       margin: 0;
@@ -25,50 +25,56 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 2;
+      z-index: 1;
+      box-shadow: 0 0 20px #3498db;
     }
 
     #gun {
-      width: 16px;
+      width: 20px;
       height: 60px;
-      background-color: limegreen;
-      border-radius: 8px;
+      background: linear-gradient(to bottom, #0ff, #0a0a0a);
+      border-radius: 10px;
       position: absolute;
       top: 50%;
       left: 50%;
       transform-origin: bottom center;
       transform: translate(-50%, -100%) rotate(0deg);
       z-index: 3;
-      box-shadow: 0 0 10px limegreen;
+      box-shadow: 0 0 12px #0ff, inset 0 0 8px #0ff;
     }
 
-    #gun::after {
+    #gun::before {
       content: "";
       position: absolute;
-      top: -10px;
-      left: -10px;
-      width: 36px;
-      height: 20px;
-      background-color: greenyellow;
-      border-radius: 50% 50% 30% 30%;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 25px;
+      background: radial-gradient(circle, #0ff, #005);
+      border-radius: 50%;
+      box-shadow: 0 0 15px #0ff;
+      z-index: 5;
     }
 
     .bullet {
       position: absolute;
-      width: 6px;
-      height: 6px;
-      background-color: yellow;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, yellow, orange);
       border-radius: 50%;
       z-index: 2;
-      box-shadow: 0 0 8px yellow;
+      box-shadow: 0 0 10px yellow;
     }
 
     .obstacle {
       position: absolute;
+      width: 40px;
+      height: 40px;
       background-color: #e74c3c;
-      z-index: 1;
-      box-shadow: 0 0 20px rgba(255, 50, 50, 0.7);
-      filter: blur(0.5px);
+      border-radius: 10px;
+      box-shadow: 0 0 15px #e74c3c;
+      z-index: 0;
     }
 
     #score {
@@ -80,18 +86,6 @@
       color: white;
       z-index: 10;
     }
-
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      50% { transform: translateX(10px); }
-      75% { transform: translateX(-10px); }
-      100% { transform: translateX(10px); }
-    }
-
-    .shake {
-      animation: shake 0.3s ease-out;
-    }
   </style>
 </head>
 <body>
@@ -102,27 +96,27 @@
   </div>
 
   <script>
+    const gun = document.getElementById("gun");
     const gameArea = document.getElementById("gameArea");
     const scoreDisplay = document.getElementById("score");
-    const gun = document.getElementById("gun");
 
     let angle = 0;
     const step = 15;
     let score = 0;
 
-    const gunLength = 60;
-
     function updateGunRotation() {
       gun.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
     }
 
-    function getGunTipPosition() {
+    function getGunTipPosition(a = angle) {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      const rad = angle * Math.PI / 180;
+      const rad = a * Math.PI / 180;
+      const length = 60;
+
       return {
-        x: centerX + Math.cos(rad) * gunLength,
-        y: centerY + Math.sin(rad) * gunLength
+        x: centerX + Math.cos(rad) * length,
+        y: centerY + Math.sin(rad) * length
       };
     }
 
@@ -130,12 +124,13 @@
       const pos = getGunTipPosition();
       const bullet = document.createElement("div");
       bullet.className = "bullet";
-      bullet.style.left = `${pos.x - 3}px`;
-      bullet.style.top = `${pos.y - 3}px`;
+      bullet.style.left = `${pos.x - 4}px`;
+      bullet.style.top = `${pos.y - 4}px`;
 
       const rad = angle * Math.PI / 180;
-      const vx = Math.cos(rad) * 8;
-      const vy = Math.sin(rad) * 8;
+      const speed = 10;
+      const vx = Math.cos(rad) * speed;
+      const vy = Math.sin(rad) * speed;
 
       gameArea.appendChild(bullet);
 
@@ -147,7 +142,6 @@
         bullet.style.left = `${newX}px`;
         bullet.style.top = `${newY}px`;
 
-        // Collision check
         const obstacles = document.querySelectorAll(".obstacle");
         obstacles.forEach(ob => {
           const rect = ob.getBoundingClientRect();
@@ -165,7 +159,6 @@
           }
         });
 
-        // Out of bounds
         if (
           newX < 0 || newX > window.innerWidth ||
           newY < 0 || newY > window.innerHeight
@@ -181,19 +174,29 @@
     }
 
     function spawnFlyingObstacle() {
+      const edge = Math.floor(Math.random() * 4);
       const ob = document.createElement("div");
       ob.className = "obstacle";
-      const size = 30 + Math.random() * 40;
-      ob.style.width = `${size}px`;
-      ob.style.height = `${size}px`;
-      ob.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-
-      const side = Math.floor(Math.random() * 4);
       let x, y;
-      if (side === 0) { x = Math.random() * window.innerWidth; y = -size; }
-      else if (side === 1) { x = Math.random() * window.innerWidth; y = window.innerHeight + size; }
-      else if (side === 2) { x = -size; y = Math.random() * window.innerHeight; }
-      else { x = window.innerWidth + size; y = Math.random() * window.innerHeight; }
+
+      switch (edge) {
+        case 0: // top
+          x = Math.random() * window.innerWidth;
+          y = -50;
+          break;
+        case 1: // bottom
+          x = Math.random() * window.innerWidth;
+          y = window.innerHeight + 50;
+          break;
+        case 2: // left
+          x = -50;
+          y = Math.random() * window.innerHeight;
+          break;
+        case 3: // right
+          x = window.innerWidth + 50;
+          y = Math.random() * window.innerHeight;
+          break;
+      }
 
       ob.style.left = `${x}px`;
       ob.style.top = `${y}px`;
@@ -204,55 +207,43 @@
       const dx = centerX - x;
       const dy = centerY - y;
       const dist = Math.hypot(dx, dy);
-      const speed = 1.5 + Math.random() * 1.5;
-      const vx = (dx / dist) * speed;
-      const vy = (dy / dist) * speed;
+      const speed = 2;
+      const vx = dx / dist * speed;
+      const vy = dy / dist * speed;
 
-      function animate() {
+      function moveObstacle() {
         x += vx;
         y += vy;
         ob.style.left = `${x}px`;
         ob.style.top = `${y}px`;
 
-        const circle = document.getElementById("circle").getBoundingClientRect();
-        const rect = ob.getBoundingClientRect();
         if (
-          rect.left < circle.right &&
-          rect.right > circle.left &&
-          rect.top < circle.bottom &&
-          rect.bottom > circle.top
+          x > -100 && x < window.innerWidth + 100 &&
+          y > -100 && y < window.innerHeight + 100
         ) {
-          gameArea.classList.add("shake");
-          setTimeout(() => gameArea.classList.remove("shake"), 300);
+          requestAnimationFrame(moveObstacle);
+        } else {
           ob.remove();
-          spawnFlyingObstacle();
         }
-
-        if (
-          x < -100 || x > window.innerWidth + 100 ||
-          y < -100 || y > window.innerHeight + 100
-        ) {
-          ob.remove();
-          spawnFlyingObstacle();
-          return;
-        }
-
-        requestAnimationFrame(animate);
       }
 
-      animate();
+      moveObstacle();
     }
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft") angle -= step;
-      if (e.key === "ArrowRight") angle += step;
-      if (e.key === " ") shootBullet();
-      updateGunRotation();
+      if (e.key === "ArrowLeft") {
+        angle -= step;
+        updateGunRotation();
+      } else if (e.key === "ArrowRight") {
+        angle += step;
+        updateGunRotation();
+      } else if (e.key === " " || e.key === "Spacebar") {
+        shootBullet();
+      }
     });
 
-    // Init
-    updateGunRotation();
-    spawnFlyingObstacle();
+    // Start game with a few obstacles
+    for (let i = 0; i < 3; i++) spawnFlyingObstacle();
   </script>
 </body>
 </html>
