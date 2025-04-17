@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Random Axe Smashing</title>
+  <title>Random Axe Smashing with Score & Screen Shake</title>
   <style>
     body {
       margin: 0;
@@ -59,21 +59,46 @@
       width: 50px;
       height: 50px;
     }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(10px); }
+    }
+
+    .shake {
+      animation: shake 0.3s ease-out;
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      font-family: Arial, sans-serif;
+      color: black;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
   <div id="gameArea">
     <div id="circle"></div>
     <div id="axe"></div>
+    <div id="score">Score: 0</div>
   </div>
 
   <script>
     const axe = document.getElementById("axe");
     const gameArea = document.getElementById("gameArea");
+    const scoreDisplay = document.getElementById("score");
 
     let angle = 0;
     const step = 15;
     const axeLength = 140;
+    let score = 0;
 
     function updateAxeRotation() {
       axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
@@ -155,6 +180,18 @@
       // Spawn new obstacle in random axe path
       setTimeout(() => {
         spawnObstacleAtRandomAngle();
+      }, 300);
+
+      // Increase score
+      score += 1;
+      scoreDisplay.textContent = `Score: ${score}`;
+
+      // Trigger screen shake effect
+      gameArea.classList.add("shake");
+
+      // Remove shake effect after animation
+      setTimeout(() => {
+        gameArea.classList.remove("shake");
       }, 300);
     }
 
