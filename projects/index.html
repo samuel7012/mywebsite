@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Circle with Rotating Axe</title>
+  <title>Rotating Axe Centered on Circle</title>
   <style>
     body {
       margin: 0;
@@ -23,15 +23,18 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 1;
+      z-index: 2;
     }
     #axe {
       width: 10px;
-      height: 40px;
+      height: 60px;
       background-color: brown;
       position: absolute;
+      top: 50%;
+      left: 50%;
       transform-origin: bottom center;
-      z-index: 0;
+      transform: translate(-50%, -100%) rotate(0deg);
+      z-index: 1;
     }
     #axe::after {
       content: "";
@@ -53,47 +56,23 @@
 
   <script>
     const axe = document.getElementById("axe");
-
-    // Circle center
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-
-    // Axe offset from center
-    let offsetX = 60;
-    let offsetY = 0;
+    let angle = 0;
     const step = 10;
 
-    function updateAxePosition() {
-      const axeX = centerX + offsetX;
-      const axeY = centerY + offsetY;
-
-      // Position axe
-      axe.style.left = (axeX - 5) + "px"; // center of axe
-      axe.style.top = (axeY - 40) + "px"; // align bottom of axe
-
-      // Calculate angle from center to axe
-      const angle = Math.atan2(offsetY, offsetX) * (180 / Math.PI);
-      axe.style.transform = `rotate(${angle}deg)`;
+    function updateAxeRotation() {
+      axe.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
     }
-
-    updateAxePosition();
 
     document.addEventListener("keydown", (e) => {
       switch (e.key) {
-        case "ArrowUp":
-          offsetY -= step;
-          break;
-        case "ArrowDown":
-          offsetY += step;
-          break;
         case "ArrowLeft":
-          offsetX -= step;
+          angle -= step;
           break;
         case "ArrowRight":
-          offsetX += step;
+          angle += step;
           break;
       }
-      updateAxePosition();
+      updateAxeRotation();
     });
   </script>
 </body>
