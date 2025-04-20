@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UFO Phaser Beam</title>
+  <title>Spaceship with Missiles</title>
   <style>
     body {
       margin: 0;
@@ -16,68 +16,48 @@
       position: relative;
     }
 
-    #ufo {
+    #ship {
       width: 120px;
       height: 60px;
-      background: radial-gradient(circle at center, #888 30%, #444);
-      border-radius: 50% / 50%;
       position: absolute;
-      top: 50%;
+      bottom: 20px;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
       z-index: 3;
-    }
-
-    #flap {
-      width: 60px;
-      height: 20px;
-      background: #333;
-      position: absolute;
-      bottom: -10px;
-      left: 30px;
-      border-radius: 0 0 10px 10px;
-      transition: transform 0.3s ease;
-      transform-origin: top center;
-      z-index: 2;
+      background-image: url('https://www.dicksmith.co.nz/content/dam/dicksmith/products/2791B/2791B_PV6.png'); /* New ship image */
+      background-size: cover;
+      background-position: center;
     }
 
     #turret {
-      width: 14px;
-      height: 50px;
-      background: linear-gradient(to bottom, #ccc, #666);
+      width: 10px;
+      height: 30px;
+      background: #ccc;
       position: absolute;
-      bottom: 0;
+      bottom: 60px;
       left: 50%;
-      transform: translateX(-50%) scaleY(0);
-      transform-origin: bottom;
-      transition: transform 0.3s ease;
+      transform: translateX(-50%);
       z-index: 2;
-      border-radius: 6px;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+      border-radius: 3px;
     }
 
-    .beam {
+    .missile {
       position: absolute;
       width: 8px;
-      background: linear-gradient(to bottom, rgba(0,255,255,0.9), rgba(0,255,255,0.2));
-      box-shadow: 0 0 25px rgba(0,255,255,0.6);
-      border-radius: 4px;
-      pointer-events: none;
-      animation: flicker 0.08s infinite alternate;
-      transform-origin: top center;
+      height: 20px;
+      background: url('https://i.pinimg.com/originals/27/88/93/2788938b56b64fa8e8e5474bee325f18.jpg'); /* Missile Image */
+      background-size: cover;
+      animation: missileMotion 2s linear infinite;
+      z-index: 1;
     }
 
-    @keyframes flicker {
-      0% { opacity: 0.9; transform: scaleX(1); }
-      100% { opacity: 1; transform: scaleX(1.1); }
-    }
-
-    .obstacle {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      background: red;
-      border-radius: 50%;
+    @keyframes missileMotion {
+      0% {
+        transform: translateY(0);
+      }
+      100% {
+        transform: translateY(-100vh);
+      }
     }
 
     #score {
@@ -89,24 +69,11 @@
       font-family: Arial, sans-serif;
       z-index: 10;
     }
-
-    .shake {
-      animation: shake 0.3s ease;
-    }
-
-    @keyframes shake {
-      0% { transform: translate(0); }
-      25% { transform: translate(-5px, 5px); }
-      50% { transform: translate(5px, -5px); }
-      75% { transform: translate(-5px, 5px); }
-      100% { transform: translate(0); }
-    }
   </style>
 </head>
 <body>
   <div id="gameArea">
-    <div id="ufo">
-      <div id="flap"></div>
+    <div id="ship">
       <div id="turret"></div>
     </div>
     <div id="score">Score: 0</div>
@@ -114,118 +81,83 @@
 
   <script>
     const gameArea = document.getElementById('gameArea');
-    const ufo = document.getElementById('ufo');
-    const flap = document.getElementById('flap');
+    const ship = document.getElementById('ship');
     const turret = document.getElementById('turret');
     const scoreDisplay = document.getElementById('score');
     let score = 0;
 
-    let shooting = false;
-    let beam = null;
-    let mouseX = 0;
-    let mouseY = 0;
+    let shipPositionX = window.innerWidth / 2;
+    let missileSpeed = 5;
+    let movingLeft = false;
+    let movingRight = false;
+    let missiles = [];
 
-    document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
-
-    document.addEventListener('mousedown', () => {
-      shooting = true;
-
-      const ufoRect = ufo.getBoundingClientRect();
-      const originX = ufoRect.left + ufoRect.width / 2;
-      const originY = ufoRect.top;
-
-      // Open flap and extend turret
-      flap.style.transform = 'rotateX(80deg)';
-      turret.style.transform = 'translateX(-50%) scaleY(1)';
-
-      // Create beam
-      beam = document.createElement('div');
-      beam.className = 'beam';
-
-      const dx = mouseX - originX;
-      const dy = mouseY - originY;
-      const angle = Math.atan2(dy, dx);
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      beam.style.height = `${distance}px`;
-      beam.style.left = `${originX - 4}px`;
-      beam.style.top = `${originY}px`;
-      beam.style.transform = `rotate(${angle}rad)`;
-
-      gameArea.appendChild(beam);
-    });
-
-    document.addEventListener('mouseup', () => {
-      shooting = false;
-      flap.style.transform = '';
-      turret.style.transform = 'translateX(-50%) scaleY(0)';
-      if (beam) {
-        beam.remove();
-        beam = null;
+    // Ship movement controls
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        movingLeft = true;
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        movingRight = true;
       }
     });
 
-    function spawnObstacle() {
-      const ob = document.createElement('div');
-      ob.className = 'obstacle';
-      ob.style.left = `${Math.random() * (window.innerWidth - 50)}px`;
-      ob.style.top = `-60px`;
-      gameArea.appendChild(ob);
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        movingLeft = false;
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        movingRight = false;
+      }
+    });
 
-      let y = -60;
-      let speed = 2;
-
-      function fall() {
-        if (!document.body.contains(ob)) return;
-        y += speed;
-        ob.style.top = `${y}px`;
-
-        const obRect = ob.getBoundingClientRect();
-        const ufoRect = ufo.getBoundingClientRect();
-
-        // Collision with UFO
-        if (
-          obRect.bottom > ufoRect.top &&
-          obRect.top < ufoRect.bottom &&
-          obRect.left < ufoRect.right &&
-          obRect.right > ufoRect.left
-        ) {
-          gameArea.classList.add('shake');
-          setTimeout(() => gameArea.classList.remove('shake'), 300);
-          ob.remove();
-          return;
-        }
-
-        // Collision with beam
-        if (beam) {
-          const beamRect = beam.getBoundingClientRect();
-          if (
-            obRect.bottom > beamRect.top &&
-            obRect.top < beamRect.bottom &&
-            obRect.left < beamRect.right &&
-            obRect.right > beamRect.left
-          ) {
-            ob.remove();
-            score += 1;
-            scoreDisplay.textContent = `Score: ${score}`;
-            return;
-          }
-        }
-
-        if (y < window.innerHeight + 60) {
-          requestAnimationFrame(fall);
-        } else {
-          ob.remove();
-        }
+    function moveShip() {
+      if (movingLeft && shipPositionX > 0) {
+        shipPositionX -= 5;
+      }
+      if (movingRight && shipPositionX < window.innerWidth - ship.offsetWidth) {
+        shipPositionX += 5;
       }
 
-      fall();
+      ship.style.left = `${shipPositionX}px`;
     }
 
-    setInterval(spawnObstacle, 1000);
+    function shootMissile() {
+      const missile = document.createElement('div');
+      missile.className = 'missile';
+
+      // Position missile at the turret
+      missile.style.left = `${shipPositionX + ship.offsetWidth / 2 - missile.offsetWidth / 2}px`;
+      missile.style.bottom = '90px'; // Above the ship
+
+      gameArea.appendChild(missile);
+      missiles.push(missile);
+    }
+
+    // Create shooting mechanic (on spacebar)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        shootMissile();
+      }
+    });
+
+    // Move missiles
+    function moveMissiles() {
+      missiles.forEach((missile, index) => {
+        const missileRect = missile.getBoundingClientRect();
+        if (missileRect.top < 0) {
+          missile.remove();
+          missiles.splice(index, 1);
+        }
+      });
+    }
+
+    // Main game loop
+    function gameLoop() {
+      moveShip();
+      moveMissiles();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
   </script>
 </body>
 </html>
