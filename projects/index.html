@@ -2,20 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UFO Defense with Tracking Beam</title>
+  <title>UFO Beam Attack</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: #000;
+      background: black;
     }
 
     #gameArea {
       width: 100vw;
       height: 100vh;
       position: relative;
-      overflow: hidden;
-      background: radial-gradient(ellipse at center, #111 0%, #000 100%);
+      background: radial-gradient(#111, #000);
     }
 
     #ufo {
@@ -31,284 +30,157 @@
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
     }
 
-    .alien {
-      width: 12px;
-      height: 20px;
-      background: lime;
-      border-radius: 50%;
+    #flap {
+      width: 40px;
+      height: 10px;
+      background: darkgray;
       position: absolute;
-      top: 15px;
+      top: 60px;
+      left: 40px;
+      border-radius: 0 0 10px 10px;
+      transition: transform 0.3s ease;
     }
 
-    .alien:nth-child(1) { left: 25px; }
-    .alien:nth-child(2) { left: 54px; }
-    .alien:nth-child(3) { left: 85px; }
-
-    #turret {
-      width: 10px;
-      height: 40px;
-      background: #333;
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 6;
-      border-radius: 5px;
-    }
-
-    #rayDot {
+    #gun {
       width: 8px;
-      height: 8px;
-      background: red;
-      border-radius: 50%;
+      height: 40px;
+      background: #444;
       position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 70px;
+      left: 56px;
+      display: none;
+      z-index: 6;
     }
 
-    .bullet {
+    #beam {
       width: 6px;
-      height: 6px;
-      background: yellow;
-      border-radius: 50%;
+      height: 0;
+      background: cyan;
       position: absolute;
-      z-index: 3;
+      top: 110px;
+      left: 57px;
+      display: none;
+      box-shadow: 0 0 12px cyan;
     }
 
     .obstacle {
       position: absolute;
-      background-color: #e74c3c;
-      z-index: 1;
       width: 40px;
       height: 40px;
-      border-radius: 10px;
+      background: crimson;
+      border-radius: 8px;
+      z-index: 2;
     }
 
-    .beam {
-      position: absolute;
-      width: 10px;
-      background: rgba(0, 255, 255, 0.3);
-      z-index: 2;
-      pointer-events: none;
+    .explode {
+      animation: explode 0.3s forwards;
+    }
+
+    @keyframes explode {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
     }
 
     #score {
       position: absolute;
       top: 20px;
       left: 20px;
-      font-size: 24px;
-      font-family: Arial, sans-serif;
       color: white;
+      font-family: sans-serif;
+      font-size: 20px;
       z-index: 10;
-    }
-
-    .shake {
-      animation: shake 0.3s ease-in-out;
-    }
-
-    @keyframes shake {
-      0% { transform: translate(-2px, 0); }
-      25% { transform: translate(4px, 0); }
-      50% { transform: translate(-4px, 0); }
-      75% { transform: translate(4px, 0); }
-      100% { transform: translate(0, 0); }
     }
   </style>
 </head>
 <body>
   <div id="gameArea">
-    <div id="ufo">
-      <div class="alien"></div>
-      <div class="alien"></div>
-      <div class="alien"></div>
-      <div id="turret">
-        <div id="rayDot"></div>
-      </div>
-    </div>
     <div id="score">Score: 0</div>
+    <div id="ufo">
+      <div id="flap"></div>
+      <div id="gun"></div>
+      <div id="beam"></div>
+    </div>
   </div>
 
   <script>
-    const gameArea = document.getElementById("gameArea");
-    const ufo = document.getElementById("ufo");
-    const turret = document.getElementById("turret");
-    const rayDot = document.getElementById("rayDot");
-    const scoreDisplay = document.getElementById("score");
+    const ufo = document.getElementById('ufo');
+    const flap = document.getElementById('flap');
+    const gun = document.getElementById('gun');
+    const beam = document.getElementById('beam');
+    const gameArea = document.getElementById('gameArea');
+    const scoreDisplay = document.getElementById('score');
 
     let score = 0;
-    let holding = false;
-    let beam = null;
-    let mouseX = window.innerWidth / 2;
 
     function spawnObstacle() {
-      const ob = document.createElement("div");
-      ob.className = "obstacle";
-
-      const edge = Math.floor(Math.random() * 4);
-      let x, y;
-
-      if (edge === 0) {
-        x = Math.random() * window.innerWidth;
-        y = -40;
-      } else if (edge === 1) {
-        x = window.innerWidth + 40;
-        y = Math.random() * window.innerHeight;
-      } else if (edge === 2) {
-        x = Math.random() * window.innerWidth;
-        y = window.innerHeight + 40;
-      } else {
-        x = -40;
-        y = Math.random() * window.innerHeight;
-      }
-
-      ob.style.left = `${x}px`;
-      ob.style.top = `${y}px`;
+      const ob = document.createElement('div');
+      ob.className = 'obstacle';
+      ob.style.left = `${Math.random() * window.innerWidth}px`;
+      ob.style.top = '-40px';
       gameArea.appendChild(ob);
 
-      const ufoCenterX = window.innerWidth / 2;
-      const ufoCenterY = window.innerHeight / 2;
-      const dx = ufoCenterX - x;
-      const dy = ufoCenterY - y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const speed = 2;
-      const vx = (dx / dist) * speed;
-      const vy = (dy / dist) * speed;
-
-      let abducting = false;
-
-      function animate() {
-        if (!document.body.contains(ob)) return;
-
-        const rect = ob.getBoundingClientRect();
-        const uRect = ufo.getBoundingClientRect();
-
-        if (
-          rect.left < uRect.right &&
-          rect.right > uRect.left &&
-          rect.top < uRect.bottom &&
-          rect.bottom > uRect.top
-        ) {
-          ob.remove();
-          shakeScreen();
-          score += 1;
-          scoreDisplay.textContent = `Score: ${score}`;
-          return;
-        }
-
-        if (holding && beam) {
-          const beamRect = beam.getBoundingClientRect();
-          if (
-            rect.left < beamRect.right &&
-            rect.right > beamRect.left &&
-            rect.top < beamRect.bottom &&
-            rect.bottom > beamRect.top
-          ) {
-            abducting = true;
-          }
-        }
-
-        if (abducting) {
-          let top = parseFloat(ob.style.top);
-          ob.style.top = `${top - 1.5}px`;
-        } else {
-          let left = parseFloat(ob.style.left);
-          let top = parseFloat(ob.style.top);
-          ob.style.left = `${left + vx}px`;
-          ob.style.top = `${top + vy}px`;
-        }
-
-        requestAnimationFrame(animate);
-      }
-
-      animate();
-    }
-
-    function shootBullet(targetX, targetY) {
-      const bullet = document.createElement("div");
-      bullet.className = "bullet";
-
-      const rayTip = rayDot.getBoundingClientRect();
-      bullet.style.left = `${rayTip.left + 2}px`;
-      bullet.style.top = `${rayTip.top + 2}px`;
-      gameArea.appendChild(bullet);
-
-      const dx = targetX - rayTip.left;
-      const dy = targetY - rayTip.top;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const speed = 8;
-      const vx = (dx / dist) * speed;
-      const vy = (dy / dist) * speed;
-
       function move() {
-        const rect = bullet.getBoundingClientRect();
-        bullet.style.left = `${rect.left + vx}px`;
-        bullet.style.top = `${rect.top + vy}px`;
+        if (!ob.parentNode) return;
+        let y = parseFloat(ob.style.top);
+        ob.style.top = `${y + 2}px`;
+
+        const ufoRect = ufo.getBoundingClientRect();
+        const obRect = ob.getBoundingClientRect();
 
         if (
-          rect.top < 0 ||
-          rect.left < 0 ||
-          rect.top > window.innerHeight ||
-          rect.left > window.innerWidth
+          obRect.top < ufoRect.bottom &&
+          obRect.bottom > ufoRect.top &&
+          obRect.left < ufoRect.right &&
+          obRect.right > ufoRect.left
         ) {
-          bullet.remove();
+          score++;
+          scoreDisplay.textContent = `Score: ${score}`;
+          ob.remove();
           return;
         }
 
         requestAnimationFrame(move);
       }
-
       move();
     }
 
-    function createBeam() {
-      beam = document.createElement("div");
-      beam.className = "beam";
-      beam.style.position = "absolute";
-      updateBeamPosition();
-      gameArea.appendChild(beam);
+    function checkBeamHit() {
+      const beamRect = beam.getBoundingClientRect();
+      document.querySelectorAll('.obstacle').forEach(ob => {
+        const obRect = ob.getBoundingClientRect();
+        if (
+          beamRect.left < obRect.right &&
+          beamRect.right > obRect.left &&
+          beamRect.top < obRect.bottom &&
+          beamRect.bottom > obRect.top
+        ) {
+          ob.classList.add('explode');
+          setTimeout(() => ob.remove(), 300);
+          score++;
+          scoreDisplay.textContent = `Score: ${score}`;
+        }
+      });
     }
 
-    function updateBeamPosition() {
-      if (beam) {
-        beam.style.left = `${mouseX}px`;
-        const turretRect = turret.getBoundingClientRect();
-        beam.style.top = `${turretRect.bottom}px`;
-        beam.style.height = `${window.innerHeight - turretRect.bottom}px`;
-      }
+    function shootBeam() {
+      flap.style.transform = 'rotateX(90deg)';
+      setTimeout(() => {
+        gun.style.display = 'block';
+        beam.style.display = 'block';
+        beam.style.height = `${window.innerHeight / 2}px`;
+        checkBeamHit();
+      }, 300);
+
+      setTimeout(() => {
+        beam.style.display = 'none';
+        beam.style.height = '0';
+        gun.style.display = 'none';
+        flap.style.transform = 'rotateX(0)';
+      }, 800);
     }
 
-    function shakeScreen() {
-      gameArea.classList.add("shake");
-      setTimeout(() => gameArea.classList.remove("shake"), 300);
-    }
-
-    setInterval(spawnObstacle, 2000);
-
-    document.addEventListener("mousedown", e => {
-      holding = true;
-      mouseX = e.clientX;
-      createBeam();
-    });
-
-    document.addEventListener("mouseup", () => {
-      holding = false;
-      if (beam) {
-        beam.remove();
-        beam = null;
-      }
-    });
-
-    document.addEventListener("mousemove", e => {
-      mouseX = e.clientX;
-      updateBeamPosition();
-    });
-
-    document.addEventListener("click", e => {
-      if (!holding) {
-        shootBullet(e.clientX, e.clientY);
-      }
-    });
+    document.addEventListener('click', shootBeam);
+    setInterval(spawnObstacle, 1500);
   </script>
 </body>
 </html>
