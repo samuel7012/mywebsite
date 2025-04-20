@@ -25,7 +25,8 @@
       transform: translateX(-50%);
       z-index: 3;
       background-image: url('https://www.dicksmith.co.nz/content/dam/dicksmith/products/2791B/2791B_PV6.png'); /* New ship image */
-      background-size: cover;
+      background-size: contain;
+      background-repeat: no-repeat;
       background-position: center;
     }
 
@@ -43,10 +44,11 @@
 
     .missile {
       position: absolute;
-      width: 8px;
-      height: 20px;
+      width: 30px; /* Adjusted width for better look */
+      height: 60px; /* Adjusted height for better look */
       background: url('https://i.pinimg.com/originals/27/88/93/2788938b56b64fa8e8e5474bee325f18.jpg'); /* Missile Image */
-      background-size: cover;
+      background-size: contain;
+      background-repeat: no-repeat;
       animation: missileMotion 2s linear infinite;
       z-index: 1;
     }
