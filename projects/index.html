@@ -17,35 +17,35 @@
     }
 
     #ship {
-      width: 120px;
-      height: 60px;
+      width: 400px; /* Bigger ship */
+      height: 200px; /* Bigger ship */
       position: absolute;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 3;
-      background-image: url('https://www.dicksmith.co.nz/content/dam/dicksmith/products/2791B/2791B_PV6.png'); /* New ship image */
+      background-image: url('https://www.dicksmith.co.nz/content/dam/dicksmith/products/2791B/2791B_PV6.png'); /* Ship image */
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
     }
 
     #turret {
-      width: 10px;
-      height: 30px;
+      width: 40px; /* Bigger turret */
+      height: 120px; /* Bigger turret */
       background: #ccc;
       position: absolute;
       bottom: 60px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 2;
-      border-radius: 3px;
+      border-radius: 8px;
     }
 
     .missile {
       position: absolute;
-      width: 30px; /* Adjusted width for better look */
-      height: 60px; /* Adjusted height for better look */
+      width: 100px; /* Bigger missile */
+      height: 200px; /* Bigger missile */
       background: url('https://i.pinimg.com/originals/27/88/93/2788938b56b64fa8e8e5474bee325f18.jpg'); /* Missile Image */
       background-size: contain;
       background-repeat: no-repeat;
@@ -67,7 +67,7 @@
       position: absolute;
       top: 20px;
       left: 20px;
-      font-size: 24px;
+      font-size: 32px; /* Bigger score */
       font-family: Arial, sans-serif;
       z-index: 10;
     }
@@ -113,10 +113,10 @@
 
     function moveShip() {
       if (movingLeft && shipPositionX > 0) {
-        shipPositionX -= 5;
+        shipPositionX -= 10; // Faster movement
       }
       if (movingRight && shipPositionX < window.innerWidth - ship.offsetWidth) {
-        shipPositionX += 5;
+        shipPositionX += 10; // Faster movement
       }
 
       ship.style.left = `${shipPositionX}px`;
@@ -128,7 +128,7 @@
 
       // Position missile at the turret
       missile.style.left = `${shipPositionX + ship.offsetWidth / 2 - missile.offsetWidth / 2}px`;
-      missile.style.bottom = '90px'; // Above the ship
+      missile.style.bottom = '250px'; // Above the ship
 
       gameArea.appendChild(missile);
       missiles.push(missile);
