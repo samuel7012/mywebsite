@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UFO Ray Gun Game</title>
+  <title>Ultimate UFO Defense</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #111;
+      background: radial-gradient(circle, #02010a, #000);
     }
 
     #gameArea {
@@ -19,52 +19,61 @@
 
     #ufo {
       position: absolute;
-      width: 120px;
-      height: 60px;
+      width: 140px;
+      height: 70px;
       background: radial-gradient(ellipse at center, #00f2ff, #005d73);
-      border-radius: 60px / 30px;
+      border-radius: 70px / 35px;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      box-shadow: 0 0 40px 10px #0ff;
       z-index: 5;
     }
 
     .alien {
       width: 20px;
       height: 20px;
-      background: green;
+      background: lime;
       border-radius: 50%;
       position: absolute;
-      top: 10px;
+      top: 8px;
+      animation: bob 2s infinite ease-in-out;
     }
 
     .alien:nth-child(1) { left: 20px; }
-    .alien:nth-child(2) { left: 50px; }
-    .alien:nth-child(3) { left: 80px; }
+    .alien:nth-child(2) { left: 60px; }
+    .alien:nth-child(3) { left: 100px; }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
 
     #turret {
       position: absolute;
       width: 20px;
-      height: 40px;
-      background: #444;
-      top: 0;
+      height: 50px;
+      background: linear-gradient(to bottom, #444, #222);
+      top: -25px;
       left: 50%;
-      transform: translateX(-50%) translateY(-100%);
-      border-radius: 6px;
+      transform: translateX(-50%) translateY(0);
+      border-radius: 10px;
       transition: transform 0.3s;
       z-index: 6;
+      box-shadow: 0 0 15px #0ff;
     }
 
     #beam {
       position: absolute;
-      width: 6px;
+      width: 8px;
       height: 0;
-      background: linear-gradient(to bottom, #0ff, #00f);
+      background: linear-gradient(to bottom, rgba(0,255,255,0.6), rgba(0,0,255,0.8));
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) rotate(0deg);
       z-index: 3;
-      border-radius: 3px;
+      border-radius: 4px;
       display: none;
+      box-shadow: 0 0 10px #0ff;
     }
 
     .obstacle {
@@ -73,15 +82,7 @@
       height: 30px;
       background: #e74c3c;
       border-radius: 10px;
-    }
-
-    .bullet {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: yellow;
-      border-radius: 50%;
-      z-index: 4;
+      box-shadow: 0 0 10px red;
     }
 
     #score {
@@ -89,9 +90,10 @@
       top: 20px;
       left: 20px;
       color: white;
-      font-family: Arial, sans-serif;
-      font-size: 24px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
       z-index: 10;
+      text-shadow: 0 0 5px cyan;
     }
 
     .shake {
@@ -108,143 +110,126 @@
   </style>
 </head>
 <body>
-  <div id="gameArea">
-    <div id="score">Score: 0</div>
-    <div id="ufo">
-      <div class="alien"></div>
-      <div class="alien"></div>
-      <div class="alien"></div>
-      <div id="turret"></div>
-      <div id="beam"></div>
-    </div>
+<div id="gameArea">
+  <div id="score">Score: 0</div>
+  <div id="ufo">
+    <div class="alien"></div>
+    <div class="alien"></div>
+    <div class="alien"></div>
+    <div id="turret"></div>
+    <div id="beam"></div>
   </div>
+</div>
 
-  <script>
-    const gameArea = document.getElementById("gameArea");
-    const turret = document.getElementById("turret");
-    const beam = document.getElementById("beam");
-    const ufo = document.getElementById("ufo");
-    const scoreDisplay = document.getElementById("score");
+<script>
+  const gameArea = document.getElementById("gameArea");
+  const turret = document.getElementById("turret");
+  const beam = document.getElementById("beam");
+  const ufo = document.getElementById("ufo");
+  const scoreDisplay = document.getElementById("score");
 
-    let score = 0;
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let holding = false;
+  let score = 0;
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let holding = false;
 
-    function getUfoCenter() {
-      const rect = ufo.getBoundingClientRect();
-      return {
-        x: rect.left + rect.width / 2,
-        y: rect.top
-      };
+  function getUfoCenter() {
+    const rect = ufo.getBoundingClientRect();
+    return {
+      x: rect.left + rect.width / 2,
+      y: rect.top
+    };
+  }
+
+  function spawnObstacle() {
+    const ob = document.createElement("div");
+    ob.className = "obstacle";
+    const size = 30;
+    let x, y;
+    const edge = Math.floor(Math.random() * 4);
+    switch (edge) {
+      case 0: x = Math.random() * window.innerWidth; y = -size; break;
+      case 1: x = window.innerWidth + size; y = Math.random() * window.innerHeight; break;
+      case 2: x = Math.random() * window.innerWidth; y = window.innerHeight + size; break;
+      case 3: x = -size; y = Math.random() * window.innerHeight; break;
     }
+    ob.style.left = `${x}px`;
+    ob.style.top = `${y}px`;
+    const ufoCenter = getUfoCenter();
+    const dx = ufoCenter.x - x;
+    const dy = ufoCenter.y - y;
+    const dist = Math.hypot(dx, dy);
+    const vx = dx / dist * 1.5;
+    const vy = dy / dist * 1.5;
 
-    function spawnObstacle() {
-      const ob = document.createElement("div");
-      ob.className = "obstacle";
-
-      const size = 30;
-      let edge = Math.floor(Math.random() * 4);
-      let x, y;
-
-      switch (edge) {
-        case 0: x = Math.random() * window.innerWidth; y = -size; break;
-        case 1: x = window.innerWidth + size; y = Math.random() * window.innerHeight; break;
-        case 2: x = Math.random() * window.innerWidth; y = window.innerHeight + size; break;
-        case 3: x = -size; y = Math.random() * window.innerHeight; break;
+    function move() {
+      const rect = ob.getBoundingClientRect();
+      ob.style.left = `${rect.left + vx}px`;
+      ob.style.top = `${rect.top + vy}px`;
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const distanceToUFO = Math.hypot(ufoCenter.x - cx, ufoCenter.y - cy);
+      if (distanceToUFO < 40) {
+        gameArea.classList.add("shake");
+        setTimeout(() => gameArea.classList.remove("shake"), 300);
+        ob.remove();
+        return;
       }
+      if (document.body.contains(ob)) requestAnimationFrame(move);
+    }
 
-      ob.style.left = `${x}px`;
-      ob.style.top = `${y}px`;
+    gameArea.appendChild(ob);
+    move();
+  }
 
-      const speed = 1 + Math.random();
-      const ufoCenter = getUfoCenter();
+  function shootBeam() {
+    const ufoCenter = getUfoCenter();
+    const dx = mouseX - ufoCenter.x;
+    const dy = mouseY - ufoCenter.y;
+    const angle = Math.atan2(dy, dx);
+    const length = 400;
+    const bx = ufoCenter.x + Math.cos(angle) * 10;
+    const by = ufoCenter.y + Math.sin(angle) * 10;
+    beam.style.display = "block";
+    beam.style.height = `${length}px`;
+    beam.style.left = `${bx}px`;
+    beam.style.top = `${by}px`;
+    beam.style.transform = `rotate(${angle}rad) translateX(-50%)`;
+    turret.style.transform = "translateX(-50%) translateY(-140%)";
 
-      const dx = ufoCenter.x - x;
-      const dy = ufoCenter.y - y;
-      const dist = Math.hypot(dx, dy);
-
-      const vx = dx / dist * speed;
-      const vy = dy / dist * speed;
-
-      function move() {
-        const rect = ob.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-
-        const distanceToUFO = Math.hypot(ufoCenter.x - cx, ufoCenter.y - cy);
-        if (distanceToUFO < 40) {
-          gameArea.classList.add("shake");
-          setTimeout(() => gameArea.classList.remove("shake"), 300);
-          ob.remove();
-          return;
-        }
-
-        ob.style.left = `${rect.left + vx}px`;
-        ob.style.top = `${rect.top + vy}px`;
-
-        if (document.body.contains(ob)) {
-          requestAnimationFrame(move);
-        }
+    // Destroy obstacles in beam path
+    document.querySelectorAll(".obstacle").forEach(ob => {
+      const rect = ob.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const distToLine = Math.abs((cy - ufoCenter.y) * dx - (cx - ufoCenter.x) * dy) / Math.hypot(dx, dy);
+      const dot = (cx - ufoCenter.x) * dx + (cy - ufoCenter.y) * dy;
+      if (distToLine < 20 && dot > 0) {
+        ob.remove();
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
       }
-
-      gameArea.appendChild(ob);
-      move();
-    }
-
-    function shootBeam() {
-      const ufoCenter = getUfoCenter();
-      const dx = mouseX - ufoCenter.x;
-      const dy = mouseY - ufoCenter.y;
-      const angle = Math.atan2(dy, dx);
-
-      beam.style.display = "block";
-      beam.style.height = "300px";
-      beam.style.left = `calc(50% + ${Math.cos(angle) * 10}px)`;
-      beam.style.top = `calc(-300px + ${Math.sin(angle) * 10}px)`;
-      beam.style.transform = `rotate(${angle}rad)`;
-
-      // Turret raise
-      turret.style.transform = "translateX(-50%) translateY(-140%)";
-
-      // Collision with beam
-      document.querySelectorAll(".obstacle").forEach(ob => {
-        const rect = ob.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-
-        const beamTipX = ufoCenter.x + Math.cos(angle) * 300;
-        const beamTipY = ufoCenter.y + Math.sin(angle) * 300;
-
-        const distance = Math.abs((cy - ufoCenter.y) * dx - (cx - ufoCenter.x) * dy) / Math.hypot(dx, dy);
-        const alongRay = (cx - ufoCenter.x) * dx + (cy - ufoCenter.y) * dy > 0;
-
-        if (distance < 20 && alongRay) {
-          ob.remove();
-          score++;
-          scoreDisplay.textContent = `Score: ${score}`;
-        }
-      });
-    }
-
-    document.addEventListener("mousemove", e => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
     });
+  }
 
-    document.addEventListener("mousedown", () => {
-      holding = true;
-      shootBeam();
-    });
+  document.addEventListener("mousemove", e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
 
-    document.addEventListener("mouseup", () => {
-      holding = false;
-      beam.style.display = "none";
-      beam.style.height = "0";
-      turret.style.transform = "translateX(-50%) translateY(-100%)";
-    });
+  document.addEventListener("mousedown", () => {
+    holding = true;
+    shootBeam();
+  });
 
-    setInterval(spawnObstacle, 1200);
-  </script>
+  document.addEventListener("mouseup", () => {
+    holding = false;
+    beam.style.display = "none";
+    beam.style.height = "0";
+    turret.style.transform = "translateX(-50%) translateY(0)";
+  });
+
+  setInterval(spawnObstacle, 1000);
+</script>
 </body>
 </html>
