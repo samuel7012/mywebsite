@@ -1,165 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Spaceship with Missiles</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DigitalDynamo Domains</title>
   <style>
     body {
       margin: 0;
-      overflow: hidden;
-      background: #000;
-    }
-
-    #gameArea {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-    }
-
-    #ship {
-      width: 400px; /* Bigger ship */
-      height: 200px; /* Bigger ship */
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 3;
-      background-image: url('https://www.dicksmith.co.nz/content/dam/dicksmith/products/2791B/2791B_PV6.png'); /* Ship image */
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
-
-    #turret {
-      width: 40px; /* Bigger turret */
-      height: 120px; /* Bigger turret */
-      background: #ccc;
-      position: absolute;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      border-radius: 8px;
-    }
-
-    .missile {
-      position: absolute;
-      width: 100px; /* Bigger missile */
-      height: 200px; /* Bigger missile */
-      background: url('https://i.pinimg.com/originals/27/88/93/2788938b56b64fa8e8e5474bee325f18.jpg'); /* Missile Image */
-      background-size: contain;
-      background-repeat: no-repeat;
-      animation: missileMotion 2s linear infinite;
-      z-index: 1;
-    }
-
-    @keyframes missileMotion {
-      0% {
-        transform: translateY(0);
-      }
-      100% {
-        transform: translateY(-100vh);
-      }
-    }
-
-    #score {
-      color: white;
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      font-size: 32px; /* Bigger score */
+      padding: 0;
       font-family: Arial, sans-serif;
-      z-index: 10;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .logo {
+      font-size: 2.5rem;
+      color: #2c3e50;
+      margin-bottom: 40px;
+    }
+
+    .search-box {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      outline: none;
+      transition: 0.3s ease;
+    }
+
+    .search-box input:focus {
+      border-color: #0077ff;
+      box-shadow: 0 0 8px rgba(0, 119, 255, 0.2);
+    }
+
+    .search-box button {
+      padding: 12px 25px;
+      font-size: 1rem;
+      margin-left: 10px;
+      border: none;
+      border-radius: 25px;
+      background-color: #0077ff;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .search-box button:hover {
+      background-color: #005fcc;
+    }
+
+    #search-results {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    #search-results h2 {
+      margin-top: 0;
+    }
+
+    #search-results p {
+      margin: 5px 0;
     }
   </style>
 </head>
 <body>
-  <div id="gameArea">
-    <div id="ship">
-      <div id="turret"></div>
-    </div>
-    <div id="score">Score: 0</div>
-  </div>
+  <h1 class="logo">DigitalDynamo Domains</h1>
+
+  <form id="search-form" class="search-box">
+    <input type="text" id="domain-input" placeholder="Search for your domain..." autofocus />
+    <button type="submit">Search</button>
+  </form>
+
+  <div id="search-results"></div>
 
   <script>
-    const gameArea = document.getElementById('gameArea');
-    const ship = document.getElementById('ship');
-    const turret = document.getElementById('turret');
-    const scoreDisplay = document.getElementById('score');
-    let score = 0;
-
-    let shipPositionX = window.innerWidth / 2;
-    let missileSpeed = 5;
-    let movingLeft = false;
-    let movingRight = false;
-    let missiles = [];
-
-    // Ship movement controls
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a') {
-        movingLeft = true;
-      } else if (e.key === 'ArrowRight' || e.key === 'd') {
-        movingRight = true;
+    document.getElementById('search-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const domain = document.getElementById('domain-input').value.trim();
+      if (domain) {
+        checkDomainAvailability(domain);
       }
     });
 
-    document.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a') {
-        movingLeft = false;
-      } else if (e.key === 'ArrowRight' || e.key === 'd') {
-        movingRight = false;
-      }
-    });
+    async function checkDomainAvailability(domain) {
+      const apiKey = 'dsf1JipJp/kJTgLsF49Jcw==rIqvaDeZgLV7kk2T'; // Your actual API key
+      const url = `https://api.api-ninjas.com/v1/domain?domain=${domain}`;
 
-    function moveShip() {
-      if (movingLeft && shipPositionX > 0) {
-        shipPositionX -= 10; // Faster movement
-      }
-      if (movingRight && shipPositionX < window.innerWidth - ship.offsetWidth) {
-        shipPositionX += 10; // Faster movement
-      }
+      try {
+        const response = await fetch(url, {
+          headers: { 'X-Api-Key': apiKey }
+        });
 
-      ship.style.left = `${shipPositionX}px`;
-    }
-
-    function shootMissile() {
-      const missile = document.createElement('div');
-      missile.className = 'missile';
-
-      // Position missile at the turret
-      missile.style.left = `${shipPositionX + ship.offsetWidth / 2 - missile.offsetWidth / 2}px`;
-      missile.style.bottom = '250px'; // Above the ship
-
-      gameArea.appendChild(missile);
-      missiles.push(missile);
-    }
-
-    // Create shooting mechanic (on spacebar)
-    document.addEventListener('keydown', (e) => {
-      if (e.key === ' ' || e.key === 'Enter') {
-        shootMissile();
-      }
-    });
-
-    // Move missiles
-    function moveMissiles() {
-      missiles.forEach((missile, index) => {
-        const missileRect = missile.getBoundingClientRect();
-        if (missileRect.top < 0) {
-          missile.remove();
-          missiles.splice(index, 1);
+        if (!response.ok) {
+          throw new Error('Failed to fetch domain info');
         }
-      });
+
+        const data = await response.json();
+        displayResults(data);
+      } catch (error) {
+        document.getElementById('search-results').innerHTML = `<p>Error: ${error.message}</p>`;
+      }
     }
 
-    // Main game loop
-    function gameLoop() {
-      moveShip();
-      moveMissiles();
-      requestAnimationFrame(gameLoop);
-    }
+    function displayResults(data) {
+      const resultsDiv = document.getElementById('search-results');
+      resultsDiv.innerHTML = '';
 
-    gameLoop();
+      if (data && data.domain) {
+        const { domain, available, registrar, creation_date } = data;
+        const creationDate = creation_date ? new Date(creation_date * 1000).toLocaleDateString() : 'N/A';
+
+        const resultHTML = `
+          <h2>Results for: ${domain}</h2>
+          <p>Status: <strong>${available ? '✅ Available' : '❌ Not Available'}</strong></p>
+          <p>Registrar: ${registrar || 'N/A'}</p>
+          <p>Creation Date: ${creationDate}</p>
+        `;
+        resultsDiv.innerHTML = resultHTML;
+      } else {
+        resultsDiv.innerHTML = '<p>No information found for this domain.</p>';
+      }
+    }
   </script>
 </body>
 </html>
