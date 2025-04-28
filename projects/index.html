@@ -88,7 +88,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Button to go to Google search */
+    /* Button to go to Google search, initially hidden */
     #google-button {
       display: none;
       margin-top: 20px;
@@ -175,7 +175,7 @@
         const { domain, available, registrar, creation_date } = data;
         const creationDate = creation_date ? new Date(creation_date * 1000).toLocaleDateString() : 'N/A';
 
-        resultsDiv.innerHTML = `
+        resultsDiv.innerHTML = ` 
           <h2>Results for: <em>${domain}</em></h2>
           <p>Status: <strong>${available ? '✅ Available' : '❌ Not Available'}</strong></p>
           <p>Registrar: ${registrar || 'N/A'}</p>
