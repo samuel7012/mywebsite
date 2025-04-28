@@ -97,7 +97,7 @@
     });
 
     async function checkDomainAvailability(domain) {
-      const apiKey = '@qgQbAzFNKJeQ7'; // ✅ Your actual API key
+      const apiKey = 'dsf1JipJp/kJTgLsF49Jcw==rIqvaDeZgLV7kk2T'; // ✅ Your real API key
       const url = `https://api.api-ninjas.com/v1/domain?domain=${domain}`;
       const loading = document.getElementById('loading');
       const resultsDiv = document.getElementById('search-results');
@@ -113,6 +113,7 @@
         if (!response.ok) throw new Error('Failed to fetch domain info');
 
         const data = await response.json();
+        console.log(data); // See raw API response in the console for debugging
         displayResults(data);
       } catch (error) {
         resultsDiv.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
