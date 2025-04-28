@@ -68,6 +68,24 @@
       margin-top: 20px;
       font-size: 1rem;
       color: #555;
+      display: none;
+      text-align: center;
+    }
+
+    /* Loading circle */
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-top: 4px solid #0077ff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     /* Button to go to Google search */
@@ -99,7 +117,11 @@
     <button type="submit">Search</button>
   </form>
 
-  <div id="loading"></div>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Loading, please wait...</p>
+  </div>
+
   <div id="search-results">
     <p>Search a domain to see details like availability, registrar, and creation date.</p>
   </div>
@@ -124,7 +146,8 @@
       const loading = document.getElementById('loading');
       const resultsDiv = document.getElementById('search-results');
 
-      loading.innerHTML = '<div id="loading-spinner"></div>';
+      // Show the loading spinner
+      loading.style.display = 'block';
       resultsDiv.innerHTML = '';
 
       try {
@@ -140,7 +163,7 @@
       } catch (error) {
         resultsDiv.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
       } finally {
-        loading.innerHTML = '';
+        loading.style.display = 'none'; // Hide the spinner
       }
     }
 
