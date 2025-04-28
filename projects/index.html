@@ -17,10 +17,25 @@
       align-items: center;
     }
 
+    .header {
+      display: flex;
+      align-items: center; /* Align logo and title vertically */
+      margin-bottom: 30px;
+    }
+
     .logo {
+      width: 50px; /* Adjust logo size */
+      height: auto;
+      margin-right: 15px; /* Space between logo and title */
+    }
+
+    .logo-container {
+      margin-right: 15px; /* Add some space between the logo and the title */
+    }
+
+    .logo-title {
       font-size: 2.5rem;
       color: #333;
-      margin-bottom: 30px;
     }
 
     .search-box {
@@ -110,7 +125,13 @@
 </head>
 <body>
 
-  <h1 class="logo">Domain Search Portal</h1>
+  <!-- Header Section with Logo and Title -->
+  <div class="header">
+    <div class="logo-container">
+      <img src="https://www.freepnglogos.com/uploads/logo-website-png/logo-website-coopera-web-design-12.png" alt="Domain Search Logo" class="logo">
+    </div>
+    <h1 class="logo-title">Domain Search Portal</h1>
+  </div>
 
   <form id="search-form" class="search-box">
     <input type="text" id="domain-input" placeholder="Enter domain or game (e.g. roblox.com)" autofocus />
