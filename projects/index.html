@@ -61,6 +61,8 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 600px;
+      min-height: 100px;
+      text-align: center;
     }
 
     #search-results h2 {
@@ -71,6 +73,32 @@
       margin-top: 20px;
       font-size: 1rem;
       color: #555;
+    }
+
+    /* Loading spinner */
+    #loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #0077ff;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin-top: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Fade-in animation */
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -97,33 +125,46 @@
     });
 
     async function checkDomainAvailability(domain) {
-      const apiKey = 'dsf1JipJp/kJTgLsF49Jcw==rIqvaDeZgLV7kk2T'; // ✅ Your real API key
-      const url = `https://api.api-ninjas.com/v1/domain?domain=${domain}`;
       const loading = document.getElementById('loading');
       const resultsDiv = document.getElementById('search-results');
 
-      loading.textContent = 'Searching...';
+      // Show spinner
+      loading.innerHTML = '<div id="loading-spinner"></div>';
       resultsDiv.innerHTML = '';
 
       try {
-        const response = await fetch(url, {
-          headers: { 'X-Api-Key': apiKey }
+        // === REAL API Call (Uncomment when ready) ===
+        /*
+        const response = await fetch(`https://api.api-ninjas.com/v1/domain?domain=${domain}`, {
+          headers: { 'X-Api-Key': 'YOUR-REAL-API-KEY-HERE' }
         });
 
         if (!response.ok) throw new Error('Failed to fetch domain info');
 
         const data = await response.json();
-        console.log(data); // See raw API response in the console for debugging
+        */
+        
+        // === FAKE DATA for testing ===
+        const data = {
+          domain: domain,
+          available: Math.random() > 0.5, // Random true/false
+          registrar: "Example Registrar",
+          creation_date: Math.floor(Date.now() / 1000)
+        };
+
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
         displayResults(data);
+
       } catch (error) {
         resultsDiv.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
       } finally {
-        loading.textContent = '';
+        loading.innerHTML = ''; // Hide spinner
       }
     }
 
     function displayResults(data) {
       const resultsDiv = document.getElementById('search-results');
+      resultsDiv.classList.add('fade-in'); // Add fade-in effect
       resultsDiv.innerHTML = '';
 
       if (data && data.domain) {
