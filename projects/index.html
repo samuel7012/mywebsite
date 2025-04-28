@@ -8,8 +8,8 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -19,8 +19,8 @@
 
     .logo {
       font-size: 2.5rem;
-      color: #2c3e50;
-      margin-bottom: 40px;
+      color: #333;
+      margin-bottom: 30px;
     }
 
     .search-box {
@@ -35,26 +35,18 @@
       padding: 12px 20px;
       font-size: 1rem;
       border: 1px solid #ccc;
-      border-radius: 25px;
+      border-radius: 25px 0 0 25px;
       outline: none;
-      transition: 0.3s ease;
-    }
-
-    .search-box input:focus {
-      border-color: #0077ff;
-      box-shadow: 0 0 8px rgba(0, 119, 255, 0.2);
     }
 
     .search-box button {
       padding: 12px 25px;
       font-size: 1rem;
-      margin-left: 10px;
       border: none;
-      border-radius: 25px;
+      border-radius: 0 25px 25px 0;
       background-color: #0077ff;
       color: white;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
 
     .search-box button:hover {
@@ -63,10 +55,10 @@
 
     #search-results {
       margin-top: 30px;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 600px;
     }
@@ -75,20 +67,25 @@
       margin-top: 0;
     }
 
-    #search-results p {
-      margin: 5px 0;
+    #loading {
+      margin-top: 20px;
+      font-size: 1rem;
+      color: #555;
     }
   </style>
 </head>
 <body>
-  <h1 class="logo">DigitalDynamo Domains</h1>
+  <h1 class="logo">Domain Search Portal</h1>
 
   <form id="search-form" class="search-box">
-    <input type="text" id="domain-input" placeholder="Search for your domain..." autofocus />
+    <input type="text" id="domain-input" placeholder="Enter domain or game (e.g. roblox.com)" autofocus />
     <button type="submit">Search</button>
   </form>
 
-  <div id="search-results"></div>
+  <div id="loading"></div>
+  <div id="search-results">
+    <p>Search a domain to see details like availability, registrar, and creation date.</p>
+  </div>
 
   <script>
     document.getElementById('search-form').addEventListener('submit', function (e) {
@@ -100,22 +97,27 @@
     });
 
     async function checkDomainAvailability(domain) {
-      const apiKey = 'dsf1JipJp/kJTgLsF49Jcw==rIqvaDeZgLV7kk2T'; // Your actual API key
+      const apiKey = '@qgQbAzFNKJeQ7'; // ✅ Your actual API key
       const url = `https://api.api-ninjas.com/v1/domain?domain=${domain}`;
+      const loading = document.getElementById('loading');
+      const resultsDiv = document.getElementById('search-results');
+
+      loading.textContent = 'Searching...';
+      resultsDiv.innerHTML = '';
 
       try {
         const response = await fetch(url, {
           headers: { 'X-Api-Key': apiKey }
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch domain info');
-        }
+        if (!response.ok) throw new Error('Failed to fetch domain info');
 
         const data = await response.json();
         displayResults(data);
       } catch (error) {
-        document.getElementById('search-results').innerHTML = `<p>Error: ${error.message}</p>`;
+        resultsDiv.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+      } finally {
+        loading.textContent = '';
       }
     }
 
@@ -127,13 +129,12 @@
         const { domain, available, registrar, creation_date } = data;
         const creationDate = creation_date ? new Date(creation_date * 1000).toLocaleDateString() : 'N/A';
 
-        const resultHTML = `
-          <h2>Results for: ${domain}</h2>
+        resultsDiv.innerHTML = `
+          <h2>Results for: <em>${domain}</em></h2>
           <p>Status: <strong>${available ? '✅ Available' : '❌ Not Available'}</strong></p>
           <p>Registrar: ${registrar || 'N/A'}</p>
-          <p>Creation Date: ${creationDate}</p>
+          <p>Registered On: ${creationDate}</p>
         `;
-        resultsDiv.innerHTML = resultHTML;
       } else {
         resultsDiv.innerHTML = '<p>No information found for this domain.</p>';
       }
