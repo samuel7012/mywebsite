@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Domain Searcher</title>
-  <h1>Domain Search Portal</h1>
   <style> 
     body {
       margin: 0;
@@ -18,11 +17,17 @@
       align-items: center;
     }
 
+    h1 {
+      margin-top: 20px;
+      font-size: 2rem;
+    }
+
     .search-box {
       display: flex;
       justify-content: center;
       width: 100%;
       max-width: 600px;
+      margin-top: 20px;
     }
 
     .search-box input {
@@ -67,7 +72,6 @@
       text-align: center;
     }
 
-    /* Loading circle */
     .spinner {
       border: 4px solid rgba(0, 0, 0, 0.1);
       border-top: 4px solid #0077ff;
@@ -83,7 +87,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Button to go to Google search */
     #google-button {
       display: none;
       margin-top: 20px;
@@ -104,6 +107,8 @@
 </head>
 <body>
 
+  <h1>Domain Search Portal</h1>
+
   <form id="search-form" class="search-box">
     <input type="text" id="domain-input" placeholder="Enter domain or game (e.g. roblox.com)" autofocus />
     <button type="submit">Search</button>
@@ -118,7 +123,6 @@
     <p>Search a domain to see details like availability, registrar, and creation date.</p>
   </div>
 
-  <!-- Button for Google search, initially hidden -->
   <button id="google-button" onclick="searchGoogle()">Search on Google</button>
 
   <script>
@@ -127,18 +131,17 @@
       const domain = document.getElementById('domain-input').value.trim();
       if (domain) {
         checkDomainAvailability(domain);
-        document.getElementById('google-button').style.display = 'inline-block'; // Show the button
+        document.getElementById('google-button').style.display = 'inline-block';
       } else {
-        document.getElementById('google-button').style.display = 'none'; // Hide the button if input is empty
+        document.getElementById('google-button').style.display = 'none';
       }
     });
 
     async function checkDomainAvailability(domain) {
-      const apiKey = 'dsf1JipJp/kJTgLsF49Jcw==rIqvaDeZgLV7kk2T'; // Your real API key
+      const apiKey = 'dsf1JipJp/kJTgLsF49Jcw==rIqvaDeZgLV7kk2T'; // Replace with your real API key
       const loading = document.getElementById('loading');
       const resultsDiv = document.getElementById('search-results');
 
-      // Show the loading spinner
       loading.style.display = 'block';
       resultsDiv.innerHTML = '';
 
@@ -155,7 +158,7 @@
       } catch (error) {
         resultsDiv.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
       } finally {
-        loading.style.display = 'none'; // Hide the spinner
+        loading.style.display = 'none';
       }
     }
 
@@ -164,14 +167,28 @@
       resultsDiv.innerHTML = '';
 
       if (data && data.domain) {
-        const { domain, available, registrar, creation_date } = data;
+        const {
+          domain,
+          available,
+          registrar,
+          creation_date,
+          expiration_date,
+          updated_date,
+          country
+        } = data;
+
         const creationDate = creation_date ? new Date(creation_date * 1000).toLocaleDateString() : 'N/A';
+        const expirationDate = expiration_date ? new Date(expiration_date * 1000).toLocaleDateString() : 'N/A';
+        const updatedDate = updated_date ? new Date(updated_date * 1000).toLocaleDateString() : 'N/A';
 
         resultsDiv.innerHTML = ` 
           <h2>Results for: <em>${domain}</em></h2>
           <p>Status: <strong>${available ? '✅ Available' : '❌ Not Available'}</strong></p>
           <p>Registrar: ${registrar || 'N/A'}</p>
           <p>Registered On: ${creationDate}</p>
+          <p>Expires On: ${expirationDate}</p>
+          <p>Last Updated: ${updatedDate}</p>
+          <p>Country: ${country || 'N/A'}</p>
         `;
       } else {
         resultsDiv.innerHTML = '<p>No information found for this domain.</p>';
@@ -181,7 +198,7 @@
     function searchGoogle() {
       const domain = document.getElementById('domain-input').value.trim();
       if (domain) {
-        window.open(`https://www.google.com/search?q=${domain}`, '_blank'); // Open Google search for the domain
+        window.open(`https://www.google.com/search?q=${domain}`, '_blank');
       }
     }
   </script>
