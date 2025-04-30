@@ -15,6 +15,7 @@
       min-height: 100vh;
       justify-content: center;
       align-items: center;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     h1 {
@@ -37,6 +38,7 @@
       border: 1px solid #ccc;
       border-radius: 25px 0 0 25px;
       outline: none;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .search-box button {
@@ -47,6 +49,7 @@
       background-color: #0077ff;
       color: white;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
 
     .search-box button:hover {
@@ -62,6 +65,7 @@
       width: 100%;
       max-width: 600px;
       text-align: left;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     #loading {
@@ -103,6 +107,66 @@
     #google-button:hover {
       background-color: #2c8c43;
     }
+
+    /* Dark Mode Styles */
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode #search-results {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode input,
+    body.dark-mode button {
+      background-color: #2c2c2c;
+      color: #e0e0e0;
+      border-color: #444;
+    }
+
+    body.dark-mode .search-box button {
+      background-color: #333;
+    }
+
+    body.dark-mode .search-box button:hover {
+      background-color: #444;
+    }
+
+    body.dark-mode #google-button {
+      background-color: #2e7d32;
+    }
+
+    body.dark-mode #google-button:hover {
+      background-color: #1b5e20;
+    }
+
+    .toggle-button {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .toggle-button:hover {
+      background-color: #555;
+    }
+
+    .toggle-button.light-mode {
+      background-color: #fff;
+      color: #333;
+    }
+
+    .toggle-button.light-mode:hover {
+      background-color: #ddd;
+    }
   </style>
 </head>
 <body>
@@ -124,6 +188,9 @@
   </div>
 
   <button id="google-button" onclick="searchGoogle()">Search on Google</button>
+
+  <!-- Dark Mode Toggle Button -->
+  <button class="toggle-button" onclick="toggleDarkMode()" id="dark-mode-toggle">Dark Mode</button>
 
   <script>
     document.getElementById('search-form').addEventListener('submit', function (e) {
@@ -210,6 +277,34 @@
         window.open(`https://www.google.com/search?q=${domain}`, '_blank');
       }
     }
+
+    // Toggle Dark Mode
+    function toggleDarkMode() {
+      const body = document.body;
+      const toggleButton = document.getElementById('dark-mode-toggle');
+      body.classList.toggle('dark-mode');
+
+      const isDark = body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+
+      // Change the button text and style
+      if (isDark) {
+        toggleButton.textContent = 'Light Mode';
+        toggleButton.classList.add('light-mode');
+      } else {
+        toggleButton.textContent = 'Dark Mode';
+        toggleButton.classList.remove('light-mode');
+      }
+    }
+
+    // Initialize based on saved preference
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('dark-mode-toggle').textContent = 'Light Mode';
+        document.getElementById('dark-mode-toggle').classList.add('light-mode');
+      }
+    });
   </script>
 
 </body>
