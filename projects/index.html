@@ -277,25 +277,7 @@
         window.open(`https://www.google.com/search?q=${domain}`, '_blank');
       }
     }
-
-    // Toggle Dark Mode
-    function toggleDarkMode() {
-      const body = document.body;
-      const toggleButton = document.getElementById('dark-mode-toggle');
-      body.classList.toggle('dark-mode');
-
-      const isDark = body.classList.contains('dark-mode');
-      localStorage.setItem('darkMode', isDark ? 'true' : 'false');
-
-      // Change the button text and style
-      if (isDark) {
-        toggleButton.textContent = 'Light Mode';
-        toggleButton.classList.add('light-mode');
-      } else {
-        toggleButton.textContent = 'Dark Mode';
-        toggleButton.classList.remove('light-mode');
-      }
-    }
+    
 
     // Initialize based on saved preference
     window.addEventListener('DOMContentLoaded', () => {
