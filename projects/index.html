@@ -1,336 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Realistic Glock 19 Simulation</title>
-  <style>
-    body {
-      margin: 0;
-      background-color: #111;
-      overflow: hidden;
-    }
-
-    #game-area {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      overflow: hidden;
-    }
-
-    #ammo-counter {
-      color: white;
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 20px;
-      z-index: 100;
-    }
-
-    .gun {
-      position: absolute;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 204px;
-      height: 139px;
-      animation: idle-wobble 3s infinite;
-    }
-
-    @keyframes idle-wobble {
-      0%, 100% { transform: translateX(-50%) rotate(0deg); }
-      50% { transform: translateX(-50%) rotate(0.3deg); }
-    }
-
-    .slide {
-      width: 186px;
-      height: 25.5px;
-      background: linear-gradient(#444, #666);
-      border-radius: 4px 4px 0 0;
-      position: absolute;
-      top: 0;
-      left: 10px;
-      box-shadow: inset 0 -2px 3px rgba(0,0,0,0.5);
-      z-index: 5;
-      transition: transform 0.05s ease-out;
-    }
-
-    .barrel {
-      width: 12px;
-      height: 8px;
-      background: #aaa;
-      position: absolute;
-      top: 10px;
-      left: 174px;
-      border-radius: 2px;
-      z-index: 6;
-    }
-
-    .muzzle-flash {
-      position: absolute;
-      top: 5px;
-      left: 184px;
-      opacity: 0;
-      border-radius: 50%;
-      pointer-events: none;
-      transition: opacity 0.05s;
-      z-index: 10;
-    }
-
-    .frame {
-      width: 200px;
-      height: 40px;
-      background: #222;
-      position: absolute;
-      top: 30px;
-      left: 10px;
-      border-radius: 0 0 4px 4px;
-      z-index: 3;
-    }
-
-    .trigger-guard {
-      width: 40px;
-      height: 20px;
-      background: #222;
-      position: absolute;
-      top: 50px;
-      left: 80px;
-      border-radius: 20px 20px 0 0;
-      z-index: 2;
-    }
-
-    .trigger {
-      width: 8px;
-      height: 18px;
-      background: #bbb;
-      position: absolute;
-      top: 52px;
-      left: 98px;
-      border-radius: 4px;
-      z-index: 4;
-    }
-
-    .grip {
-      width: 50px;
-      height: 70px;
-      background: #333;
-      position: absolute;
-      top: 60px;
-      left: 75px;
-      transform: skewY(10deg);
-      border-radius: 4px;
-      z-index: 1;
-    }
-
-    .bullet {
-      width: 10px;
-      height: 5px;
-      background: yellow;
-      border-radius: 2px;
-      position: absolute;
-      z-index: 7;
-    }
-
-    .smoke {
-      width: 10px;
-      height: 10px;
-      background: radial-gradient(white, transparent);
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.5;
-      animation: rise 1s ease-out forwards;
-      z-index: 11;
-    }
-
-    @keyframes rise {
-      0% { transform: translateY(0); opacity: 0.5; }
-      100% { transform: translateY(-50px); opacity: 0; }
-    }
-
-    .ground {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 20px;
-      background: #222;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Free Robux Giveaway!</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(135deg, #7bdff2, #6cdbb5);
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    max-width: 400px;
+  }
+  h1 {
+    color: #28a745;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    color: #555;
+  }
+  button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 15px;
+    background-color: #ff4500;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 6px 12px rgba(255,69,0,0.5);
+  }
+  button:hover {
+    background-color: #e03e00;
+  }
+  small {
+    display: block;
+    margin-top: 15px;
+    color: #777;
+  }
+</style>
 </head>
 <body>
 
-<div id="game-area">
-  <div id="ammo-counter">Ammo: 17</div>
-  <div class="gun" id="gun">
-    <div class="slide"></div>
-    <div class="barrel"></div>
-    <div class="frame"></div>
-    <div class="trigger-guard"></div>
-    <div class="trigger"></div>
-    <div class="grip"></div>
-    <div class="muzzle-flash" id="muzzle-flash"></div>
-  </div>
-  <div class="ground"></div>
+<div id="content">
+  <h1>🎉 Free Robux Giveaway! 🎉</h1>
+  <p>Hey there! We're super excited to share some free Robux with you! Just click the button below and see what happens!</p>
+  <button id="claim-btn">Claim Your Free Robux</button>
 </div>
 
-<audio id="shoot-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_95c3dbddfa.mp3" preload="auto"></audio>
-<audio id="empty-click" src="https://cdn.pixabay.com/download/audio/2021/09/20/audio_78f6dc776e.mp3" preload="auto"></audio>
+<div id="virus-warning" style="display:none; background:#000; color:#ff4444; font-weight:bold; font-size:24px; padding: 30px; text-align:center;">
+  ⚠️ WARNING! Virus detected on your system! ⚠️<br/>
+  Your computer is infected! Immediate action required!
+</div>
+
+<div id="crash-screen" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:black; color:lime; font-family: monospace; font-size:18px; padding:30px; overflow:auto;">
+  <pre id="crash-text"></pre>
+</div>
+
+<div id="rick-roll" style="display:none; width:100vw; height:100vh;">
+  <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&controls=0&loop=1&playlist=dQw4w9WgXcQ" 
+          title="Rick Astley - Never Gonna Give You Up" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
 
 <script>
-  const gun = document.getElementById("gun");
-  const muzzleFlash = document.getElementById("muzzle-flash");
-  const shootSound = document.getElementById("shoot-sound");
-  const emptyClick = document.getElementById("empty-click");
-  const gameArea = document.getElementById("game-area");
-  const slide = document.querySelector(".slide");
-  let ammo = 17;
+  const claimBtn = document.getElementById('claim-btn');
+  const contentDiv = document.getElementById('content');
+  const virusWarning = document.getElementById('virus-warning');
+  const crashScreen = document.getElementById('crash-screen');
+  const crashText = document.getElementById('crash-text');
+  const rickRoll = document.getElementById('rick-roll');
 
-  document.addEventListener("mousedown", shoot);
+  claimBtn.addEventListener('click', () => {
+    // Step 1: Hide main content, show virus warning
+    contentDiv.style.display = 'none';
+    virusWarning.style.display = 'block';
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "r") {
-      ammo = 17;
-      document.getElementById("ammo-counter").textContent = `Ammo: ${ammo}`;
-    }
+    // Step 2: After 3 seconds, start "crash"
+    setTimeout(() => {
+      virusWarning.style.display = 'none';
+      crashScreen.style.display = 'block';
+
+      // Simulate "crash" text scrolling
+      let crashLines = [
+        "SYSTEM ERROR: 0xDEADBEEF",
+        "STACK OVERFLOW DETECTED",
+        "MEMORY ACCESS VIOLATION",
+        "CRITICAL PROCESS TERMINATED",
+        "REBOOT REQUIRED",
+        "UNHANDLED EXCEPTION",
+        "KERNEL PANIC - SYSTEM HALTED",
+        "FAULT AT ADDRESS 0xCAFEBABE",
+        "Attempting to recover...",
+        "Recovery failed.",
+        "Preparing to restart...",
+      ];
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < crashLines.length) {
+          crashText.textContent += crashLines[i] + "\n";
+          i++;
+        } else {
+          clearInterval(interval);
+          // After "crash", show Rickroll
+          setTimeout(() => {
+            crashScreen.style.display = 'none';
+            rickRoll.style.display = 'block';
+          }, 2000);
+        }
+      }, 700);
+    }, 3000);
   });
-
-  function shoot() {
-    if (ammo <= 0) {
-      emptyClick.play();
-      return;
-    }
-
-    ammo--;
-    document.getElementById("ammo-counter").textContent = `Ammo: ${ammo}`;
-
-    gun.style.transform = "translateX(-50%) rotate(-2deg)";
-    setTimeout(() => gun.style.transform = "translateX(-50%)", 100);
-
-    slide.style.transform = "translateX(-15px)";
-    setTimeout(() => slide.style.transform = "translateX(0)", 80);
-
-    gun.style.animation = "none";
-    setTimeout(() => {
-      gun.style.animation = "idle-wobble 3s infinite";
-    }, 150);
-
-    showMuzzleFlash();
-    shootSound.currentTime = 0;
-    shootSound.play().catch(() => {});
-    shake();
-    ejectShell();
-    emitSmoke();
-
-    const rect = gun.getBoundingClientRect();
-    createBullet(rect.left + 184, rect.top + 14);
-  }
-
-  function showMuzzleFlash() {
-    muzzleFlash.style.width = `${20 + Math.random() * 20}px`;
-    muzzleFlash.style.height = `${15 + Math.random() * 10}px`;
-    muzzleFlash.style.background = `radial-gradient(orange, yellow, transparent)`;
-    muzzleFlash.style.opacity = 1;
-    setTimeout(() => {
-      muzzleFlash.style.opacity = 0;
-    }, 50);
-  }
-
-  function shake(duration = 100, intensity = 5) {
-    const start = Date.now();
-    function applyShake() {
-      const now = Date.now();
-      if (now - start > duration) {
-        gameArea.style.transform = "";
-        return;
-      }
-      const x = (Math.random() - 0.5) * intensity;
-      const y = (Math.random() - 0.5) * intensity;
-      gameArea.style.transform = `translate(${x}px, ${y}px)`;
-      requestAnimationFrame(applyShake);
-    }
-    applyShake();
-  }
-
-  function ejectShell() {
-    const shell = document.createElement("div");
-    shell.style.width = "6px";
-    shell.style.height = "12px";
-    shell.style.background = "gold";
-    shell.style.borderRadius = "3px";
-    shell.style.position = "absolute";
-    shell.style.zIndex = 9;
-
-    const rect = gun.getBoundingClientRect();
-    let x = rect.left + 160;
-    let y = rect.top + 15;
-    let vx = 3 + Math.random() * 4;
-    let vy = -6 - Math.random() * 2;
-    let rotation = 0;
-    let vrot = 5 + Math.random() * 10;
-
-    shell.style.left = `${x}px`;
-    shell.style.top = `${y}px`;
-    gameArea.appendChild(shell);
-
-    function animateShell() {
-      vy += 0.3;
-      x += vx;
-      y += vy;
-      rotation += vrot;
-
-      shell.style.left = `${x}px`;
-      shell.style.top = `${y}px`;
-      shell.style.transform = `rotate(${rotation}deg)`;
-
-      if (y > window.innerHeight) {
-        shell.remove();
-        return;
-      }
-
-      requestAnimationFrame(animateShell);
-    }
-
-    animateShell();
-  }
-
-  function emitSmoke() {
-    const smoke = document.createElement("div");
-    smoke.className = "smoke";
-    const rect = gun.getBoundingClientRect();
-    smoke.style.left = `${rect.left + 180}px`;
-    smoke.style.top = `${rect.top + 5}px`;
-    gameArea.appendChild(smoke);
-    setTimeout(() => smoke.remove(), 1000);
-  }
-
-  function createBullet(x, y) {
-    const bullet = document.createElement("div");
-    bullet.className = "bullet";
-    bullet.style.left = `${x}px`;
-    bullet.style.top = `${y}px`;
-    gameArea.appendChild(bullet);
-
-    let vx = 20;
-    let vy = 0;
-    const gravity = 0.1;
-
-    function moveBullet() {
-      vx *= 0.99;
-      vy += gravity;
-      x += vx;
-      y += vy;
-      bullet.style.left = `${x}px`;
-      bullet.style.top = `${y}px`;
-
-      if (x > window.innerWidth || y > window.innerHeight) {
-        bullet.remove();
-        return;
-      }
-
-      requestAnimationFrame(moveBullet);
-    }
-
-    moveBullet();
-  }
 </script>
 
 </body>
