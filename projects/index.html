@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Realistic Glock 17 Simulation</title>
   <style>
     body {
@@ -18,19 +18,33 @@
       overflow: hidden;
     }
 
+    #ammo-counter {
+      color: white;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 20px;
+      z-index: 100;
+    }
+
     .gun {
       position: absolute;
       bottom: 50px;
       left: 50%;
       transform: translateX(-50%);
-      width: 204px; /* Length of Glock 17 */
-      height: 139px; /* Height including magazine */
-      transition: transform 0.1s ease-out;
+      width: 204px;
+      height: 139px;
+      animation: idle-wobble 3s infinite;
+    }
+
+    @keyframes idle-wobble {
+      0%, 100% { transform: translateX(-50%) rotate(0deg); }
+      50% { transform: translateX(-50%) rotate(0.3deg); }
     }
 
     .slide {
-      width: 186px; /* Slide length */
-      height: 25.5px; /* Slide width */
+      width: 186px;
+      height: 25.5px;
       background: linear-gradient(#444, #666);
       border-radius: 4px 4px 0 0;
       position: absolute;
@@ -38,6 +52,7 @@
       left: 10px;
       box-shadow: inset 0 -2px 3px rgba(0,0,0,0.5);
       z-index: 5;
+      transition: transform 0.05s ease-out;
     }
 
     .barrel {
@@ -46,18 +61,15 @@
       background: #aaa;
       position: absolute;
       top: 10px;
-      left: 174px; /* Slide length minus barrel width */
+      left: 174px;
       border-radius: 2px;
       z-index: 6;
     }
 
     .muzzle-flash {
-      width: 30px;
-      height: 20px;
-      background: radial-gradient(orange, yellow, transparent);
       position: absolute;
       top: 5px;
-      left: 184px; /* Slide length minus muzzle flash width */
+      left: 184px;
       opacity: 0;
       border-radius: 50%;
       pointer-events: none;
@@ -116,6 +128,23 @@
       background: yellow;
       border-radius: 2px;
       position: absolute;
+      z-index: 7;
+    }
+
+    .smoke {
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(white, transparent);
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: rise 1s ease-out forwards;
+      z-index: 11;
+    }
+
+    @keyframes rise {
+      0% { transform: translateY(0); opacity: 0.5; }
+      100% { transform: translateY(-50px); opacity: 0; }
     }
 
     .ground {
@@ -130,6 +159,7 @@
 <body>
 
 <div id="game-area">
+  <div id="ammo-counter">Ammo: 17</div>
   <div class="gun" id="gun">
     <div class="slide"></div>
     <div class="barrel"></div>
@@ -143,53 +173,159 @@
 </div>
 
 <audio id="shoot-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_95c3dbddfa.mp3" preload="auto"></audio>
+<audio id="empty-click" src="https://cdn.pixabay.com/download/audio/2021/09/20/audio_78f6dc776e.mp3" preload="auto"></audio>
 
 <script>
   const gun = document.getElementById("gun");
   const muzzleFlash = document.getElementById("muzzle-flash");
   const shootSound = document.getElementById("shoot-sound");
+  const emptyClick = document.getElementById("empty-click");
   const gameArea = document.getElementById("game-area");
-
-  document.body.addEventListener("click", () => {
-    shootSound.play().catch(() => {});
-  }, { once: true });
+  const slide = document.querySelector(".slide");
+  let ammo = 17;
 
   document.addEventListener("mousedown", shoot);
 
-  function shoot() {
-    // Recoil animation
-    gun.style.transform = "translateX(-50%) rotate(-2deg)";
-    setTimeout(() => {
-      gun.style.transform = "translateX(-50%) rotate(0)";
-    }, 100);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "r") {
+      ammo = 17;
+      document.getElementById("ammo-counter").textContent = `Ammo: ${ammo}`;
+    }
+  });
 
-    // Muzzle flash
+  function shoot() {
+    if (ammo <= 0) {
+      emptyClick.play();
+      return;
+    }
+
+    ammo--;
+    document.getElementById("ammo-counter").textContent = `Ammo: ${ammo}`;
+
+    gun.style.transform = "translateX(-50%) rotate(-2deg)";
+    setTimeout(() => gun.style.transform = "translateX(-50%)", 100);
+
+    slide.style.transform = "translateX(-15px)";
+    setTimeout(() => slide.style.transform = "translateX(0)", 80);
+
+    gun.style.animation = "none";
+    setTimeout(() => {
+      gun.style.animation = "idle-wobble 3s infinite";
+    }, 150);
+
+    showMuzzleFlash();
+    shootSound.currentTime = 0;
+    shootSound.play().catch(() => {});
+    shake();
+    ejectShell();
+    emitSmoke();
+
+    const rect = gun.getBoundingClientRect();
+    createBullet(rect.left + 184, rect.top + 14);
+  }
+
+  function showMuzzleFlash() {
+    muzzleFlash.style.width = `${20 + Math.random() * 20}px`;
+    muzzleFlash.style.height = `${15 + Math.random() * 10}px`;
+    muzzleFlash.style.background = `radial-gradient(orange, yellow, transparent)`;
     muzzleFlash.style.opacity = 1;
     setTimeout(() => {
       muzzleFlash.style.opacity = 0;
     }, 50);
+  }
 
-    // Sound
-    shootSound.currentTime = 0;
-    shootSound.play().catch(() => {});
+  function shake(duration = 100, intensity = 5) {
+    const start = Date.now();
+    function applyShake() {
+      const now = Date.now();
+      if (now - start > duration) {
+        gameArea.style.transform = "";
+        return;
+      }
+      const x = (Math.random() - 0.5) * intensity;
+      const y = (Math.random() - 0.5) * intensity;
+      gameArea.style.transform = `translate(${x}px, ${y}px)`;
+      requestAnimationFrame(applyShake);
+    }
+    applyShake();
+  }
 
-    // Bullet
+  function ejectShell() {
+    const shell = document.createElement("div");
+    shell.style.width = "6px";
+    shell.style.height = "12px";
+    shell.style.background = "gold";
+    shell.style.borderRadius = "3px";
+    shell.style.position = "absolute";
+    shell.style.zIndex = 9;
+
+    const rect = gun.getBoundingClientRect();
+    let x = rect.left + 160;
+    let y = rect.top + 15;
+    let vx = 3 + Math.random() * 4;
+    let vy = -6 - Math.random() * 2;
+    let rotation = 0;
+    let vrot = 5 + Math.random() * 10;
+
+    shell.style.left = `${x}px`;
+    shell.style.top = `${y}px`;
+    gameArea.appendChild(shell);
+
+    function animateShell() {
+      vy += 0.3;
+      x += vx;
+      y += vy;
+      rotation += vrot;
+
+      shell.style.left = `${x}px`;
+      shell.style.top = `${y}px`;
+      shell.style.transform = `rotate(${rotation}deg)`;
+
+      if (y > window.innerHeight) {
+        shell.remove();
+        return;
+      }
+
+      requestAnimationFrame(animateShell);
+    }
+
+    animateShell();
+  }
+
+  function emitSmoke() {
+    const smoke = document.createElement("div");
+    smoke.className = "smoke";
+    const rect = gun.getBoundingClientRect();
+    smoke.style.left = `${rect.left + 180}px`;
+    smoke.style.top = `${rect.top + 5}px`;
+    gameArea.appendChild(smoke);
+    setTimeout(() => smoke.remove(), 1000);
+  }
+
+  function createBullet(x, y) {
     const bullet = document.createElement("div");
     bullet.className = "bullet";
-    const rect = gun.getBoundingClientRect();
-    bullet.style.left = (rect.left + 184) + "px";
-    bullet.style.top = (rect.top + 14) + "px";
+    bullet.style.left = `${x}px`;
+    bullet.style.top = `${y}px`;
     gameArea.appendChild(bullet);
 
-    let velocityX = 10;
+    let vx = 20;
+    let vy = 0;
+    const gravity = 0.1;
 
     function moveBullet() {
-      const left = parseFloat(bullet.style.left);
-      if (left > window.innerWidth) {
+      vx *= 0.99;
+      vy += gravity;
+      x += vx;
+      y += vy;
+      bullet.style.left = `${x}px`;
+      bullet.style.top = `${y}px`;
+
+      if (x > window.innerWidth || y > window.innerHeight) {
         bullet.remove();
         return;
       }
-      bullet.style.left = left + velocityX + "px";
+
       requestAnimationFrame(moveBullet);
     }
 
