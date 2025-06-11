@@ -3,104 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stickman Warrior</title>
+    <title>Perfect 2D Stickman</title>
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: black;
+            background-color: #f0f0f0;
         }
-
-        .warrior {
-            position: relative;
-            width: 100px;
-            height: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        canvas {
+            background-color: white;
         }
-
-        /* Glowing Aura */
-        .aura {
-            position: absolute;
-            width: 120px;
-            height: 220px;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 20%, transparent);
-            box-shadow: 0 0 40px yellow;
-            animation: glow 1.5s infinite alternate;
-        }
-
-        @keyframes glow {
-            from { transform: scale(1); opacity: 0.7; }
-            to { transform: scale(1.2); opacity: 1; }
-        }
-
-        /* Head */
-        .head {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: gold;
-            box-shadow: 0 0 20px yellow;
-            position: relative;
-            top: -5px; /* Shift head closer to body */
-        }
-
-        /* Body */
-        .body {
-            width: 10px;
-            height: 70px; /* Reduced height */
-            background-color: yellow;
-        }
-
-        /* Arms */
-        .arms {
-            width: 80px;
-            height: 10px;
-            background-color: yellow;
-            position: relative;
-            top: -5px;
-        }
-
-        /* Legs */
-        .legs {
-            display: flex;
-            justify-content: space-between;
-            width: 40px;
-            position: relative;
-            top: -5px;
-        }
-
-        .leg {
-            width: 10px;
-            height: 70px;
-            background-color: yellow;
-        }
-
-        .left-leg {
-            transform: rotate(20deg);
-        }
-
-        .right-leg {
-            transform: rotate(-20deg);
-        }
-
     </style>
 </head>
 <body>
 
-<div class="warrior">
-    <div class="aura"></div>
-    <div class="head"></div>
-    <div class="body"></div>
-    <div class="arms"></div>
-    <div class="legs">
-        <div class="leg left-leg"></div>
-        <div class="leg right-leg"></div>
-    </div>
-</div>
+<canvas id="stickmanCanvas" width="400" height="400"></canvas>
+
+<script>
+    const canvas = document.getElementById('stickmanCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawStickman() {
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 4;
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(200, 50, 30, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Body
+        ctx.beginPath();
+        ctx.moveTo(200, 80);
+        ctx.lineTo(200, 200);
+        ctx.stroke();
+
+        // Arms
+        ctx.beginPath();
+        ctx.moveTo(150, 120);
+        ctx.lineTo(250, 120);
+        ctx.stroke();
+
+        // Legs
+        ctx.beginPath();
+        ctx.moveTo(200, 200);
+        ctx.lineTo(160, 280); // Left leg
+        ctx.moveTo(200, 200);
+        ctx.lineTo(240, 280); // Right leg
+        ctx.stroke();
+    }
+
+    drawStickman();
+</script>
 
 </body>
 </html>
