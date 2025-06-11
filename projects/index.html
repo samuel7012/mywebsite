@@ -1,129 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Free Robux Giveaway!</title>
-<style>
-  body, html {
-    margin: 0; padding: 0; height: 100%; overflow: hidden;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    background: linear-gradient(135deg, #7bdff2, #6cdbb5);
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  #content {
-    background: white;
-    border-radius: 20px;
-    padding: 40px 50px;
-    text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    max-width: 400px;
-  }
-  h1 {
-    color: #28a745;
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-  }
-  p {
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-    color: #555;
-  }
-  button {
-    padding: 15px 30px;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 15px;
-    background-color: #ff4500;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 6px 12px rgba(255,69,0,0.5);
-  }
-  button:hover {
-    background-color: #e03e00;
-  }
-  small {
-    display: block;
-    margin-top: 15px;
-    color: #777;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stickman Warrior</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+        }
+
+        .warrior {
+            position: relative;
+            width: 100px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Head */
+        .head {
+            position: absolute;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: gold;
+            box-shadow: 0 0 20px yellow;
+        }
+
+        /* Body */
+        .body {
+            position: absolute;
+            top: 50px;
+            width: 10px;
+            height: 80px;
+            background-color: yellow;
+        }
+
+        /* Arms */
+        .arms {
+            position: absolute;
+            top: 70px;
+            width: 80px;
+            height: 10px;
+            background-color: yellow;
+        }
+
+        /* Legs */
+        .leg {
+            position: absolute;
+            top: 130px;
+            width: 10px;
+            height: 70px;
+            background-color: yellow;
+        }
+
+        .left-leg {
+            transform: rotate(20deg);
+            left: -20px;
+        }
+
+        .right-leg {
+            transform: rotate(-20deg);
+            right: -20px;
+        }
+
+        /* Glowing Aura */
+        .aura {
+            position: absolute;
+            width: 120px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 20%, transparent);
+            box-shadow: 0 0 40px yellow;
+            animation: glow 1.5s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { transform: scale(1); opacity: 0.7; }
+            to { transform: scale(1.2); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
 
-<div id="content">
-  <h1>🎉 Free Robux Giveaway! 🎉</h1>
-  <p>Hey there! We're super excited to share some free Robux with you! Just click the button below and see what happens!</p>
-  <button id="claim-btn">Claim Your Free Robux</button>
+<div class="warrior">
+    <div class="aura"></div>
+    <div class="head"></div>
+    <div class="body"></div>
+    <div class="arms"></div>
+    <div class="leg left-leg"></div>
+    <div class="leg right-leg"></div>
 </div>
-
-<div id="virus-warning" style="display:none; background:#000; color:#ff4444; font-weight:bold; font-size:24px; padding: 30px; text-align:center;">
-  ⚠️ WARNING! Virus detected on your system! ⚠️<br/>
-  Your computer is infected! Immediate action required!
-</div>
-
-<div id="crash-screen" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:black; color:lime; font-family: monospace; font-size:18px; padding:30px; overflow:auto;">
-  <pre id="crash-text"></pre>
-</div>
-
-<div id="rick-roll" style="display:none; width:100vw; height:100vh;">
-  <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&controls=0&loop=1&playlist=dQw4w9WgXcQ" 
-          title="Rick Astley - Never Gonna Give You Up" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-
-<script>
-  const claimBtn = document.getElementById('claim-btn');
-  const contentDiv = document.getElementById('content');
-  const virusWarning = document.getElementById('virus-warning');
-  const crashScreen = document.getElementById('crash-screen');
-  const crashText = document.getElementById('crash-text');
-  const rickRoll = document.getElementById('rick-roll');
-
-  claimBtn.addEventListener('click', () => {
-    // Step 1: Hide main content, show virus warning
-    contentDiv.style.display = 'none';
-    virusWarning.style.display = 'block';
-
-    // Step 2: After 3 seconds, start "crash"
-    setTimeout(() => {
-      virusWarning.style.display = 'none';
-      crashScreen.style.display = 'block';
-
-      // Simulate "crash" text scrolling
-      let crashLines = [
-        "SYSTEM ERROR: 0xDEADBEEF",
-        "STACK OVERFLOW DETECTED",
-        "MEMORY ACCESS VIOLATION",
-        "CRITICAL PROCESS TERMINATED",
-        "REBOOT REQUIRED",
-        "UNHANDLED EXCEPTION",
-        "KERNEL PANIC - SYSTEM HALTED",
-        "FAULT AT ADDRESS 0xCAFEBABE",
-        "Attempting to recover...",
-        "Recovery failed.",
-        "Preparing to restart...",
-      ];
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i < crashLines.length) {
-          crashText.textContent += crashLines[i] + "\n";
-          i++;
-        } else {
-          clearInterval(interval);
-          // After "crash", show Rickroll
-          setTimeout(() => {
-            crashScreen.style.display = 'none';
-            rickRoll.style.display = 'block';
-          }, 2000);
-        }
-      }, 700);
-    }, 3000);
-  });
-</script>
 
 </body>
 </html>
