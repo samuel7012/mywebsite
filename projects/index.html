@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfect Stickman</title>
+    <title>Realistic Fist Animation</title>
     <style>
         body {
             display: flex;
@@ -13,78 +13,59 @@
             background-color: #f0f0f0;
         }
 
-        .stickman {
+        .hand {
             position: relative;
             width: 100px;
-            height: 220px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            height: 150px;
+            background-color: #d4a373;
+            border-radius: 40px;
         }
 
-        /* Head */
-        .head {
+        .finger {
+            width: 90px;
+            height: 20px;
+            background-color: #d4a373;
+            position: absolute;
+            border-radius: 10px;
+            left: 5px;
+            transition: 0.5s ease-in-out;
+        }
+
+        .finger:nth-child(1) { top: 10px; }
+        .finger:nth-child(2) { top: 40px; }
+        .finger:nth-child(3) { top: 70px; }
+        .finger:nth-child(4) { top: 100px; }
+
+        .thumb {
             width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: black;
-            position: relative;
-            top: 0;
+            height: 20px;
+            background-color: #d4a373;
+            position: absolute;
+            left: 10px;
+            top: 120px;
+            border-radius: 10px;
+            transform: rotate(-20deg);
+            transition: 0.5s ease-in-out;
         }
 
-        /* Torso */
-        .torso {
-            width: 15px;
-            height: 90px;
-            background-color: black;
-            position: relative;
-            top: -2px;
+        .hand:hover .finger {
+            transform: rotate(-90deg) translateY(30px);
         }
 
-        /* Arms */
-        .arms {
-            width: 80px;
-            height: 10px;
-            background-color: black;
-            position: relative;
-            top: -5px;
-        }
-
-        /* Legs */
-        .legs {
-            display: flex;
-            justify-content: space-between;
-            width: 60px;
-            position: relative;
-            top: -5px;
-        }
-
-        .leg {
-            width: 10px;
-            height: 70px;
-            background-color: black;
-        }
-
-        .left-leg {
-            transform: rotate(15deg);
-        }
-
-        .right-leg {
-            transform: rotate(-15deg);
+        .hand:hover .thumb {
+            transform: rotate(-90deg) translateY(-10px);
         }
 
     </style>
 </head>
 <body>
 
-<div class="stickman">
-    <div class="head"></div>
-    <div class="torso"></div>
-    <div class="arms"></div>
-    <div class="legs">
-        <div class="leg left-leg"></div>
-        <div class="leg right-leg"></div>
-    </div>
+<div class="hand">
+    <div class="finger"></div>
+    <div class="finger"></div>
+    <div class="finger"></div>
+    <div class="finger"></div>
+    <div class="thumb"></div>
 </div>
 
 </body>
