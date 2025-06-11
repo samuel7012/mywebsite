@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stickman Without Canvas</title>
+    <title>Perfect Stickman</title>
     <style>
         body {
             display: flex;
@@ -16,7 +16,7 @@
         .stickman {
             position: relative;
             width: 100px;
-            height: 200px;
+            height: 220px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -29,20 +29,22 @@
             border-radius: 50%;
             background-color: black;
             position: relative;
-            top: 5px;
+            top: 0;
         }
 
-        /* Body */
-        .body {
-            width: 6px;
-            height: 80px;
+        /* Torso */
+        .torso {
+            width: 15px;
+            height: 90px;
             background-color: black;
+            position: relative;
+            top: -2px;
         }
 
         /* Arms */
         .arms {
             width: 80px;
-            height: 6px;
+            height: 10px;
             background-color: black;
             position: relative;
             top: -5px;
@@ -52,13 +54,13 @@
         .legs {
             display: flex;
             justify-content: space-between;
-            width: 50px;
+            width: 60px;
             position: relative;
             top: -5px;
         }
 
         .leg {
-            width: 6px;
+            width: 10px;
             height: 70px;
             background-color: black;
         }
@@ -77,7 +79,7 @@
 
 <div class="stickman">
     <div class="head"></div>
-    <div class="body"></div>
+    <div class="torso"></div>
     <div class="arms"></div>
     <div class="legs">
         <div class="leg left-leg"></div>
