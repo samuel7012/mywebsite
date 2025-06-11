@@ -16,65 +16,17 @@
         .warrior {
             position: relative;
             width: 100px;
-            height: 200px;
+            height: 220px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-        }
-
-        /* Head */
-        .head {
-            position: absolute;
-            top: 0;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: gold;
-            box-shadow: 0 0 20px yellow;
-        }
-
-        /* Body */
-        .body {
-            position: absolute;
-            top: 50px;
-            width: 10px;
-            height: 80px;
-            background-color: yellow;
-        }
-
-        /* Arms */
-        .arms {
-            position: absolute;
-            top: 70px;
-            width: 80px;
-            height: 10px;
-            background-color: yellow;
-        }
-
-        /* Legs */
-        .leg {
-            position: absolute;
-            top: 130px;
-            width: 10px;
-            height: 70px;
-            background-color: yellow;
-        }
-
-        .left-leg {
-            transform: rotate(20deg);
-            left: -20px;
-        }
-
-        .right-leg {
-            transform: rotate(-20deg);
-            right: -20px;
         }
 
         /* Glowing Aura */
         .aura {
             position: absolute;
             width: 120px;
-            height: 220px;
+            height: 240px;
             background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 20%, transparent);
             box-shadow: 0 0 40px yellow;
             animation: glow 1.5s infinite alternate;
@@ -84,6 +36,55 @@
             from { transform: scale(1); opacity: 0.7; }
             to { transform: scale(1.2); opacity: 1; }
         }
+
+        /* Head */
+        .head {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: gold;
+            box-shadow: 0 0 20px yellow;
+        }
+
+        /* Body */
+        .body {
+            width: 10px;
+            height: 90px;
+            background-color: yellow;
+        }
+
+        /* Arms */
+        .arms {
+            width: 80px;
+            height: 10px;
+            background-color: yellow;
+            position: relative;
+            top: -10px;
+        }
+
+        /* Legs */
+        .legs {
+            display: flex;
+            justify-content: space-between;
+            width: 40px;
+            position: relative;
+            top: -10px;
+        }
+
+        .leg {
+            width: 10px;
+            height: 70px;
+            background-color: yellow;
+        }
+
+        .left-leg {
+            transform: rotate(20deg);
+        }
+
+        .right-leg {
+            transform: rotate(-20deg);
+        }
+
     </style>
 </head>
 <body>
@@ -93,8 +94,10 @@
     <div class="head"></div>
     <div class="body"></div>
     <div class="arms"></div>
-    <div class="leg left-leg"></div>
-    <div class="leg right-leg"></div>
+    <div class="legs">
+        <div class="leg left-leg"></div>
+        <div class="leg right-leg"></div>
+    </div>
 </div>
 
 </body>
