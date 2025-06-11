@@ -16,7 +16,7 @@
         .warrior {
             position: relative;
             width: 100px;
-            height: 220px;
+            height: 200px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -26,7 +26,7 @@
         .aura {
             position: absolute;
             width: 120px;
-            height: 240px;
+            height: 220px;
             background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 20%, transparent);
             box-shadow: 0 0 40px yellow;
             animation: glow 1.5s infinite alternate;
@@ -44,12 +44,14 @@
             border-radius: 50%;
             background-color: gold;
             box-shadow: 0 0 20px yellow;
+            position: relative;
+            top: -5px; /* Shift head closer to body */
         }
 
         /* Body */
         .body {
             width: 10px;
-            height: 70px;
+            height: 70px; /* Reduced height */
             background-color: yellow;
         }
 
@@ -59,7 +61,7 @@
             height: 10px;
             background-color: yellow;
             position: relative;
-            top: -10px;
+            top: -5px;
         }
 
         /* Legs */
@@ -68,7 +70,7 @@
             justify-content: space-between;
             width: 40px;
             position: relative;
-            top: -10px;
+            top: -5px;
         }
 
         .leg {
