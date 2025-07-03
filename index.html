@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>3D Stickman Game - Mouse Camera Always On</title>
+  <title>3D Stickman Game - Walk & Run Animation</title>
   <style>
     body { margin: 0; overflow: hidden; }
     #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -11,6 +11,7 @@
 <body>
   <div id="info">
     Use <b>arrow keys</b> or <b>WASD</b> to move the stickman.<br>
+    Hold <b>Shift</b> to run<br>
     Press <b>1</b>: Third-person &nbsp; <b>2</b>: First-person &nbsp; <b>3</b>: Top-down view<br>
     <b>Move mouse</b> to rotate camera, <b>Scroll</b> to zoom (except first-person)
   </div>
@@ -84,65 +85,99 @@
     hips.rotation.z = Math.PI/2;
     stickman.add(hips);
 
-    // Left upper arm (pointing straight down)
+    // --- Arms and Legs as groups for animation ---
+    // LEFT ARM
+    const leftArm = new THREE.Group();
+    leftArm.position.set(-0.2, 1.8, 0);
+    stickman.add(leftArm);
+
     const upperArmL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
       stickMat
     );
-    upperArmL.position.set(-0.2, 1.8, 0);
-    // No rotation, points down from shoulder
-    stickman.add(upperArmL);
+    upperArmL.position.y = -0.25;
+    leftArm.add(upperArmL);
 
-    // Right upper arm (pointing straight down)
-    const upperArmR = upperArmL.clone();
-    upperArmR.position.x = 0.2;
-    stickman.add(upperArmR);
-
-    // Left lower arm (straight down, attached to upper arm/hand)
+    const leftForearm = new THREE.Group();
+    leftForearm.position.y = -0.5;
     const lowerArmL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.045, 0.045, 0.45, 8),
       stickMat
     );
-    lowerArmL.position.set(-0.2, 1.45, 0);
-    stickman.add(lowerArmL);
+    lowerArmL.position.y = -0.225;
+    leftForearm.add(lowerArmL);
+    leftArm.add(leftForearm);
 
-    // Right lower arm (straight down)
-    const lowerArmR = lowerArmL.clone();
-    lowerArmR.position.x = 0.2;
-    stickman.add(lowerArmR);
+    // RIGHT ARM
+    const rightArm = new THREE.Group();
+    rightArm.position.set(0.2, 1.8, 0);
+    stickman.add(rightArm);
 
-    // Left upper leg (pointing straight down)
+    const upperArmR = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
+      stickMat
+    );
+    upperArmR.position.y = -0.25;
+    rightArm.add(upperArmR);
+
+    const rightForearm = new THREE.Group();
+    rightForearm.position.y = -0.5;
+    const lowerArmR = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.045, 0.045, 0.45, 8),
+      stickMat
+    );
+    lowerArmR.position.y = -0.225;
+    rightForearm.add(lowerArmR);
+    rightArm.add(rightForearm);
+
+    // LEFT LEG
+    const leftLeg = new THREE.Group();
+    leftLeg.position.set(-0.09, 1.02, 0);
+    stickman.add(leftLeg);
     const upperLegL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8),
       stickMat
     );
-    upperLegL.position.set(-0.09, 1.02, 0);
-    // No rotation
-    stickman.add(upperLegL);
+    upperLegL.position.y = -0.275;
+    leftLeg.add(upperLegL);
 
-    // Right upper leg (pointing straight down)
-    const upperLegR = upperLegL.clone();
-    upperLegR.position.x = 0.09;
-    stickman.add(upperLegR);
-
-    // Left lower leg (straight down, below upper leg)
+    const leftShin = new THREE.Group();
+    leftShin.position.y = -0.55;
     const lowerLegL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
       stickMat
     );
-    lowerLegL.position.set(-0.09, 0.67, 0);
-    stickman.add(lowerLegL);
+    lowerLegL.position.y = -0.25;
+    leftShin.add(lowerLegL);
+    leftLeg.add(leftShin);
 
-    // Right lower leg (straight down)
-    const lowerLegR = lowerLegL.clone();
-    lowerLegR.position.x = 0.09;
-    stickman.add(lowerLegR);
+    // RIGHT LEG
+    const rightLeg = new THREE.Group();
+    rightLeg.position.set(0.09, 1.02, 0);
+    stickman.add(rightLeg);
+    const upperLegR = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8),
+      stickMat
+    );
+    upperLegR.position.y = -0.275;
+    rightLeg.add(upperLegR);
+
+    const rightShin = new THREE.Group();
+    rightShin.position.y = -0.55;
+    const lowerLegR = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
+      stickMat
+    );
+    lowerLegR.position.y = -0.25;
+    rightShin.add(lowerLegR);
+    rightLeg.add(rightShin);
 
     scene.add(stickman);
 
-    // Stickman movement
+    // Animation state
     let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-    const speed = 0.07;
+    let isRunning = false;
+    let walkCycle = 0; // for gait animation
 
     window.addEventListener('keydown', function(e){
       switch(e.key) {
@@ -154,12 +189,12 @@
         case 'ArrowLeft': moveLeft = true; break;
         case 'd':
         case 'ArrowRight': moveRight = true; break;
+        case 'Shift': isRunning = true; break;
         case '1': cameraMode = 1; break;
         case '2': cameraMode = 2; break;
         case '3': cameraMode = 3; break;
       }
     });
-
     window.addEventListener('keyup', function(e){
       switch(e.key) {
         case 'w':
@@ -170,6 +205,7 @@
         case 'ArrowLeft': moveLeft = false; break;
         case 'd':
         case 'ArrowRight': moveRight = false; break;
+        case 'Shift': isRunning = false; break;
       }
     });
 
@@ -180,14 +216,10 @@
     const minPolar = 0.1;
     const maxPolar = Math.PI/2 - 0.05;
 
-    // Center of the screen at start (for normalization)
     let lastMouse = {x: window.innerWidth/2, y: window.innerHeight/2};
     let mouseInitialized = false;
-
-    // Sensitivity
     const mouseSensitivity = 0.005;
 
-    // On mouse move, update azimuth and polar
     document.addEventListener('mousemove', function(e){
       if (cameraMode === 2) return; // No orbit for first-person
       if (!mouseInitialized) {
@@ -222,12 +254,10 @@
       lastMouse.y = touch.clientY;
     });
 
-    // Reset mouse tracking when mouse leaves window
     document.addEventListener('mouseleave', function(){
       mouseInitialized = false;
     });
 
-    // Zoom (scroll wheel)
     renderer.domElement.addEventListener('wheel', function(e){
       if (cameraMode === 2) return;
       radius += e.deltaY * 0.01;
@@ -262,17 +292,73 @@
       }
     }
 
+    // Animation logic
+    function animateStickman(state) {
+      // state: "idle", "walk", "run"
+      // Arms and legs swing in opposition, arms on side (on X axis)
+      let t = walkCycle;
+      if (state === "idle") {
+        leftArm.rotation.x = 0;
+        rightArm.rotation.x = 0;
+        leftForearm.rotation.x = 0;
+        rightForearm.rotation.x = 0;
+        leftLeg.rotation.x = 0;
+        rightLeg.rotation.x = 0;
+        leftShin.rotation.x = 0;
+        rightShin.rotation.x = 0;
+      } else {
+        let freq = state === "walk" ? 5 : 10;
+        let ampArm = state === "walk" ? 0.5 : 1.1;
+        let ampLeg = state === "walk" ? 0.6 : 1.0;
+        let shinamp = state === "walk" ? 0.45 : 0.8;
+        let phase = t * freq;
+
+        leftArm.rotation.x = Math.sin(phase) * ampArm;
+        rightArm.rotation.x = Math.sin(phase + Math.PI) * ampArm;
+        leftForearm.rotation.x = 0;
+        rightForearm.rotation.x = 0;
+
+        leftLeg.rotation.x = Math.sin(phase) * ampLeg;
+        rightLeg.rotation.x = Math.sin(phase + Math.PI) * ampLeg;
+        leftShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 4)) * shinamp;
+        rightShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 4 + Math.PI)) * shinamp;
+      }
+    }
+
     // Animate
     function animate() {
       requestAnimationFrame(animate);
 
-      let dx = 0, dz = 0;
-      if(moveForward) dz -= speed;
-      if(moveBackward) dz += speed;
-      if(moveLeft) dx -= speed;
-      if(moveRight) dx += speed;
-      stickman.position.x += dx;
-      stickman.position.z += dz;
+      // Movement vector
+      let moveVec = new THREE.Vector3();
+      if(moveForward) moveVec.z -= 1;
+      if(moveBackward) moveVec.z += 1;
+      if(moveLeft) moveVec.x -= 1;
+      if(moveRight) moveVec.x += 1;
+      if(moveVec.lengthSq() > 0) moveVec.normalize();
+
+      // Face movement direction (except top-down)
+      if(cameraMode !== 3 && moveVec.lengthSq() > 0) {
+        let theta = azimuth;
+        let moveAngle = Math.atan2(moveVec.x, moveVec.z);
+        stickman.rotation.y = theta + moveAngle;
+      }
+
+      // Movement
+      let moveSpeed = isRunning ? 0.16 : 0.08;
+      if(moveVec.lengthSq() > 0) {
+        stickman.position.x += Math.sin(stickman.rotation.y) * moveVec.z * moveSpeed;
+        stickman.position.z += Math.cos(stickman.rotation.y) * moveVec.z * moveSpeed;
+        stickman.position.x += Math.cos(stickman.rotation.y) * moveVec.x * moveSpeed;
+        stickman.position.z -= Math.sin(stickman.rotation.y) * moveVec.x * moveSpeed;
+      }
+
+      // Animation state
+      let state = "idle";
+      if(moveVec.lengthSq() > 0) state = isRunning ? "run" : "walk";
+      animateStickman(state);
+      if(state === "walk" || state === "run") walkCycle += isRunning ? 0.17 : 0.08;
+      else walkCycle += 0.012;
 
       updateCamera();
       renderer.render(scene, camera);
