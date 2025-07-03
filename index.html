@@ -2,26 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>3D Stickman Game</title>
+  <title>3D Stickman Game - Mouse Camera</title>
   <style>
     body { margin: 0; overflow: hidden; }
     #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
   </style>
 </head>
 <body>
-  <div id="info">Use arrow keys or WASD to move the stickman</div>
+  <div id="info">
+    Use <b>arrow keys</b> or <b>WASD</b> to move the stickman.<br>
+    Press <b>1</b>: Third-person &nbsp; <b>2</b>: First-person &nbsp; <b>3</b>: Top-down view<br>
+    <b>Drag mouse</b> to rotate camera, <b>Scroll</b> to zoom (except first-person)
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
   <script>
     // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x222233);
 
-    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     camera.position.set(0, 4, 8);
 
+    let cameraMode = 1; // 1: third-person, 2: first-person, 3: top-down
+
     const renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
@@ -103,6 +109,10 @@
         case 'ArrowLeft': moveLeft = true; break;
         case 'd':
         case 'ArrowRight': moveRight = true; break;
+        // Perspective switching logic
+        case '1': cameraMode = 1; break;
+        case '2': cameraMode = 2; break;
+        case '3': cameraMode = 3; break;
       }
     });
 
@@ -119,9 +129,92 @@
       }
     });
 
+    // Mouse orbit controls (custom, not Three.js OrbitControls)
+    let isDragging = false;
+    let prevMouse = {x: 0, y: 0};
+    let azimuth = 0;      // Horizontal angle, radians
+    let polar = Math.PI/5; // Vertical angle (from Y axis), radians
+    let radius = 8;       // Distance from stickman
+
+    // Clamp limits for polar angle
+    const minPolar = 0.1;
+    const maxPolar = Math.PI/2 - 0.05;
+
+    renderer.domElement.addEventListener('mousedown', function(e){
+      if (cameraMode === 2) return; // No mouse orbit in first-person
+      isDragging = true;
+      prevMouse.x = e.clientX;
+      prevMouse.y = e.clientY;
+    });
+    renderer.domElement.addEventListener('mousemove', function(e){
+      if (!isDragging || cameraMode === 2) return;
+      let dx = e.clientX - prevMouse.x;
+      let dy = e.clientY - prevMouse.y;
+      azimuth -= dx * 0.01;
+      polar -= dy * 0.01;
+      polar = Math.max(minPolar, Math.min(maxPolar, polar));
+      prevMouse.x = e.clientX;
+      prevMouse.y = e.clientY;
+    });
+    window.addEventListener('mouseup', function(){ isDragging = false; });
+
+    // Touch support
+    renderer.domElement.addEventListener('touchstart', function(e){
+      if (cameraMode === 2) return;
+      isDragging = true;
+      prevMouse.x = e.touches[0].clientX;
+      prevMouse.y = e.touches[0].clientY;
+    });
+    renderer.domElement.addEventListener('touchmove', function(e){
+      if (!isDragging || cameraMode === 2) return;
+      let dx = e.touches[0].clientX - prevMouse.x;
+      let dy = e.touches[0].clientY - prevMouse.y;
+      azimuth -= dx * 0.01;
+      polar -= dy * 0.01;
+      polar = Math.max(minPolar, Math.min(maxPolar, polar));
+      prevMouse.x = e.touches[0].clientX;
+      prevMouse.y = e.touches[0].clientY;
+    });
+    window.addEventListener('touchend', function(){ isDragging = false; });
+
+    // Zoom (scroll wheel)
+    renderer.domElement.addEventListener('wheel', function(e){
+      if (cameraMode === 2) return;
+      radius += e.deltaY * 0.01;
+      radius = Math.max(2, Math.min(30, radius));
+    });
+
+    function updateCamera() {
+      if (cameraMode === 1) {
+        // Third-person (orbit)
+        let camX = stickman.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
+        let camY = stickman.position.y + radius * Math.cos(polar) + 1;
+        let camZ = stickman.position.z + radius * Math.sin(polar) * Math.cos(azimuth);
+        camera.position.set(camX, camY, camZ);
+        camera.lookAt(stickman.position.x, 1, stickman.position.z);
+      } else if (cameraMode === 2) {
+        // First-person (at head)
+        camera.position.x = stickman.position.x;
+        camera.position.y = stickman.position.y + 1.9;
+        camera.position.z = stickman.position.z + 0.2;
+        camera.lookAt(
+          stickman.position.x,
+          stickman.position.y + 1.9,
+          stickman.position.z + 2
+        );
+      } else if (cameraMode === 3) {
+        // Top-down (orbit XZ)
+        let camX = stickman.position.x + radius * Math.sin(azimuth);
+        let camY = stickman.position.y + 15;
+        let camZ = stickman.position.z + radius * Math.cos(azimuth);
+        camera.position.set(camX, camY, camZ);
+        camera.lookAt(stickman.position.x, stickman.position.y, stickman.position.z);
+      }
+    }
+
     // Animate
     function animate() {
-      requestAnimationFrame( animate );
+      requestAnimationFrame(animate);
 
       let dx = 0, dz = 0;
       if(moveForward) dz -= speed;
@@ -131,12 +224,8 @@
       stickman.position.x += dx;
       stickman.position.z += dz;
 
-      // Keep camera behind stickman
-      camera.position.x = stickman.position.x;
-      camera.position.z = stickman.position.z + 8;
-      camera.lookAt(stickman.position.x, 1, stickman.position.z);
-
-      renderer.render( scene, camera );
+      updateCamera();
+      renderer.render(scene, camera);
     }
     animate();
 
