@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>3D Stickman Game - Arms Slightly Down</title>
+  <title>3D Stickman Game - Arms Slightly Down (Fixed)</title>
   <style>
     body { margin: 0; overflow: hidden; }
     #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -84,43 +84,56 @@
     hips.rotation.z = Math.PI/2;
     stickman.add(hips);
 
-    // --- Arms: slightly down (about 30 deg from vertical) ---
-    // Left upper arm
+    // ---- Arms: slightly down, proper attachment ----
+
+    // Arm parameters
+    const upperArmLength = 0.5;
+    const lowerArmLength = 0.45;
+    const armOffsetX = 0.2; // horizontal from body
+    const armShoulderY = 1.98; // just below shoulders
+    const armAngle = Math.PI/6; // 30deg, slightly down from horizontal
+
+    // LEFT upper arm
     const upperArmL = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
+      new THREE.CylinderGeometry(0.05, 0.05, upperArmLength, 8),
       stickMat
     );
-    upperArmL.position.set(-0.26, 1.82, 0);
-    upperArmL.rotation.z = Math.PI / 6; // 30 deg downward from shoulder
+    // Pivot at shoulder, so move half-length along local Y
+    upperArmL.position.set(
+      -armOffsetX - (upperArmLength/2)*Math.sin(armAngle),
+      armShoulderY - (upperArmLength/2)*Math.cos(armAngle),
+      0
+    );
+    upperArmL.rotation.z = armAngle;
     stickman.add(upperArmL);
 
-    // Right upper arm
+    // RIGHT upper arm
     const upperArmR = upperArmL.clone();
-    upperArmR.position.x = 0.26;
-    upperArmR.rotation.z = -Math.PI / 6; // 30 deg downward from shoulder
+    upperArmR.position.x = armOffsetX + (upperArmLength/2)*Math.sin(armAngle);
+    upperArmR.rotation.z = -armAngle;
     stickman.add(upperArmR);
 
-    // Left lower arm (straight down from upper arm end)
+    // LEFT lower arm
     const lowerArmL = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.045, 0.045, 0.45, 8),
+      new THREE.CylinderGeometry(0.045, 0.045, lowerArmLength, 8),
       stickMat
     );
     // Start at end of upper arm
     lowerArmL.position.set(
-      -0.42, // a bit farther out
-      1.53,  // lower than upper arm
+      -armOffsetX - upperArmLength*Math.sin(armAngle) - (lowerArmLength/2)*Math.sin(armAngle),
+      armShoulderY - upperArmLength*Math.cos(armAngle) - (lowerArmLength/2)*Math.cos(armAngle),
       0
     );
-    lowerArmL.rotation.z = Math.PI / 6;
+    lowerArmL.rotation.z = armAngle;
     stickman.add(lowerArmL);
 
-    // Right lower arm
+    // RIGHT lower arm
     const lowerArmR = lowerArmL.clone();
-    lowerArmR.position.x = 0.42;
-    lowerArmR.rotation.z = -Math.PI / 6;
+    lowerArmR.position.x = armOffsetX + upperArmLength*Math.sin(armAngle) + (lowerArmLength/2)*Math.sin(armAngle);
+    lowerArmR.rotation.z = -armAngle;
     stickman.add(lowerArmR);
 
-    // Legs (pointing straight down)
+    // --- Legs (pointing straight down) ---
     const upperLegL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8),
       stickMat
