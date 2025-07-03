@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>3D Stickman Game - On</title>
+  <title>3D Stickman Game - Mouse Camera Always On</title>
   <style>
     body { margin: 0; overflow: hidden; }
     #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -84,64 +84,58 @@
     hips.rotation.z = Math.PI/2;
     stickman.add(hips);
 
-    // Left upper arm
+    // Left upper arm (pointing straight down)
     const upperArmL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
       stickMat
     );
-    upperArmL.position.set(-0.32, 1.88, 0);
-    upperArmL.rotation.z = Math.PI/4;
+    upperArmL.position.set(-0.2, 1.8, 0);
+    // No rotation, points down from shoulder
     stickman.add(upperArmL);
 
-    // Right upper arm
+    // Right upper arm (pointing straight down)
     const upperArmR = upperArmL.clone();
-    upperArmR.position.x = 0.32;
-    upperArmR.rotation.z = -Math.PI/4;
+    upperArmR.position.x = 0.2;
     stickman.add(upperArmR);
 
-    // Left lower arm
+    // Left lower arm (straight down, attached to upper arm/hand)
     const lowerArmL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.045, 0.045, 0.45, 8),
       stickMat
     );
-    lowerArmL.position.set(-0.6, 1.6, 0);
-    lowerArmL.rotation.z = Math.PI/4;
+    lowerArmL.position.set(-0.2, 1.45, 0);
     stickman.add(lowerArmL);
 
-    // Right lower arm
+    // Right lower arm (straight down)
     const lowerArmR = lowerArmL.clone();
-    lowerArmR.position.x = 0.6;
-    lowerArmR.rotation.z = -Math.PI/4;
+    lowerArmR.position.x = 0.2;
     stickman.add(lowerArmR);
 
-    // Left upper leg
+    // Left upper leg (pointing straight down)
     const upperLegL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8),
       stickMat
     );
-    upperLegL.position.set(-0.13, 1.0, 0);
-    upperLegL.rotation.z = Math.PI/16;
+    upperLegL.position.set(-0.09, 1.02, 0);
+    // No rotation
     stickman.add(upperLegL);
 
-    // Right upper leg
+    // Right upper leg (pointing straight down)
     const upperLegR = upperLegL.clone();
-    upperLegR.position.x = 0.13;
-    upperLegR.rotation.z = -Math.PI/16;
+    upperLegR.position.x = 0.09;
     stickman.add(upperLegR);
 
-    // Left lower leg
+    // Left lower leg (straight down, below upper leg)
     const lowerLegL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
       stickMat
     );
-    lowerLegL.position.set(-0.19, 0.68, 0);
-    lowerLegL.rotation.z = -Math.PI/24;
+    lowerLegL.position.set(-0.09, 0.67, 0);
     stickman.add(lowerLegL);
 
-    // Right lower leg
+    // Right lower leg (straight down)
     const lowerLegR = lowerLegL.clone();
-    lowerLegR.position.x = 0.19;
-    lowerLegR.rotation.z = Math.PI/24;
+    lowerLegR.position.x = 0.09;
     stickman.add(lowerLegR);
 
     scene.add(stickman);
@@ -179,7 +173,7 @@
       }
     });
 
-    // Mouse orbit controls (always enabled, not just on drag)
+    // Mouse orbit controls (always enabled)
     let azimuth = 0;         // Horizontal angle, radians
     let polar = Math.PI/5;   // Vertical angle (from Y axis), radians
     let radius = 8;          // Distance from stickman
