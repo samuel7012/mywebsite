@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>3D Stickman Game - Arms Slightly Down (Fixed)</title>
+  <title>3D Stickman Game - Mouse Camera Always On</title>
   <style>
     body { margin: 0; overflow: hidden; }
     #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -84,76 +84,64 @@
     hips.rotation.z = Math.PI/2;
     stickman.add(hips);
 
-    // ---- Arms: slightly down, proper attachment ----
-
-    // Arm parameters
-    const upperArmLength = 0.5;
-    const lowerArmLength = 0.45;
-    const armOffsetX = 0.2; // horizontal from body
-    const armShoulderY = 1.98; // just below shoulders
-    const armAngle = Math.PI/6; // 30deg, slightly down from horizontal
-
-    // LEFT upper arm
+    // Left upper arm
     const upperArmL = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.05, 0.05, upperArmLength, 8),
+      new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
       stickMat
     );
-    // Pivot at shoulder, so move half-length along local Y
-    upperArmL.position.set(
-      -armOffsetX - (upperArmLength/2)*Math.sin(armAngle),
-      armShoulderY - (upperArmLength/2)*Math.cos(armAngle),
-      0
-    );
-    upperArmL.rotation.z = armAngle;
+    upperArmL.position.set(-0.32, 1.88, 0);
+    upperArmL.rotation.z = Math.PI/4;
     stickman.add(upperArmL);
 
-    // RIGHT upper arm
+    // Right upper arm
     const upperArmR = upperArmL.clone();
-    upperArmR.position.x = armOffsetX + (upperArmLength/2)*Math.sin(armAngle);
-    upperArmR.rotation.z = -armAngle;
+    upperArmR.position.x = 0.32;
+    upperArmR.rotation.z = -Math.PI/4;
     stickman.add(upperArmR);
 
-    // LEFT lower arm
+    // Left lower arm
     const lowerArmL = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.045, 0.045, lowerArmLength, 8),
+      new THREE.CylinderGeometry(0.045, 0.045, 0.45, 8),
       stickMat
     );
-    // Start at end of upper arm
-    lowerArmL.position.set(
-      -armOffsetX - upperArmLength*Math.sin(armAngle) - (lowerArmLength/2)*Math.sin(armAngle),
-      armShoulderY - upperArmLength*Math.cos(armAngle) - (lowerArmLength/2)*Math.cos(armAngle),
-      0
-    );
-    lowerArmL.rotation.z = armAngle;
+    lowerArmL.position.set(-0.6, 1.6, 0);
+    lowerArmL.rotation.z = Math.PI/4;
     stickman.add(lowerArmL);
 
-    // RIGHT lower arm
+    // Right lower arm
     const lowerArmR = lowerArmL.clone();
-    lowerArmR.position.x = armOffsetX + upperArmLength*Math.sin(armAngle) + (lowerArmLength/2)*Math.sin(armAngle);
-    lowerArmR.rotation.z = -armAngle;
+    lowerArmR.position.x = 0.6;
+    lowerArmR.rotation.z = -Math.PI/4;
     stickman.add(lowerArmR);
 
-    // --- Legs (pointing straight down) ---
+    // Left upper leg
     const upperLegL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8),
       stickMat
     );
-    upperLegL.position.set(-0.09, 1.02, 0);
+    upperLegL.position.set(-0.13, 1.0, 0);
+    upperLegL.rotation.z = Math.PI/16;
     stickman.add(upperLegL);
 
+    // Right upper leg
     const upperLegR = upperLegL.clone();
-    upperLegR.position.x = 0.09;
+    upperLegR.position.x = 0.13;
+    upperLegR.rotation.z = -Math.PI/16;
     stickman.add(upperLegR);
 
+    // Left lower leg
     const lowerLegL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
       stickMat
     );
-    lowerLegL.position.set(-0.09, 0.67, 0);
+    lowerLegL.position.set(-0.19, 0.68, 0);
+    lowerLegL.rotation.z = -Math.PI/24;
     stickman.add(lowerLegL);
 
+    // Right lower leg
     const lowerLegR = lowerLegL.clone();
-    lowerLegR.position.x = 0.09;
+    lowerLegR.position.x = 0.19;
+    lowerLegR.rotation.z = Math.PI/24;
     stickman.add(lowerLegR);
 
     scene.add(stickman);
@@ -191,7 +179,7 @@
       }
     });
 
-    // Mouse orbit controls (always enabled)
+    // Mouse orbit controls (always enabled, not just on drag)
     let azimuth = 0;         // Horizontal angle, radians
     let polar = Math.PI/5;   // Vertical angle (from Y axis), radians
     let radius = 8;          // Distance from stickman
