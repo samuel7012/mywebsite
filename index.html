@@ -51,14 +51,6 @@
     const stickMat = new THREE.MeshStandardMaterial({color: 0x222222});
     const headMat = new THREE.MeshStandardMaterial({color: 0xffffff});
 
-    // Head
-    const head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.25, 32, 32),
-      headMat
-    );
-    head.position.y = 2.2;
-    stickman.add(head);
-
     // Body (spine)
     const body = new THREE.Mesh(
       new THREE.CylinderGeometry(0.07, 0.07, 0.8, 12),
@@ -67,29 +59,37 @@
     body.position.y = 1.7;
     stickman.add(body);
 
-    // Shoulders
+    // Shoulders (the root for both arms)
     const shoulders = new THREE.Mesh(
       new THREE.CylinderGeometry(0.07, 0.07, 0.4, 12),
       stickMat
     );
-    shoulders.position.y = 2.05;
+    shoulders.position.y = 2.1;
     shoulders.rotation.z = Math.PI/2;
-    stickman.add(shoulders);
+    body.add(shoulders);
 
-    // Hips
+    // Head (connected to top of body)
+    const head = new THREE.Mesh(
+      new THREE.SphereGeometry(0.25, 32, 32),
+      headMat
+    );
+    head.position.y = 0.65; // above body (body height/2 + head radius)
+    body.add(head);
+
+    // Hips (the root for both legs)
     const hips = new THREE.Mesh(
       new THREE.CylinderGeometry(0.07, 0.07, 0.3, 12),
       stickMat
     );
-    hips.position.y = 1.3;
+    hips.position.y = -0.4; // below body (body height/2 + hips height/2)
     hips.rotation.z = Math.PI/2;
-    stickman.add(hips);
+    body.add(hips);
 
     // --- Arms and Legs as groups for animation ---
-    // LEFT ARM
+    // LEFT ARM (shoulders as parent)
     const leftArm = new THREE.Group();
-    leftArm.position.set(-0.2, 1.8, 0);
-    stickman.add(leftArm);
+    leftArm.position.set(-0.2, 0.0, 0); // relative to shoulders
+    shoulders.add(leftArm);
 
     const upperArmL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
@@ -108,10 +108,10 @@
     leftForearm.add(lowerArmL);
     leftArm.add(leftForearm);
 
-    // RIGHT ARM
+    // RIGHT ARM (shoulders as parent)
     const rightArm = new THREE.Group();
-    rightArm.position.set(0.2, 1.8, 0);
-    stickman.add(rightArm);
+    rightArm.position.set(0.2, 0.0, 0); // relative to shoulders
+    shoulders.add(rightArm);
 
     const upperArmR = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
@@ -130,10 +130,11 @@
     rightForearm.add(lowerArmR);
     rightArm.add(rightForearm);
 
-    // LEFT LEG
+    // LEFT LEG (hips as parent)
     const leftLeg = new THREE.Group();
-    leftLeg.position.set(-0.09, 1.02, 0);
-    stickman.add(leftLeg);
+    leftLeg.position.set(-0.09, -0.15, 0); // relative to hips
+    hips.add(leftLeg);
+
     const upperLegL = new THREE.Mesh(
       new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8),
       stickMat
@@ -151,10 +152,11 @@
     leftShin.add(lowerLegL);
     leftLeg.add(leftShin);
 
-    // RIGHT LEG
+    // RIGHT LEG (hips as parent)
     const rightLeg = new THREE.Group();
-    rightLeg.position.set(0.09, 1.02, 0);
-    stickman.add(rightLeg);
+    rightLeg.position.set(0.09, -0.15, 0); // relative to hips
+    hips.add(rightLeg);
+
     const upperLegR = new THREE.Mesh(
       new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8),
       stickMat
@@ -263,6 +265,8 @@
     });
 
     function updateCamera() {
+      // Stickman vertical reference is at body.position.y = 1.7
+      stickman.position.y = Math.max(stickman.position.y, 0);
       if (cameraMode === 1) {
         // Third-person (orbit)
         let camX = stickman.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
@@ -273,11 +277,11 @@
       } else if (cameraMode === 2) {
         // First-person (at head)
         camera.position.x = stickman.position.x;
-        camera.position.y = stickman.position.y + 2.2;
+        camera.position.y = stickman.position.y + 2.5;
         camera.position.z = stickman.position.z + 0.2;
         camera.lookAt(
           stickman.position.x,
-          stickman.position.y + 2.2,
+          stickman.position.y + 2.5,
           stickman.position.z + 2
         );
       } else if (cameraMode === 3) {
