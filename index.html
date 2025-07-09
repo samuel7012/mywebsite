@@ -361,6 +361,7 @@
     function animateStickman(state) {
       // state: "idle", "walk", "run", "jump"
       let t = walkCycle;
+
       if (state === "idle") {
         leftArm.rotation.x = 0;
         rightArm.rotation.x = 0;
@@ -370,11 +371,12 @@
         rightLeg.rotation.x = 0;
         leftShin.rotation.x = 0;
         rightShin.rotation.x = 0;
-      } else if (state === "walk" || state === "run") {
-        let freq = state === "walk" ? 5 : 10;
-        let ampArm = state === "walk" ? 0.65 : 1.18;
-        let ampLeg = state === "walk" ? 0.7 : 1.08;
-        let shinamp = state === "walk" ? 0.47 : 0.9;
+      } else if (state === "walk") {
+        // Walk: relaxed, natural swing
+        let freq = 5;
+        let ampArm = 0.65;
+        let ampLeg = 0.7;
+        let shinamp = 0.47;
         let phase = t * freq;
 
         leftArm.rotation.x = Math.sin(phase) * ampArm;
@@ -386,6 +388,25 @@
         rightLeg.rotation.x = Math.sin(phase + Math.PI) * ampLeg;
         leftShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 4)) * shinamp;
         rightShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 4 + Math.PI)) * shinamp;
+      } else if (state === "run") {
+        // RUN: powerful, high knee, arms bent, more forward lean & arm bend
+        let freq = 9.5;
+        let ampArm = 1.6;
+        let ampLeg = 1.8;
+        let shinamp = 1.35;
+        let phase = t * freq;
+
+        // Arms: more bent, strong swing
+        leftArm.rotation.x = Math.sin(phase) * ampArm * 0.6;
+        rightArm.rotation.x = Math.sin(phase + Math.PI) * ampArm * 0.6;
+        leftForearm.rotation.x = Math.abs(Math.sin(phase)) * 0.9 - 1.1; // arms bent in front
+        rightForearm.rotation.x = Math.abs(Math.sin(phase + Math.PI)) * 0.9 - 1.1;
+
+        // Legs: high knee, strong kickback
+        leftLeg.rotation.x = Math.sin(phase) * ampLeg;
+        rightLeg.rotation.x = Math.sin(phase + Math.PI) * ampLeg;
+        leftShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 6)) * shinamp + 0.13 * Math.abs(Math.sin(phase)); // more extension
+        rightShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 6 + Math.PI)) * shinamp + 0.13 * Math.abs(Math.sin(phase + Math.PI));
       } else if (state === "jump") {
         leftArm.rotation.x = -1.15;
         rightArm.rotation.x = -1.15;
