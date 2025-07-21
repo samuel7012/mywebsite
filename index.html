@@ -45,39 +45,46 @@
     scene.add(ground);
 
     // Wall properties
-const wallHeight = 4;
-const wallThickness = 1;
-const wallLength = 40;
-const wallColor = 0x444444;
+    const wallHeight = 4;
+    const wallThickness = 1;
+    const wallLength = 40;
+    const wallColor = 0x444444;
 
-// Wall material (same as ground)
-const wallMaterial = new THREE.MeshStandardMaterial({ color: wallColor });
+    // Wall material (same as ground)
+    const wallMaterial = new THREE.MeshStandardMaterial({ color: wallColor });
 
-// Front wall
-const frontWallGeometry = new THREE.BoxGeometry(wallLength, wallHeight, wallThickness);
-const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
-frontWall.position.set(0, wallHeight / 2, -wallLength / 2);
-scene.add(frontWall);
+    // Front wall
+    const frontWallGeometry = new THREE.BoxGeometry(wallLength, wallHeight, wallThickness);
+    const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
+    frontWall.position.set(0, wallHeight / 2, -wallLength / 2);
+    scene.add(frontWall);
 
-// Back wall
-const backWallGeometry = new THREE.BoxGeometry(wallLength, wallHeight, wallThickness);
-const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
-backWall.position.set(0, wallHeight / 2, wallLength / 2);
-scene.add(backWall);
+    // Back wall
+    const backWallGeometry = new THREE.BoxGeometry(wallLength, wallHeight, wallThickness);
+    const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+    backWall.position.set(0, wallHeight / 2, wallLength / 2);
+    scene.add(backWall);
 
-// Left wall
-const leftWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, wallLength);
-const leftWall = new THREE.Mesh(leftWallGeometry, wallMaterial);
-leftWall.position.set(-wallLength / 2, wallHeight / 2, 0);
-scene.add(leftWall);
+    // Left wall
+    const leftWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, wallLength);
+    const leftWall = new THREE.Mesh(leftWallGeometry, wallMaterial);
+    leftWall.position.set(-wallLength / 2, wallHeight / 2, 0);
+    scene.add(leftWall);
 
-// Right wall
-const rightWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, wallLength);
-const rightWall = new THREE.Mesh(rightWallGeometry, wallMaterial);
-rightWall.position.set(wallLength / 2, wallHeight / 2, 0);
-scene.add(rightWall);
+    // Right wall
+    const rightWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, wallLength);
+    const rightWall = new THREE.Mesh(rightWallGeometry, wallMaterial);
+    rightWall.position.set(wallLength / 2, wallHeight / 2, 0);
+    scene.add(rightWall);
 
-    
+    // Store wall bounds for collision detection
+    const bounds = {
+      minX: -wallLength/2 + wallThickness/2 + 0.18, // 0.18 is half stickman width
+      maxX: wallLength/2 - wallThickness/2 - 0.18,
+      minZ: -wallLength/2 + wallThickness/2 + 0.18,
+      maxZ: wallLength/2 - wallThickness/2 - 0.18
+    };
+
     // Stickman group (perfect stickman proportions and joints)
     const stickman = new THREE.Group();
 
@@ -481,8 +488,18 @@ scene.add(rightWall);
         dz *= runSpeed / walkSpeed;
       }
 
-      stickman.position.x += dx;
-      stickman.position.z += dz;
+      // Predict next position for collision
+      let nextX = stickman.position.x + dx;
+      let nextZ = stickman.position.z + dz;
+
+      // Clamp to wall bounds (prevent going through)
+      if(nextX < bounds.minX) nextX = bounds.minX;
+      if(nextX > bounds.maxX) nextX = bounds.maxX;
+      if(nextZ < bounds.minZ) nextZ = bounds.minZ;
+      if(nextZ > bounds.maxZ) nextZ = bounds.maxZ;
+
+      stickman.position.x = nextX;
+      stickman.position.z = nextZ;
 
       // Jumping/Gravity
       if(isJumping || !isGrounded) {
