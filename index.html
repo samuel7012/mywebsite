@@ -44,6 +44,40 @@
     ground.rotation.x = -Math.PI/2;
     scene.add(ground);
 
+    // Wall properties
+const wallHeight = 4;
+const wallThickness = 1;
+const wallLength = 40;
+const wallColor = 0x444444;
+
+// Wall material (same as ground)
+const wallMaterial = new THREE.MeshStandardMaterial({ color: wallColor });
+
+// Front wall
+const frontWallGeometry = new THREE.BoxGeometry(wallLength, wallHeight, wallThickness);
+const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
+frontWall.position.set(0, wallHeight / 2, -wallLength / 2);
+scene.add(frontWall);
+
+// Back wall
+const backWallGeometry = new THREE.BoxGeometry(wallLength, wallHeight, wallThickness);
+const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+backWall.position.set(0, wallHeight / 2, wallLength / 2);
+scene.add(backWall);
+
+// Left wall
+const leftWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, wallLength);
+const leftWall = new THREE.Mesh(leftWallGeometry, wallMaterial);
+leftWall.position.set(-wallLength / 2, wallHeight / 2, 0);
+scene.add(leftWall);
+
+// Right wall
+const rightWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, wallLength);
+const rightWall = new THREE.Mesh(rightWallGeometry, wallMaterial);
+rightWall.position.set(wallLength / 2, wallHeight / 2, 0);
+scene.add(rightWall);
+
+    
     // Stickman group (perfect stickman proportions and joints)
     const stickman = new THREE.Group();
 
