@@ -82,14 +82,6 @@
     rightWall.position.set(wallLength / 2, wallHeight / 2, 0);
     scene.add(rightWall);
 
-    // ROOF (add this after the walls)
-    const roofThickness = 0.7; // You can adjust the thickness
-    const roofGeometry = new THREE.BoxGeometry(wallLength, roofThickness, wallLength);
-    const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x666666, opacity: 0.94, transparent: true });
-    const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-    roof.position.set(0, wallHeight + roofThickness / 2, 0); // Position on top of the walls
-    scene.add(roof);
-
     // Stickman group (perfect stickman proportions and joints)
     const stickman = new THREE.Group();
 
