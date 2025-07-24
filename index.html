@@ -418,28 +418,35 @@ function animate() {
 requestAnimationFrame(animate);
 
 // Camera-relative movement
-let dx = 0, dz = 0;
-if (moveForward) {
-dx += Math.sin(azimuth) * walkSpeed;
-dz += Math.cos(azimuth) * walkSpeed;
-}
-if (moveBackward) {
-dx -= Math.sin(azimuth) * walkSpeed;
-dz -= Math.cos(azimuth) * walkSpeed;
-}
-if (moveLeft) {
-dx += Math.sin(azimuth - Math.PI/2) * walkSpeed;
-dz += Math.cos(azimuth - Math.PI/2) * walkSpeed;
-}
-if (moveRight) {
-dx += Math.sin(azimuth + Math.PI/2) * walkSpeed;
-dz += Math.cos(azimuth + Math.PI/2) * walkSpeed;
+if (moveForward || moveBackward || moveLeft || moveRight) {
+  let dx = 0, dz = 0;
+
+  if (moveForward) {
+    dx += Math.sin(azimuth) * walkSpeed;
+    dz += Math.cos(azimuth) * walkSpeed;
+  }
+  if (moveBackward) {
+    dx -= Math.sin(azimuth) * walkSpeed;
+    dz -= Math.cos(azimuth) * walkSpeed;
+  }
+  if (moveLeft) {
+    dx += Math.sin(azimuth - Math.PI/2) * walkSpeed;
+    dz += Math.cos(azimuth - Math.PI/2) * walkSpeed;
+  }
+  if (moveRight) {
+    dx += Math.sin(azimuth + Math.PI/2) * walkSpeed;
+    dz += Math.cos(azimuth + Math.PI/2) * walkSpeed;
+  }
+
+  if (isRunning) {
+    dx *= runSpeed / walkSpeed;
+    dz *= runSpeed / walkSpeed;
+  }
+
+  stickman.position.x += dx;
+  stickman.position.z += dz;
 }
 
-if ((moveForward || moveBackward || moveLeft || moveRight) && isRunning) {
-dx *= runSpeed / walkSpeed;
-dz *= runSpeed / walkSpeed;
-}
 
 stickman.position.x += dx;
 stickman.position.z += dz;
