@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>I SEE U D###N HEHE</title>
+  <title>HI</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -245,7 +245,7 @@ rightShin.add(footR);
 
 rightLeg.add(rightShin);
 
-scene.add(stickman); 
+scene.add(stickman);
 
 // Movement state
 let moveBackward = false, moveForward = false, moveLeft = false, moveRight = false;
@@ -259,35 +259,42 @@ const jumpStrength = 0.24;
 const gravity = 0.012;
 let walkCycle = 0; // for gait animation
 
-window.addEventListener('keydown', function(e) {
-  switch(e.key) {
-    case 'w': moveBackward = true; break;
-    case 's': moveForward = true; break;
-    case 'a': moveLeft = true; break;
-    case 'd': moveRight = true; break;
-    case 'Shift': isRunning = true; break;
-    case ' ': 
-      if (isGrounded && !isJumping) {
-        isJumping = true;
-        velocityY = jumpStrength;
-      }
-      break;
-    case '1': cameraMode = 1; break;
-    case '2': cameraMode = 2; break;
-    case '3': cameraMode = 3; break;
-  }
+window.addEventListener('keydown', function(e){
+switch(e.key) {
+case 'w': moveBackward = true; break;
+case 's': moveForward = true; break;
+case 'a': moveLeft = true; break;
+case 'd': moveRight = true; break;
+case 'ArrowUp': moveForward = true; break;
+case 'ArrowDown': moveBackward = true; break;
+case 'ArrowLeft': moveLeft = true; break;
+case 'ArrowRight': moveRight = true; break;
+case 'Shift': isRunning = true; break;
+case ' ': 
+if (isGrounded && !isJumping) {
+isJumping = true;
+velocityY = jumpStrength;
+}
+break;
+case '1': cameraMode = 1; break;
+case '2': cameraMode = 2; break;
+case '3': cameraMode = 3; break;
+}
 });
 
-window.addEventListener('keyup', function(e) {
-  switch(e.key) {
-    case 'w': moveBackward = false; break;
-    case 's': moveForward = false; break;
-    case 'a': moveLeft = false; break;
-    case 'd': moveRight = false; break;
-    case 'Shift': isRunning = false; break;
-  }
+window.addEventListener('keyup', function(e){
+switch(e.key) {
+case 'w': moveBackward = false; break;
+case 's': moveForward = false; break;
+case 'a': moveLeft = false; break;
+case 'd': moveRight = false; break;
+case 'ArrowUp': moveForward = false; break;
+case 'ArrowDown': moveBackward = false; break;
+case 'ArrowLeft': moveLeft = false; break;
+case 'ArrowRight': moveRight = false; break;
+case 'Shift': isRunning = false; break;
+}
 });
-
 
 // Mouse orbit controls (always enabled)
 let azimuth = 0;
@@ -418,35 +425,28 @@ function animate() {
 requestAnimationFrame(animate);
 
 // Camera-relative movement
-if (moveForward || moveBackward || moveLeft || moveRight) {
-  let dx = 0, dz = 0;
-
-  if (moveForward) {
-    dx += Math.sin(azimuth) * walkSpeed;
-    dz += Math.cos(azimuth) * walkSpeed;
-  }
-  if (moveBackward) {
-    dx -= Math.sin(azimuth) * walkSpeed;
-    dz -= Math.cos(azimuth) * walkSpeed;
-  }
-  if (moveLeft) {
-    dx += Math.sin(azimuth - Math.PI/2) * walkSpeed;
-    dz += Math.cos(azimuth - Math.PI/2) * walkSpeed;
-  }
-  if (moveRight) {
-    dx += Math.sin(azimuth + Math.PI/2) * walkSpeed;
-    dz += Math.cos(azimuth + Math.PI/2) * walkSpeed;
-  }
-
-  if (isRunning) {
-    dx *= runSpeed / walkSpeed;
-    dz *= runSpeed / walkSpeed;
-  }
-
-  stickman.position.x += dx;
-  stickman.position.z += dz;
+let dx = 0, dz = 0;
+if (moveForward) {
+dx += Math.sin(azimuth) * walkSpeed;
+dz += Math.cos(azimuth) * walkSpeed;
+}
+if (moveBackward) {
+dx -= Math.sin(azimuth) * walkSpeed;
+dz -= Math.cos(azimuth) * walkSpeed;
+}
+if (moveLeft) {
+dx += Math.sin(azimuth - Math.PI/2) * walkSpeed;
+dz += Math.cos(azimuth - Math.PI/2) * walkSpeed;
+}
+if (moveRight) {
+dx += Math.sin(azimuth + Math.PI/2) * walkSpeed;
+dz += Math.cos(azimuth + Math.PI/2) * walkSpeed;
 }
 
+if ((moveForward || moveBackward || moveLeft || moveRight) && isRunning) {
+dx *= runSpeed / walkSpeed;
+dz *= runSpeed / walkSpeed;
+}
 
 stickman.position.x += dx;
 stickman.position.z += dz;
