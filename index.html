@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>pleseeee</title>
+  <title>BRO....</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -422,61 +422,35 @@ rightShin.rotation.x = 0.8;
 
 // Animate
 function animate() {
-  requestAnimationFrame(animate);
+requestAnimationFrame(animate);
 
-  let dx = 0, dz = 0;
-
-  // Camera-relative movement
-  if (moveForward) {
-    dx += Math.sin(azimuth) * walkSpeed;
-    dz += Math.cos(azimuth) * walkSpeed;
-  }
-  if (moveBackward) {
-    dx -= Math.sin(azimuth) * walkSpeed;
-    dz -= Math.cos(azimuth) * walkSpeed;
-  }
-  if (moveLeft) {
-    dx += Math.sin(azimuth - Math.PI / 2) * walkSpeed;
-    dz += Math.cos(azimuth - Math.PI / 2) * walkSpeed;
-  }
-  if (moveRight) {
-    dx += Math.sin(azimuth + Math.PI / 2) * walkSpeed;
-    dz += Math.cos(azimuth + Math.PI / 2) * walkSpeed;
-  }
-
-  // Adjust speed for running
-  if ((moveForward || moveBackward || moveLeft || moveRight) && isRunning) {
-    dx *= runSpeed / walkSpeed;
-    dz *= runSpeed / walkSpeed;
-  }
-
-  // Apply movement
-  stickman.position.x += dx;
-  stickman.position.z += dz;
-
-  // Check for motion
-  isMoving = dx !== 0 || dz !== 0;
-
-  // Gait cycle control
-  if (isMoving) {
-    walkCycle += 0.016; // 👣 Adjust increment for your frame rate
-  } else {
-    walkCycle = 0; // Reset when idle
-  }
-
-  // Animation state switch
-  if (!isGrounded && isJumping) {
-    animateStickman("jump");
-  } else if (isMoving && isRunning) {
-    animateStickman("run");
-  } else if (isMoving) {
-    animateStickman("walk");
-  } else {
-    animateStickman("idle");
-  }
+// Camera-relative movement
+let dx = 0, dz = 0;
+if (moveForward) {
+dx += Math.sin(azimuth) * walkSpeed;
+dz += Math.cos(azimuth) * walkSpeed;
+}
+if (moveBackward) {
+dx -= Math.sin(azimuth) * walkSpeed;
+dz -= Math.cos(azimuth) * walkSpeed;
+}
+if (moveLeft) {
+dx += Math.sin(azimuth - Math.PI/2) * walkSpeed;
+dz += Math.cos(azimuth - Math.PI/2) * walkSpeed;
+}
+if (moveRight) {
+dx += Math.sin(azimuth + Math.PI/2) * walkSpeed;
+dz += Math.cos(azimuth + Math.PI/2) * walkSpeed;
 }
 
-  
+if ((moveForward || moveBackward || moveLeft || moveRight) && isRunning) {
+dx *= runSpeed / walkSpeed;
+dz *= runSpeed / walkSpeed;
+}
+
+stickman.position.x += dx;
+stickman.position.z += dz;
+
 // Jumping/Gravity
 if(isJumping || !isGrounded) {
 stickman.position.y += velocityY;
