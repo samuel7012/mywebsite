@@ -265,10 +265,6 @@ case 'w': moveBackward = true; break;
 case 's': moveForward = true; break;
 case 'a': moveLeft = true; break;
 case 'd': moveRight = true; break;
-case 'ArrowUp': moveForward = true; break;
-case 'ArrowDown': moveBackward = true; break;
-case 'ArrowLeft': moveLeft = true; break;
-case 'ArrowRight': moveRight = true; break;
 case 'Shift': isRunning = true; break;
 case ' ': 
 if (isGrounded && !isJumping) {
@@ -288,10 +284,6 @@ case 'w': moveBackward = false; break;
 case 's': moveForward = false; break;
 case 'a': moveLeft = false; break;
 case 'd': moveRight = false; break;
-case 'ArrowUp': moveForward = false; break;
-case 'ArrowDown': moveBackward = false; break;
-case 'ArrowLeft': moveLeft = false; break;
-case 'ArrowRight': moveRight = false; break;
 case 'Shift': isRunning = false; break;
 }
 });
