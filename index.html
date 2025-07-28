@@ -479,7 +479,7 @@ else if(dx !== 0 || dz !== 0) state = isRunning ? "run" : "walk";
 animateStickman(state);
 
 // KEY CHANGE: run animation is slower
-if(state === "walk" || state === "run") walkCycle += isRunning ? 0.025 : 0.09;
+if(state === "walk" || state === "run") walkCycle += isRunning ? 0.025 : 0.011;
 else walkCycle += 0.012;
 
 updateCamera();
