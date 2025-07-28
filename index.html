@@ -422,30 +422,58 @@ rightShin.rotation.x = 0.8;
 
 // Animate
 function animate() {
-requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 
-// Camera-relative movement
-let dx = 0, dz = 0;
-if (moveForward) {
-dx += Math.sin(azimuth) * walkSpeed;
-dz += Math.cos(azimuth) * walkSpeed;
-}
-if (moveBackward) {
-dx -= Math.sin(azimuth) * walkSpeed;
-dz -= Math.cos(azimuth) * walkSpeed;
-}
-if (moveLeft) {
-dx += Math.sin(azimuth - Math.PI/2) * walkSpeed;
-dz += Math.cos(azimuth - Math.PI/2) * walkSpeed;
-}
-if (moveRight) {
-dx += Math.sin(azimuth + Math.PI/2) * walkSpeed;
-dz += Math.cos(azimuth + Math.PI/2) * walkSpeed;
-}
+  let dx = 0, dz = 0;
 
-if ((moveForward || moveBackward || moveLeft || moveRight) && isRunning) {
-dx *= runSpeed / walkSpeed;
-dz *= runSpeed / walkSpeed;
+  // Camera-relative movement
+  if (moveForward) {
+    dx += Math.sin(azimuth) * walkSpeed;
+    dz += Math.cos(azimuth) * walkSpeed;
+  }
+  if (moveBackward) {
+    dx -= Math.sin(azimuth) * walkSpeed;
+    dz -= Math.cos(azimuth) * walkSpeed;
+  }
+  if (moveLeft) {
+    dx += Math.sin(azimuth - Math.PI / 2) * walkSpeed;
+    dz += Math.cos(azimuth - Math.PI / 2) * walkSpeed;
+  }
+  if (moveRight) {
+    dx += Math.sin(azimuth + Math.PI / 2) * walkSpeed;
+    dz += Math.cos(azimuth + Math.PI / 2) * walkSpeed;
+  }
+
+  // Adjust speed for running
+  if ((moveForward || moveBackward || moveLeft || moveRight) && isRunning) {
+    dx *= runSpeed / walkSpeed;
+    dz *= runSpeed / walkSpeed;
+  }
+
+  // Apply movement
+  stickman.position.x += dx;
+  stickman.position.z += dz;
+
+  // Check for motion
+  isMoving = dx !== 0 || dz !== 0;
+
+  // Gait cycle control
+  if (isMoving) {
+    walkCycle += 0.016; // 👣 Adjust increment for your frame rate
+  } else {
+    walkCycle = 0; // Reset when idle
+  }
+
+  // Animation state switch
+  if (!isGrounded && isJumping) {
+    animateStickman("jump");
+  } else if (isMoving && isRunning) {
+    animateStickman("run");
+  } else if (isMoving) {
+    animateStickman("walk");
+  } else {
+    animateStickman("idle");
+  }
 }
 
 stickman.position.x += dx;
