@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>im gonna add comments if u see any bugs while i update</title>
+  <title>i think this is a better animation</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -479,7 +479,7 @@ else if(dx !== 0 || dz !== 0) state = isRunning ? "run" : "walk";
 animateStickman(state);
 
 // KEY CHANGE: run animation is slower
-if(state === "walk" || state === "run") walkCycle += isRunning ? 0.025 : 0.08;
+if(state === "walk" || state === "run") walkCycle += isRunning ? 0.025 : 0.010;
 else walkCycle += 0.012;
 
 updateCamera();
