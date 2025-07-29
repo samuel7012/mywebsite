@@ -270,11 +270,6 @@ if (isGrounded && !isJumping) {
 isJumping = true;
 velocityY = jumpStrength;
 }
-break;
-case '1': cameraMode = 1; break;
-case '2': cameraMode = 2; break;
-case '3': cameraMode = 3; break;
-}
 });
 
 window.addEventListener('keyup', function(e){
@@ -340,13 +335,6 @@ stickman.position.x,
 stickman.position.y + 2.25,
 stickman.position.z + 2
 );
-} else if (cameraMode === 3) {
-let camX = stickman.position.x + radius * Math.sin(azimuth);
-let camY = stickman.position.y + 15;
-let camZ = stickman.position.z + radius * Math.cos(azimuth);
-camera.position.set(camX, camY, camZ);
-camera.lookAt(stickman.position.x, stickman.position.y, stickman.position.z);
-}
 }
 
 // Animation logic
