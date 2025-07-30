@@ -43,6 +43,27 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
+// Obby Platforms
+const platformMaterial = new THREE.MeshStandardMaterial({ color: 0x00cc66 });
+
+const createPlatform = (x, y, z, w = 3, h = 0.3, d = 3) => {
+  const platformGeometry = new THREE.BoxGeometry(w, h, d);
+  const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+  platform.position.set(x, y, z);
+  platform.castShadow = true;
+  platform.receiveShadow = true;
+  scene.add(platform);
+  return platform;
+};
+
+// Basic obstacle course layout
+createPlatform(0, 0.15, 0);       // Start platform
+createPlatform(5, 0.5, -5);       // First jump
+createPlatform(10, 1.2, -10);     // Second jump
+createPlatform(15, 2.0, -15);     // Tall platform
+createPlatform(20, 2.0, -10, 6);  // Wide platform
+createPlatform(27, 1.0, -5);      // Step down
+createPlatform(32, 0.15, 0);      // Final goal platform
 
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
