@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>TESTING IN PROGRESS</title>
+  <title>TESTING IN PROGRES</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -49,7 +49,7 @@ const platforms = [];
 for (let i = -10; i <= 10; i++) {
   for (let j = -10; j <= 10; j++) {
     const tile = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 2), platformMaterial);
-    tile.position.set(i * 2, -0.05, j * 2);
+    tile.position.set(i * 2, 0.05, j * 2);
     tile.userData = {
       width: 2,
       height: 0.1,
