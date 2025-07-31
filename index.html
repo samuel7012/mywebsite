@@ -1,14 +1,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>no j-- u cant play yet</title>
+  <title>TESTING IN PROGRESS</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
 </style>
 </head>
 <body>
-<div id="info" style="display:none">
+<div id="info">
 <b>W</b>: backward &nbsp; <b>S</b>: forward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
 Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
 <b>1</b>: Third-person &nbsp; <b>2</b>: First-person &nbsp; <b>3</b>: Top-down view<br>
@@ -16,7 +16,6 @@ Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
-  
 // Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222233);
@@ -36,46 +35,31 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
 
-// Ground
-const groundGeometry = new THREE.PlaneGeometry(100, 100);
+// Original Ground (Visual only)
+const groundGeometry = new THREE.PlaneGeometry(40, 40);
 const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
-// Obby Platforms
-const platformMaterial = new THREE.MeshStandardMaterial({ color: 0x00cc66 });
-
-const createPlatform = (x, y, z, w = 3, h = 0.3, d = 3) => {
-  const platformGeometry = new THREE.BoxGeometry(w, h, d);
-  const platform = new THREE.Mesh(platformGeometry, platformMaterial);
-  platform.position.set(x, y, z);
-  platform.castShadow = true;
-  platform.receiveShadow = true;
-  scene.add(platform);
-  return platform;
-};
-
-// Basic obstacle course layout
+// Endless Platforms (Minimal Addition)
+const platformMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
 const platforms = [];
 
-const addPlatform = (x, y, z, w = 3, h = 0.3, d = 3) => {
-  const geometry = new THREE.BoxGeometry(w, h, d);
-  const mesh = new THREE.Mesh(geometry, platformMaterial);
-  mesh.position.set(x, y, z);
-  mesh.userData = { width: w, height: h, depth: d };
-  scene.add(mesh);
-  platforms.push(mesh);
-  return mesh;
-};
-
-addPlatform(0, 0.15, 0);
-addPlatform(5, 0.5, -5);
-addPlatform(10, 1.2, -10);
-addPlatform(15, 2.0, -15);
-addPlatform(20, 2.0, -10, 6);
-addPlatform(27, 1.0, -5);
-addPlatform(32, 0.15, 0);
+for (let i = -10; i <= 10; i++) {
+  for (let j = -10; j <= 10; j++) {
+    const tile = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 2), platformMaterial);
+    tile.position.set(i * 2, -0.05, j * 2);
+    tile.userData = {
+      width: 2,
+      height: 0.1,
+      depth: 2,
+      solid: true
+    };
+    scene.add(tile);
+    platforms.push(tile);
+  }
+}
 
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
