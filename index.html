@@ -1,3 +1,4 @@
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -58,24 +59,6 @@ for (let i = -10; i <= 10; i++) {
     platforms.push(tile);
   }
 }
-
-// *** Walls added here ***
-const wallGeometry = new THREE.BoxGeometry(2, 4, 0.5);
-const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
-
-const wallPositions = [
-  {x: 5, y: 7, z: 0},
-  {x: 7, y: 7, z: 0},
-  {x: 9, y: 7, z: 0},
-  {x: 5, y: 7, z: 2},
-  {x: 5, y: 7, z: -2}
-];
-
-wallPositions.forEach(pos => {
-  const wall = new THREE.Mesh(wallGeometry, wallMaterial);
-  wall.position.set(pos.x, pos.y, pos.z);
-  scene.add(wall);
-});
 
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
@@ -277,190 +260,296 @@ rightShin.add(footR);
 
 rightLeg.add(rightShin);
 
-// Add stickman to scene and position
-stickman.position.set(5, 6.3, 0);
 scene.add(stickman);
 
-// Controls and movement
-const keys = {w:false, a:false, s:false, d:false, shift:false, space:false};
-window.addEventListener('keydown', e => {
-  if(e.key.toLowerCase() === 'w') keys.w = true;
-  if(e.key.toLowerCase() === 'a') keys.a = true;
-  if(e.key.toLowerCase() === 's') keys.s = true;
-  if(e.key.toLowerCase() === 'd') keys.d = true;
-  if(e.key.toLowerCase() === 'shift') keys.shift = true;
-  if(e.code === 'Space') keys.space = true;
-  if(e.key === '1') cameraMode = 1;
-  if(e.key === '2') cameraMode = 2;
-  if(e.key === '3') cameraMode = 3;
-});
+// Movement state
+let moveBackward = false, moveForward = false, moveLeft = false, moveRight = false;
+let isRunning = false;
+let isJumping = false;
+let isGrounded = true;
+let velocityY = 0;
+const walkSpeed = 0.08;
+const runSpeed = 0.16;
+const jumpStrength = 0.24;
+const gravity = 0.012;
+let walkCycle = 0; // for gait animation
 
-window.addEventListener('keyup', e => {
-  if(e.key.toLowerCase() === 'w') keys.w = false;
-  if(e.key.toLowerCase() === 'a') keys.a = false;
-  if(e.key.toLowerCase() === 's') keys.s = false;
-  if(e.key.toLowerCase() === 'd') keys.d = false;
-  if(e.key.toLowerCase() === 'shift') keys.shift = false;
-  if(e.code === 'Space') keys.space = false;
-});
-
-// Movement variables
-let velocity = new THREE.Vector3();
-let direction = new THREE.Vector3();
-let canJump = false;
-
-const clock = new THREE.Clock();
-
-// Raycaster for collision detection
-const raycaster = new THREE.Raycaster();
-const downRaycaster = new THREE.Raycaster();
-
-function collideWithPlatforms(position, size) {
-  // AABB collision detection with platforms and walls
-  for (const platform of platforms) {
-    if (!platform.userData.solid) continue;
-    const p = platform.position;
-    const w = platform.userData.width / 2;
-    const h = platform.userData.height / 2;
-    const d = platform.userData.depth / 2;
-    // Simple bounding box collision on x, y, z
-    if (position.x + size.x/2 > p.x - w && position.x - size.x/2 < p.x + w &&
-        position.y - size.y/2 < p.y + h && position.y + size.y/2 > p.y - h &&
-        position.z + size.z/2 > p.z - d && position.z - size.z/2 < p.z + d) {
-      return platform;
-    }
-  }
-  // Also check walls (which are in scene.children)
-  for (const child of scene.children) {
-    if (!child.geometry || child === stickman || child === ground) continue;
-    if (child.userData.solid === false) continue;
-    if (child.geometry.type !== 'BoxGeometry') continue;
-    // assume walls are BoxGeometry with userData.solid undefined, treat them as solid
-    const p = child.position;
-    const w = child.geometry.parameters.width / 2;
-    const h = child.geometry.parameters.height / 2;
-    const d = child.geometry.parameters.depth / 2;
-    if (position.x + size.x/2 > p.x - w && position.x - size.x/2 < p.x + w &&
-        position.y - size.y/2 < p.y + h && position.y + size.y/2 > p.y - h &&
-        position.z + size.z/2 > p.z - d && position.z - size.z/2 < p.z + d) {
-      return child;
-    }
-  }
-  return null;
+window.addEventListener('keydown', function(e){
+switch(e.key) {
+case 'w': moveBackward = true; break;
+case 's': moveForward = true; break;
+case 'a': moveLeft = true; break;
+case 'd': moveRight = true; break;
+case 'Shift': isRunning = true; break;
+case ' ': 
+if (isGrounded && !isJumping) {
+isJumping = true;
+velocityY = jumpStrength;
 }
+break;
+case '1': cameraMode = 1; break;
+case '2': cameraMode = 2; break;
+case '3': cameraMode = 3; break;
+}
+});
 
-function update() {
-  const delta = clock.getDelta();
+window.addEventListener('keyup', function(e){
+switch(e.key) {
+case 'w': moveBackward = false; break;
+case 's': moveForward = false; break;
+case 'a': moveLeft = false; break;
+case 'd': moveRight = false; break;
+case 'Shift': isRunning = false; break;
+}
+});
 
-  // Movement speed
-  const speed = keys.shift ? 6 : 3;
-  direction.set(0,0,0);
-  if(keys.w) direction.z -= 1;
-  if(keys.s) direction.z += 1;
-  if(keys.a) direction.x -= 1;
-  if(keys.d) direction.x += 1;
-  direction.normalize();
+// Mouse orbit controls (always enabled)
+let azimuth = 0;
+let polar = Math.PI/5;
+let radius = 8;
+const minPolar = 0.1;
+const maxPolar = Math.PI/2 - 0.05;
 
-  // Rotate direction based on camera yaw
-  const euler = new THREE.Euler(0, camera.rotation.y, 0, 'YXZ');
-  direction.applyEuler(euler);
+let lastMouse = {x: window.innerWidth/2, y: window.innerHeight/2};
+let mouseInitialized = false;
+const mouseSensitivity = 0.005;
 
-  // Horizontal velocity
-  velocity.x = direction.x * speed;
-  velocity.z = direction.z * speed;
+document.addEventListener('mousemove', function(e){
+if (cameraMode === 2) return;
+if (!mouseInitialized) {
+lastMouse.x = e.clientX; lastMouse.y = e.clientY;
+mouseInitialized = true;
+return;
+}
+let dx = e.clientX - lastMouse.x;
+let dy = e.clientY - lastMouse.y;
+azimuth -= dx * mouseSensitivity;
+polar -= dy * mouseSensitivity;
+polar = Math.max(minPolar, Math.min(maxPolar, polar));
+lastMouse.x = e.clientX;
+lastMouse.y = e.clientY;
+});
 
-  // Gravity and vertical velocity
-  velocity.y -= 9.8 * delta; // gravity
+document.addEventListener('mouseleave', function(){
+mouseInitialized = false;
+});
 
-  // Jumping
-  if (keys.space && canJump) {
-    velocity.y = 6;
-    canJump = false;
-  }
+renderer.domElement.addEventListener('wheel', function(e){
+if (cameraMode === 2) return;
+radius += e.deltaY * 0.01;
+radius = Math.max(2, Math.min(30, radius));
+});
 
-  // New position attempt
-  const newPos = stickman.position.clone();
-  newPos.addScaledVector(velocity, delta);
-
-  // Check collisions and resolve them
-  const stickmanSize = new THREE.Vector3(0.35, 2.5, 0.35); // approx size box
-  let collision = collideWithPlatforms(newPos, stickmanSize);
-
-  if (collision) {
-    // simple collision resolution: block movement on collision axis
-    if (newPos.y < stickman.position.y) {
-      // landed on platform or wall
-      velocity.y = 0;
-      canJump = true;
-      newPos.y = collision.position.y + collision.userData.height/2 + stickmanSize.y/2;
-    } else {
-      // hit ceiling or wall - stop upward movement
-      velocity.y = Math.min(velocity.y, 0);
-    }
-    // For horizontal collision, stop horizontal movement:
-    if (Math.abs(newPos.x - stickman.position.x) > 0) newPos.x = stickman.position.x;
-    if (Math.abs(newPos.z - stickman.position.z) > 0) newPos.z = stickman.position.z;
-  } else {
-    canJump = false;
-  }
-
-  stickman.position.copy(newPos);
-
-  // Animate arms and legs swinging if moving
-  const time = clock.elapsedTime * 5;
-  if(direction.length() > 0.1) {
-    upperArmL.rotation.x = Math.sin(time) * 0.6;
-    upperArmR.rotation.x = Math.sin(time + Math.PI) * 0.6;
-    leftForearm.rotation.x = Math.sin(time) * 0.2;
-    rightForearm.rotation.x = Math.sin(time + Math.PI) * 0.2;
-    upperLegL.rotation.x = Math.sin(time + Math.PI) * 0.7;
-    upperLegR.rotation.x = Math.sin(time) * 0.7;
-    leftShin.rotation.x = Math.max(0, -Math.sin(time + Math.PI));
-    rightShin.rotation.x = Math.max(0, -Math.sin(time));
-  } else {
-    upperArmL.rotation.x = 0;
-    upperArmR.rotation.x = 0;
-    leftForearm.rotation.x = 0;
-    rightForearm.rotation.x = 0;
-    upperLegL.rotation.x = 0;
-    upperLegR.rotation.x = 0;
-    leftShin.rotation.x = 0;
-    rightShin.rotation.x = 0;
-  }
-
-  // Camera modes
-  switch(cameraMode){
-    case 1: // third-person
-      {
-        const offset = new THREE.Vector3(0,2.5,5);
-        offset.applyEuler(new THREE.Euler(0, stickman.rotation.y, 0));
-        camera.position.copy(stickman.position).add(offset);
-        camera.lookAt(stickman.position.x, stickman.position.y + 1.5, stickman.position.z);
-      }
-      break;
-    case 2: // first-person
-      camera.position.copy(stickman.position);
-      camera.position.y += 1.7;
-      camera.rotation.copy(stickman.rotation);
-      break;
-    case 3: // top-down
-      camera.position.set(stickman.position.x, stickman.position.y + 15, stickman.position.z);
-      camera.lookAt(stickman.position);
-      break;
+function updateCamera() {
+  if (cameraMode === 1) { // third-person
+    let camX = stickman.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
+    let camY = stickman.position.y + radius * Math.cos(polar) + 1;
+    let camZ = stickman.position.z + radius * Math.sin(polar) * Math.cos(azimuth);
+    camera.position.set(camX, camY, camZ);
+    camera.lookAt(stickman.position.x, stickman.position.y + 1.4, stickman.position.z);
+  } else if (cameraMode === 2) { // first-person
+    // Position camera at head height, looking forward relative to azimuth
+    camera.position.set(stickman.position.x, stickman.position.y + 2.25, stickman.position.z);
+    // Calculate lookAt point in front of the stickman based on azimuth angle
+    const lookX = stickman.position.x + Math.sin(azimuth);
+    const lookY = stickman.position.y + 2.25;
+    const lookZ = stickman.position.z + Math.cos(azimuth);
+    camera.lookAt(lookX, lookY, lookZ);
+  } else if (cameraMode === 3) { // top-down
+    let camX = stickman.position.x + radius * Math.sin(azimuth);
+    let camY = stickman.position.y + 15;
+    let camZ = stickman.position.z + radius * Math.cos(azimuth);
+    camera.position.set(camX, camY, camZ);
+    camera.lookAt(stickman.position.x, stickman.position.y, stickman.position.z);
   }
 }
 
+// Animation logic
+function animateStickman(state) {
+// state: "idle", "walk", "run", "jump"
+let t = walkCycle;
+
+if (state === "idle") {
+leftArm.rotation.x = 0;
+rightArm.rotation.x = 0;
+leftForearm.rotation.x = 0;
+rightForearm.rotation.x = 0;
+leftLeg.rotation.x = 0;
+rightLeg.rotation.x = 0;
+leftShin.rotation.x = 0;
+rightShin.rotation.x = 0;
+} else if (state === "walk") {
+// Walk: relaxed, natural swing
+let freq = 5;
+let ampArm = 0.65;
+let ampLeg = 0.7;
+let shinamp = 0.47;
+let phase = t * freq;
+
+leftArm.rotation.x = Math.sin(phase) * ampArm;
+rightArm.rotation.x = Math.sin(phase + Math.PI) * ampArm;
+leftForearm.rotation.x = 0;
+rightForearm.rotation.x = 0;
+
+leftLeg.rotation.x = Math.sin(phase) * ampLeg;
+rightLeg.rotation.x = Math.sin(phase + Math.PI) * ampLeg;
+leftShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 4)) * shinamp;
+rightShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 4 + Math.PI)) * shinamp;
+} else if (state === "run") {
+// RUN: powerful, high knee, arms bent, more forward lean & arm bend
+let freq = 9.5;
+let ampArm = 1.6;
+let ampLeg = 1.8;
+let shinamp = 1.35;
+let phase = t * freq;
+
+// Arms: more bent, strong swing
+leftArm.rotation.x = Math.sin(phase) * ampArm * 0.6;
+rightArm.rotation.x = Math.sin(phase + Math.PI) * ampArm * 0.6;
+leftForearm.rotation.x = Math.abs(Math.sin(phase)) * 0.9 - 1.1; // arms bent in front
+rightForearm.rotation.x = Math.abs(Math.sin(phase + Math.PI)) * 0.9 - 1.1;
+
+// Legs: high knee, strong kickback
+leftLeg.rotation.x = Math.sin(phase) * ampLeg;
+rightLeg.rotation.x = Math.sin(phase + Math.PI) * ampLeg;
+leftShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 6)) * shinamp + 0.13 * Math.abs(Math.sin(phase)); // more extension
+rightShin.rotation.x = Math.max(0, -Math.sin(phase + Math.PI / 6 + Math.PI)) * shinamp + 0.13 * Math.abs(Math.sin(phase + Math.PI));
+} else if (state === "jump") {
+leftArm.rotation.x = -1.15;
+rightArm.rotation.x = -1.15;
+leftForearm.rotation.x = -0.42;
+rightForearm.rotation.x = -0.42;
+leftLeg.rotation.x = 0.88;
+rightLeg.rotation.x = 0.88;
+leftShin.rotation.x = 0.8;
+rightShin.rotation.x = 0.8;
+}
+}
+
+// Animate
 function animate() {
-  requestAnimationFrame(animate);
-  update();
-  renderer.render(scene, camera);
+requestAnimationFrame(animate);
+
+// Camera-relative movement
+let dx = 0, dz = 0;
+if (moveForward) {
+dx += Math.sin(azimuth) * walkSpeed;
+dz += Math.cos(azimuth) * walkSpeed;
+}
+if (moveBackward) {
+dx -= Math.sin(azimuth) * walkSpeed;
+dz -= Math.cos(azimuth) * walkSpeed;
+}
+if (moveLeft) {
+dx += Math.sin(azimuth - Math.PI/2) * walkSpeed;
+dz += Math.cos(azimuth - Math.PI/2) * walkSpeed;
+}
+if (moveRight) {
+dx += Math.sin(azimuth + Math.PI/2) * walkSpeed;
+dz += Math.cos(azimuth + Math.PI/2) * walkSpeed;
+}
+
+if ((moveForward || moveBackward || moveLeft || moveRight) && isRunning) {
+dx *= runSpeed / walkSpeed;
+dz *= runSpeed / walkSpeed;
+}
+
+stickman.position.x += dx;
+stickman.position.z += dz;
+
+if (isJumping || !isGrounded) {
+  stickman.position.y += velocityY;
+  velocityY -= gravity;
+
+  // Check platform collisions
+  let landed = false;
+  for (let plat of platforms) {
+    const px = plat.position.x;
+    const py = plat.position.y + plat.userData.height / 2;
+    const pz = plat.position.z;
+    const w = plat.userData.width / 2;
+    const d = plat.userData.depth / 2;
+
+    const sx = stickman.position.x;
+    const sz = stickman.position.z;
+
+    if (
+      sx > px - w && sx < px + w &&
+      sz > pz - d && sz < pz + d &&
+      stickman.position.y <= py + 0.01 &&
+      velocityY <= 0
+    ) {
+      stickman.position.y = py;
+      velocityY = 0;
+      isJumping = false;
+      isGrounded = true;
+      landed = true;
+      break;
+    }
+  }
+
+  if (!landed && stickman.position.y <= 0) {
+    stickman.position.y = 0;
+    velocityY = 0;
+    isJumping = false;
+    isGrounded = true;
+  } else if (!landed) {
+    isGrounded = false;
+  }
+} else {
+  // Check if still on a platform or fell off
+  let onSomething = false;
+  for (let plat of platforms) {
+    const px = plat.position.x;
+    const py = plat.position.y + plat.userData.height / 2;
+    const pz = plat.position.z;
+    const w = plat.userData.width / 2;
+    const d = plat.userData.depth / 2;
+
+    const sx = stickman.position.x;
+    const sz = stickman.position.z;
+
+    if (
+      sx > px - w && sx < px + w &&
+      sz > pz - d && sz < pz + d &&
+      Math.abs(stickman.position.y - py) < 0.05
+    ) {
+      onSomething = true;
+      break;
+    }
+  }
+  if (!onSomething && stickman.position.y <= 0.01) {
+    stickman.position.y = 0;
+    isGrounded = true;
+  } else if (!onSomething) {
+    isGrounded = false;
+  }
+}
+
+// Face direction of movement (except top-down)
+if (cameraMode !== 3 && (dx !== 0 || dz !== 0)) {
+stickman.rotation.y = Math.atan2(dx, dz);
+}
+
+// Animation state
+let state = "idle";
+if(isJumping || !isGrounded) state = "jump";
+else if(dx !== 0 || dz !== 0) state = isRunning ? "run" : "walk";
+animateStickman(state);
+
+// KEY CHANGE: run animation is slower
+if(state === "walk" || state === "run") walkCycle += isRunning ? 0.025 : 0.024;
+else walkCycle += 0.012;
+
+updateCamera();
+renderer.render(scene, camera);
 }
 animate();
 
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+window.addEventListener('resize', function() {
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 </body>
