@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>BROSKI STOP</title>
+  <title>bruh are u even reading this</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -59,14 +59,23 @@ for (let i = -10; i <= 10; i++) {
   }
 }
 
-// Create a simple wall block
-const wallGeometry = new THREE.BoxGeometry(2, 4, 0.5); // width, height, depth
+// *** Walls added here ***
+const wallGeometry = new THREE.BoxGeometry(2, 4, 0.5);
 const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
-const wall = new THREE.Mesh(wallGeometry, wallMaterial);
 
-// Position the wall somewhere in the scene
-wall.position.set(5, 2, 0); // x, y (half height), z
-scene.add(wall);
+const wallPositions = [
+  {x: 5, y: 7, z: 0},
+  {x: 7, y: 7, z: 0},
+  {x: 9, y: 7, z: 0},
+  {x: 5, y: 7, z: 2},
+  {x: 5, y: 7, z: -2}
+];
+
+wallPositions.forEach(pos => {
+  const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+  wall.position.set(pos.x, pos.y, pos.z);
+  scene.add(wall);
+});
 
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
@@ -268,179 +277,190 @@ rightShin.add(footR);
 
 rightLeg.add(rightShin);
 
+// Add stickman to scene and position
+stickman.position.set(5, 6.3, 0);
 scene.add(stickman);
 
-// Movement state
-let moveBackward = false, moveForward = false, moveLeft = false, moveRight = false;
-let isRunning = false;
-let isJumping = false;
-let isGrounded = true;
-let velocityY = 0;
-const walkSpeed = 0.08;
-const runSpeed = 0.16;
-const jumpStrength = 0.24;
-const gravity = 0.012;
-let walkCycle = 0; // for gait animation
-
-window.addEventListener('keydown', function(e){
-switch(e.key) {
-case 'w': moveBackward = true; break;
-case 's': moveForward = true; break;
-case 'a': moveLeft = true; break;
-case 'd': moveRight = true; break;
-case 'Shift': isRunning = true; break;
-case ' ': 
-if(isGrounded) {
-velocityY = jumpStrength;
-isJumping = true;
-isGrounded = false;
-}
-break;
-case '1': cameraMode = 1; break;
-case '2': cameraMode = 2; break;
-case '3': cameraMode = 3; break;
-}
+// Controls and movement
+const keys = {w:false, a:false, s:false, d:false, shift:false, space:false};
+window.addEventListener('keydown', e => {
+  if(e.key.toLowerCase() === 'w') keys.w = true;
+  if(e.key.toLowerCase() === 'a') keys.a = true;
+  if(e.key.toLowerCase() === 's') keys.s = true;
+  if(e.key.toLowerCase() === 'd') keys.d = true;
+  if(e.key.toLowerCase() === 'shift') keys.shift = true;
+  if(e.code === 'Space') keys.space = true;
+  if(e.key === '1') cameraMode = 1;
+  if(e.key === '2') cameraMode = 2;
+  if(e.key === '3') cameraMode = 3;
 });
 
-window.addEventListener('keyup', function(e){
-switch(e.key) {
-case 'w': moveBackward = false; break;
-case 's': moveForward = false; break;
-case 'a': moveLeft = false; break;
-case 'd': moveRight = false; break;
-case 'Shift': isRunning = false; break;
-}
+window.addEventListener('keyup', e => {
+  if(e.key.toLowerCase() === 'w') keys.w = false;
+  if(e.key.toLowerCase() === 'a') keys.a = false;
+  if(e.key.toLowerCase() === 's') keys.s = false;
+  if(e.key.toLowerCase() === 'd') keys.d = false;
+  if(e.key.toLowerCase() === 'shift') keys.shift = false;
+  if(e.code === 'Space') keys.space = false;
 });
 
-// Mouse control
-let mouseX = 0;
-let mouseY = 0;
-let isPointerLocked = false;
+// Movement variables
+let velocity = new THREE.Vector3();
+let direction = new THREE.Vector3();
+let canJump = false;
 
-function onMouseMove(e) {
-if(!isPointerLocked) return;
-mouseX += e.movementX * 0.0025;
-mouseY += e.movementY * 0.0025;
-mouseY = Math.min(Math.max(mouseY, -Math.PI/3), Math.PI/3);
-}
+const clock = new THREE.Clock();
 
-document.body.addEventListener('click', () => {
-if(!isPointerLocked) {
-document.body.requestPointerLock();
-}
-});
-
-document.addEventListener('pointerlockchange', () => {
-isPointerLocked = document.pointerLockElement === document.body;
-});
-
-document.addEventListener('mousemove', onMouseMove);
-
-// Raycaster for ground/platform detection
+// Raycaster for collision detection
 const raycaster = new THREE.Raycaster();
-const downVector = new THREE.Vector3(0, -1, 0);
+const downRaycaster = new THREE.Raycaster();
 
-// Stickman base position and rotation
-stickman.position.set(0, 5, 0);
-stickman.rotation.y = 0;
+function collideWithPlatforms(position, size) {
+  // AABB collision detection with platforms and walls
+  for (const platform of platforms) {
+    if (!platform.userData.solid) continue;
+    const p = platform.position;
+    const w = platform.userData.width / 2;
+    const h = platform.userData.height / 2;
+    const d = platform.userData.depth / 2;
+    // Simple bounding box collision on x, y, z
+    if (position.x + size.x/2 > p.x - w && position.x - size.x/2 < p.x + w &&
+        position.y - size.y/2 < p.y + h && position.y + size.y/2 > p.y - h &&
+        position.z + size.z/2 > p.z - d && position.z - size.z/2 < p.z + d) {
+      return platform;
+    }
+  }
+  // Also check walls (which are in scene.children)
+  for (const child of scene.children) {
+    if (!child.geometry || child === stickman || child === ground) continue;
+    if (child.userData.solid === false) continue;
+    if (child.geometry.type !== 'BoxGeometry') continue;
+    // assume walls are BoxGeometry with userData.solid undefined, treat them as solid
+    const p = child.position;
+    const w = child.geometry.parameters.width / 2;
+    const h = child.geometry.parameters.height / 2;
+    const d = child.geometry.parameters.depth / 2;
+    if (position.x + size.x/2 > p.x - w && position.x - size.x/2 < p.x + w &&
+        position.y - size.y/2 < p.y + h && position.y + size.y/2 > p.y - h &&
+        position.z + size.z/2 > p.z - d && position.z - size.z/2 < p.z + d) {
+      return child;
+    }
+  }
+  return null;
+}
+
+function update() {
+  const delta = clock.getDelta();
+
+  // Movement speed
+  const speed = keys.shift ? 6 : 3;
+  direction.set(0,0,0);
+  if(keys.w) direction.z -= 1;
+  if(keys.s) direction.z += 1;
+  if(keys.a) direction.x -= 1;
+  if(keys.d) direction.x += 1;
+  direction.normalize();
+
+  // Rotate direction based on camera yaw
+  const euler = new THREE.Euler(0, camera.rotation.y, 0, 'YXZ');
+  direction.applyEuler(euler);
+
+  // Horizontal velocity
+  velocity.x = direction.x * speed;
+  velocity.z = direction.z * speed;
+
+  // Gravity and vertical velocity
+  velocity.y -= 9.8 * delta; // gravity
+
+  // Jumping
+  if (keys.space && canJump) {
+    velocity.y = 6;
+    canJump = false;
+  }
+
+  // New position attempt
+  const newPos = stickman.position.clone();
+  newPos.addScaledVector(velocity, delta);
+
+  // Check collisions and resolve them
+  const stickmanSize = new THREE.Vector3(0.35, 2.5, 0.35); // approx size box
+  let collision = collideWithPlatforms(newPos, stickmanSize);
+
+  if (collision) {
+    // simple collision resolution: block movement on collision axis
+    if (newPos.y < stickman.position.y) {
+      // landed on platform or wall
+      velocity.y = 0;
+      canJump = true;
+      newPos.y = collision.position.y + collision.userData.height/2 + stickmanSize.y/2;
+    } else {
+      // hit ceiling or wall - stop upward movement
+      velocity.y = Math.min(velocity.y, 0);
+    }
+    // For horizontal collision, stop horizontal movement:
+    if (Math.abs(newPos.x - stickman.position.x) > 0) newPos.x = stickman.position.x;
+    if (Math.abs(newPos.z - stickman.position.z) > 0) newPos.z = stickman.position.z;
+  } else {
+    canJump = false;
+  }
+
+  stickman.position.copy(newPos);
+
+  // Animate arms and legs swinging if moving
+  const time = clock.elapsedTime * 5;
+  if(direction.length() > 0.1) {
+    upperArmL.rotation.x = Math.sin(time) * 0.6;
+    upperArmR.rotation.x = Math.sin(time + Math.PI) * 0.6;
+    leftForearm.rotation.x = Math.sin(time) * 0.2;
+    rightForearm.rotation.x = Math.sin(time + Math.PI) * 0.2;
+    upperLegL.rotation.x = Math.sin(time + Math.PI) * 0.7;
+    upperLegR.rotation.x = Math.sin(time) * 0.7;
+    leftShin.rotation.x = Math.max(0, -Math.sin(time + Math.PI));
+    rightShin.rotation.x = Math.max(0, -Math.sin(time));
+  } else {
+    upperArmL.rotation.x = 0;
+    upperArmR.rotation.x = 0;
+    leftForearm.rotation.x = 0;
+    rightForearm.rotation.x = 0;
+    upperLegL.rotation.x = 0;
+    upperLegR.rotation.x = 0;
+    leftShin.rotation.x = 0;
+    rightShin.rotation.x = 0;
+  }
+
+  // Camera modes
+  switch(cameraMode){
+    case 1: // third-person
+      {
+        const offset = new THREE.Vector3(0,2.5,5);
+        offset.applyEuler(new THREE.Euler(0, stickman.rotation.y, 0));
+        camera.position.copy(stickman.position).add(offset);
+        camera.lookAt(stickman.position.x, stickman.position.y + 1.5, stickman.position.z);
+      }
+      break;
+    case 2: // first-person
+      camera.position.copy(stickman.position);
+      camera.position.y += 1.7;
+      camera.rotation.copy(stickman.rotation);
+      break;
+    case 3: // top-down
+      camera.position.set(stickman.position.x, stickman.position.y + 15, stickman.position.z);
+      camera.lookAt(stickman.position);
+      break;
+  }
+}
 
 function animate() {
-// Movement vector
-let moveX = 0;
-let moveZ = 0;
-if(moveForward) moveZ -= 1;
-if(moveBackward) moveZ += 1;
-if(moveLeft) moveX -= 1;
-if(moveRight) moveX += 1;
-
-const length = Math.sqrt(moveX*moveX + moveZ*moveZ);
-if(length > 0) {
-moveX /= length;
-moveZ /= length;
+  requestAnimationFrame(animate);
+  update();
+  renderer.render(scene, camera);
 }
-
-// Determine speed
-const speed = isRunning ? runSpeed : walkSpeed;
-
-// Apply horizontal movement
-stickman.position.x += moveX * speed;
-stickman.position.z += moveZ * speed;
-
-// Rotate stickman to face movement direction
-if(length > 0) {
-stickman.rotation.y = Math.atan2(moveX, moveZ);
-}
-
-// Gravity and vertical movement
-velocityY -= gravity;
-stickman.position.y += velocityY;
-
-// Check platform collision under stickman
-raycaster.set(stickman.position.clone().add(new THREE.Vector3(0, 0.2, 0)), downVector);
-const intersects = raycaster.intersectObjects(platforms.concat([ground, wall]));
-if(intersects.length > 0) {
-const closest = intersects[0];
-const platformY = closest.point.y;
-if(stickman.position.y < platformY + 0.5) {
-stickman.position.y = platformY + 0.5;
-velocityY = 0;
-isGrounded = true;
-isJumping = false;
-}
-} else {
-isGrounded = false;
-}
-
-// Animate gait cycle
-if(length > 0) {
-walkCycle += speed * 0.1;
-} else {
-walkCycle = 0;
-}
-
-const swing = Math.sin(walkCycle * 8) * 0.7;
-const kneeBend = Math.cos(walkCycle * 8) * 0.5;
-
-// Arms swing opposite to legs
-leftArm.rotation.x = swing;
-rightArm.rotation.x = -swing;
-
-// Forearms bend at elbow (opposite phase to upper arms)
-leftForearm.rotation.x = -swing * 0.5;
-rightForearm.rotation.x = swing * 0.5;
-
-// Legs swing
-leftLeg.rotation.x = -swing;
-rightLeg.rotation.x = swing;
-
-// Knees bend slightly
-leftShin.rotation.x = Math.max(0, kneeBend);
-rightShin.rotation.x = Math.max(0, -kneeBend);
-
-// Camera control by mode
-if(cameraMode === 1) { // third person
-const offset = new THREE.Vector3(0, 3, 5);
-offset.applyAxisAngle(new THREE.Vector3(0,1,0), stickman.rotation.y + mouseX);
-camera.position.copy(stickman.position).add(offset);
-camera.lookAt(stickman.position.clone().add(new THREE.Vector3(0, 2, 0)));
-} else if(cameraMode === 2) { // first person
-camera.position.copy(stickman.position).add(new THREE.Vector3(0, 2.3, 0));
-camera.rotation.set(-mouseY, stickman.rotation.y + mouseX, 0);
-} else { // top down
-camera.position.set(stickman.position.x, 20, stickman.position.z);
-camera.lookAt(stickman.position);
-}
-
-renderer.render(scene, camera);
-requestAnimationFrame(animate);
-}
-
 animate();
 
 window.addEventListener('resize', () => {
-camera.aspect = window.innerWidth/window.innerHeight;
-camera.updateProjectionMatrix();
-renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 </body>
