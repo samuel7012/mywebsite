@@ -1,58 +1,67 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>YOUR NAME chan. you said:'nani gaski?'</title>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    #info {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: #fff;
-      background: rgba(0,0,0,0.5);
-      padding: 8px;
-      border-radius: 5px;
-      font-family: sans-serif;
-      font-size: 14px;
-    }
-  </style>
+<meta charset="UTF-8">
+  <title>TESTING IN PROGRES</title>
+<style>
+body { margin: 0; overflow: hidden; }
+#info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
+</style>
 </head>
 <body>
-  <div id="info">
-    <b>W</b>: backward &nbsp; <b>S</b>: forward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
-    Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
-    <b>1</b>: Third-person &nbsp; <b>2</b>: First-person &nbsp; <b>3</b>: Top-down view<br>
-    <b>Move mouse</b> to rotate camera, <b>Scroll</b> to zoom (except first-person)
-  </div>
+<div id="info">
+<b>W</b>: backward &nbsp; <b>S</b>: forward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
+Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
+<b>1</b>: Third-person &nbsp; <b>2</b>: First-person &nbsp; <b>3</b>: Top-down view<br>
+<b>Move mouse</b> to rotate camera, <b>Scroll</b> to zoom (except first-person)
+</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+<script>
+// Scene setup
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x222233);
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-  <script>
-    
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x222233);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0, 4, 8);
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 4, 8);
-    let cameraMode = 1;
+let cameraMode = 1; // 1: third-person, 2: first-person, 3: top-down
 
-    const renderer = new THREE.WebGLRenderer({antialias:true});
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-    directionalLight.position.set(5, 10, 7.5);
-    scene.add(directionalLight);
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+directionalLight.position.set(5, 10, 7.5);
+scene.add(directionalLight);
 
-    // Ground
-    const groundGeometry = new THREE.PlaneGeometry(40, 40);
-    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    ground.rotation.x = -Math.PI/2;
-    scene.add(ground);
-    
-  // Stickman group (perfect stickman proportions and joints)
+// Original Ground (Visual only)
+const groundGeometry = new THREE.PlaneGeometry(100, 100);
+const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = -Math.PI/2;
+scene.add(ground);
+
+// Endless Platforms (Minimal Addition)
+const platformMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
+const platforms = [];
+
+for (let i = -10; i <= 10; i++) {
+  for (let j = -10; j <= 10; j++) {
+    const tile = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 2), platformMaterial);
+    tile.position.set(i * 2, 0.05, j * 2);
+    tile.userData = {
+      width: 2,
+      height: 0.1,
+      depth: 2,
+      solid: true
+    };
+    scene.add(tile);
+    platforms.push(tile);
+  }
+}
+
+// Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
 
 // Materials
@@ -333,27 +342,28 @@ radius = Math.max(2, Math.min(30, radius));
 });
 
 function updateCamera() {
-  if (cameraMode === 1) { // third-person
-    let camX = stickman.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
-    let camY = stickman.position.y + radius * Math.cos(polar) + 1;
-    let camZ = stickman.position.z + radius * Math.sin(polar) * Math.cos(azimuth);
-    camera.position.set(camX, camY, camZ);
-    camera.lookAt(stickman.position.x, stickman.position.y + 1.4, stickman.position.z);
-  } else if (cameraMode === 2) { // first-person
-    // Position camera at head height, looking forward relative to azimuth
-    camera.position.set(stickman.position.x, stickman.position.y + 2.25, stickman.position.z);
-    // Calculate lookAt point in front of the stickman based on azimuth angle
-    const lookX = stickman.position.x + Math.sin(azimuth);
-    const lookY = stickman.position.y + 2.25;
-    const lookZ = stickman.position.z + Math.cos(azimuth);
-    camera.lookAt(lookX, lookY, lookZ);
-  } else if (cameraMode === 3) { // top-down
-    let camX = stickman.position.x + radius * Math.sin(azimuth);
-    let camY = stickman.position.y + 15;
-    let camZ = stickman.position.z + radius * Math.cos(azimuth);
-    camera.position.set(camX, camY, camZ);
-    camera.lookAt(stickman.position.x, stickman.position.y, stickman.position.z);
-  }
+if (cameraMode === 1) {
+let camX = stickman.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
+let camY = stickman.position.y + radius * Math.cos(polar) + 1;
+let camZ = stickman.position.z + radius * Math.sin(polar) * Math.cos(azimuth);
+camera.position.set(camX, camY, camZ);
+camera.lookAt(stickman.position.x, 1.4, stickman.position.z);
+} else if (cameraMode === 2) {
+camera.position.x = stickman.position.x;
+camera.position.y = stickman.position.y + 2.25;
+camera.position.z = stickman.position.z + 0.2;
+camera.lookAt(
+stickman.position.x,
+stickman.position.y + 2.25,
+stickman.position.z + 2
+);
+} else if (cameraMode === 3) {
+let camX = stickman.position.x + radius * Math.sin(azimuth);
+let camY = stickman.position.y + 15;
+let camZ = stickman.position.z + radius * Math.cos(azimuth);
+camera.position.set(camX, camY, camZ);
+camera.lookAt(stickman.position.x, stickman.position.y, stickman.position.z);
+}
 }
 
 // Animation logic
@@ -529,7 +539,7 @@ if(isJumping || !isGrounded) state = "jump";
 else if(dx !== 0 || dz !== 0) state = isRunning ? "run" : "walk";
 animateStickman(state);
 
-// KEY CHANGE: run animation is slower
+// You can change it freely now at:                              here    here
 if(state === "walk" || state === "run") walkCycle += isRunning ? 0.025 : 0.024;
 else walkCycle += 0.012;
 
@@ -538,11 +548,11 @@ renderer.render(scene, camera);
 }
 animate();
 
-    window.addEventListener('resize', function() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  </script>
+window.addEventListener('resize', function() {
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
 </body>
 </html>
