@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>let me COOOOOOOOOOOOOOOOOOOOOOOK</title>
+  <title>I have a bad feeling about this: samuel produtions (not real!)</title>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
@@ -23,11 +23,12 @@ document.body.appendChild(renderer.domElement);
 // Lighting
 scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-light.position.set(10, 10, 10);
-light.castShadow = true;
-scene.add(light);
+directionalLight.position.set(10, 10, 10);
+directionalLight.castShadow = true;
+scene.add(directionalLight);
 
 
+  
 // Ground
 const groundGeometry = new THREE.PlaneGeometry(100, 100);
 const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
@@ -489,24 +490,6 @@ camera.aspect = window.innerWidth / window.innerHeight;
 camera.updateProjectionMatrix();
 renderer.setSize(window.innerWidth, window.innerHeight);
 });
-  
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw platforms
-    ctx.fillStyle = 'green';
-    platforms.forEach(p => {
-        ctx.fillRect(p.x, p.y, p.width, p.height);
-    });
-}
-  
-  // Game loop
-    function gameLoop() {
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
-
-    gameLoop(); // Start the loop
 </script>
 </body>
 </html>
