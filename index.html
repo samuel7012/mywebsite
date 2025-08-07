@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>I have a bad feeling about this: samuel produtions (not real!)</title>
+  <title>im working on a request from africa (how did you guys found this????)</title>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
@@ -40,13 +40,27 @@ const platforms = [];
 
 function createPlatform(x, y, z, w, h, d) {
   const geometry = new THREE.BoxGeometry(w, h, d);
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+  const material = new THREE.MeshStandardMaterial({ color: 0x444444 });
   const platform = new THREE.Mesh(geometry, material);
   platform.position.set(x, y, z);
   platform.receiveShadow = true;
   scene.add(platform);
   platforms.push(platform);
 }
+
+  const corners = [
+  [-48, -48], // back-left
+  [48, -48],  // back-right
+  [-48, 48],  // front-left
+  [48, 48],   // front-right
+];
+
+corners.forEach(([x, z]) => {
+  createPlatform(x, 0.5, z, 2, 1, 2);    // bottom crate
+  createPlatform(x, 1.6, z, 2, 1, 2);    // middle crate
+  createPlatform(x, 2.7, z, 2, 1, 2);    // top crate
+});
+
 
 // platform storage
 createPlatform(0, -1, 0, 20, 1, 20);  // Ground
