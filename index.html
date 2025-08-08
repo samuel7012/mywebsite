@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>(how did you guys found this????)</title>
+  <title>TORMENT THIS PERSON >:) jayc@p--s.school.nz</title>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
@@ -40,7 +40,7 @@ const platforms = [];
 
 function createPlatform(x, y, z, w, h, d) {
   const geometry = new THREE.BoxGeometry(w, h, d);
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+  const material = new THREE.MeshStandardMaterial({ color: 0x444444 });
   const platform = new THREE.Mesh(geometry, material);
   platform.position.set(x, y, z);
   platform.receiveShadow = true;
@@ -55,11 +55,6 @@ for (let i = 0; i < 20; i++) {
   const stepZ = -40 + i * 5;
   createPlatform(stepX, stepY, stepZ, 5, 1, 5);
 }
-
-
-// platform storage
-createPlatform(0, -1, 0, 20, 1, 20);  // Ground
-createPlatform(5, 2, -5, 5, 1, 5);    // Floating block
 
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
