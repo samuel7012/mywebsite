@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>jayc@p--s.school.nz</title>
+  <title>PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS</title>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
@@ -40,7 +40,7 @@ const platforms = [];
 
 function createPlatform(x, y, z, w, h, d) {
   const geometry = new THREE.BoxGeometry(w, h, d);
-  const material = new THREE.MeshStandardMaterial({ color: 0x696969 });
+  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
   const platform = new THREE.Mesh(geometry, material);
   platform.position.set(x, y, z);
   platform.receiveShadow = true;
@@ -48,12 +48,15 @@ function createPlatform(x, y, z, w, h, d) {
   platforms.push(platform);
 }
 
-// Stairs: a series of small platforms rising diagonally
-for (let i = 0; i < 20; i++) {
-  const stepX = -40 + i * 5;
-  const stepY = i * 1;
-  const stepZ = -40 + i * 5;
-  createPlatform(stepX, stepY, stepZ, 5, 1, 5);
+// Ground
+createPlatform(0, -1, 0, 20, 1, 20);
+
+// Stairs along the right edge of the ground
+for (let i = 0; i < 10; i++) {
+  const stepX = 8;          // fixed near right edge of ground
+  const stepY = i * 1;      // each step is 1 unit higher
+  const stepZ = -9 + i * 2; // moves forward along the side
+  createPlatform(stepX, stepY, stepZ, 2, 1, 2);
 }
 
 // Stickman group (perfect stickman proportions and joints)
