@@ -31,7 +31,7 @@ scene.add(directionalLight);
   
 // Ground
 const groundGeometry = new THREE.PlaneGeometry(100, 100);
-const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x696969 });
+const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
@@ -40,7 +40,7 @@ const platforms = [];
 
 function createPlatform(x, y, z, w, h, d) {
   const geometry = new THREE.BoxGeometry(w, h, d);
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+  const material = new THREE.MeshStandardMaterial({ color: 696969 });
   const platform = new THREE.Mesh(geometry, material);
   platform.position.set(x, y, z);
   platform.receiveShadow = true;
