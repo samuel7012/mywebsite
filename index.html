@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS</title>
+  <title>lets make teh stairs! :P (PS Dev said: bruh i bet this wont work.)</title>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
@@ -40,7 +40,7 @@ const platforms = [];
 
 function createPlatform(x, y, z, w, h, d) {
   const geometry = new THREE.BoxGeometry(w, h, d);
-  const material = new THREE.MeshStandardMaterial({ color: 696969 });
+  const material = new THREE.MeshStandardMaterial({ color: 0x696969 });
   const platform = new THREE.Mesh(geometry, material);
   platform.position.set(x, y, z);
   platform.receiveShadow = true;
@@ -56,7 +56,7 @@ for (let i = 0; i < 10; i++) {
   const stepX = 8;          // fixed near right edge of ground
   const stepY = i * 1;      // each step is 1 unit higher
   const stepZ = -9 + i * 2; // moves forward along the side
-  createPlatform(stepX, stepY, stepZ, 2, 1, 2);
+  createPlatform(stepX, stepY, stepZ, 4, 1, 3);
 }
 
 // Stickman group (perfect stickman proportions and joints)
