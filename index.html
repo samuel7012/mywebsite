@@ -1,12 +1,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>I have a bad feeling about this: samuel produtions (not real!)</title>
+  <title>TESTING IN PROGRES</title>
+<style>
+body { margin: 0; overflow: hidden; }
+#info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
+</style>
 </head>
 <body>
+<div id="info">
+<b>W</b>: backward &nbsp; <b>S</b>: forward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
+Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
+<b>1</b>: Third-person &nbsp; <b>2</b>: First-person &nbsp; <b>3</b>: Top-down view<br>
+<b>Move mouse</b> to rotate camera, <b>Scroll</b> to zoom (except first-person)
+</div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
-  
 // Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222233);
@@ -23,34 +32,15 @@ document.body.appendChild(renderer.domElement);
 // Lighting
 scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-directionalLight.position.set(10, 10, 10);
-directionalLight.castShadow = true;
+directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
 
-
-  
-// Ground
+// Original Ground (Visual only)
 const groundGeometry = new THREE.PlaneGeometry(100, 100);
 const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
-
-const platforms = [];
-
-function createPlatform(x, y, z, w, h, d) {
-  const geometry = new THREE.BoxGeometry(w, h, d);
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-  const platform = new THREE.Mesh(geometry, material);
-  platform.position.set(x, y, z);
-  platform.receiveShadow = true;
-  scene.add(platform);
-  platforms.push(platform);
-}
-
-// platform storage
-createPlatform(0, -1, 0, 20, 1, 20);  // Ground
-createPlatform(5, 2, -5, 5, 1, 5);    // Floating block
 
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
@@ -333,27 +323,28 @@ radius = Math.max(2, Math.min(30, radius));
 });
 
 function updateCamera() {
-  if (cameraMode === 1) { // third-person
-    let camX = stickman.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
-    let camY = stickman.position.y + radius * Math.cos(polar) + 1;
-    let camZ = stickman.position.z + radius * Math.sin(polar) * Math.cos(azimuth);
-    camera.position.set(camX, camY, camZ);
-    camera.lookAt(stickman.position.x, stickman.position.y + 1.4, stickman.position.z);
-  } else if (cameraMode === 2) { // first-person
-    // Position camera at head height, looking forward relative to azimuth
-    camera.position.set(stickman.position.x, stickman.position.y + 2.25, stickman.position.z);
-    // Calculate lookAt point in front of the stickman based on azimuth angle
-    const lookX = stickman.position.x + Math.sin(azimuth);
-    const lookY = stickman.position.y + 2.25;
-    const lookZ = stickman.position.z + Math.cos(azimuth);
-    camera.lookAt(lookX, lookY, lookZ);
-  } else if (cameraMode === 3) { // top-down
-    let camX = stickman.position.x + radius * Math.sin(azimuth);
-    let camY = stickman.position.y + 15;
-    let camZ = stickman.position.z + radius * Math.cos(azimuth);
-    camera.position.set(camX, camY, camZ);
-    camera.lookAt(stickman.position.x, stickman.position.y, stickman.position.z);
-  }
+if (cameraMode === 1) {
+let camX = stickman.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
+let camY = stickman.position.y + radius * Math.cos(polar) + 1;
+let camZ = stickman.position.z + radius * Math.sin(polar) * Math.cos(azimuth);
+camera.position.set(camX, camY, camZ);
+camera.lookAt(stickman.position.x, 1.4, stickman.position.z);
+} else if (cameraMode === 2) {
+camera.position.x = stickman.position.x;
+camera.position.y = stickman.position.y + 2.25;
+camera.position.z = stickman.position.z + 0.2;
+camera.lookAt(
+stickman.position.x,
+stickman.position.y + 2.25,
+stickman.position.z + 2
+);
+} else if (cameraMode === 3) {
+let camX = stickman.position.x + radius * Math.sin(azimuth);
+let camY = stickman.position.y + 15;
+let camZ = stickman.position.z + radius * Math.cos(azimuth);
+camera.position.set(camX, camY, camZ);
+camera.lookAt(stickman.position.x, stickman.position.y, stickman.position.z);
+}
 }
 
 // Animation logic
@@ -449,20 +440,73 @@ dz *= runSpeed / walkSpeed;
 stickman.position.x += dx;
 stickman.position.z += dz;
 
-// Jumping/Gravity
-if(isJumping || !isGrounded) {
-stickman.position.y += velocityY;
-velocityY -= gravity;
-if(stickman.position.y <= 0) {
-stickman.position.y = 0;
-isJumping = false;
-isGrounded = true;
-velocityY = 0;
+if (isJumping || !isGrounded) {
+  stickman.position.y += velocityY;
+  velocityY -= gravity;
+
+  // Check platform collisions
+  let landed = false;
+  for (let plat of platforms) {
+    const px = plat.position.x;
+    const py = plat.position.y + plat.userData.height / 2;
+    const pz = plat.position.z;
+    const w = plat.userData.width / 2;
+    const d = plat.userData.depth / 2;
+
+    const sx = stickman.position.x;
+    const sz = stickman.position.z;
+
+    if (
+      sx > px - w && sx < px + w &&
+      sz > pz - d && sz < pz + d &&
+      stickman.position.y <= py + 0.01 &&
+      velocityY <= 0
+    ) {
+      stickman.position.y = py;
+      velocityY = 0;
+      isJumping = false;
+      isGrounded = true;
+      landed = true;
+      break;
+    }
+  }
+
+  if (!landed && stickman.position.y <= 0) {
+    stickman.position.y = 0;
+    velocityY = 0;
+    isJumping = false;
+    isGrounded = true;
+  } else if (!landed) {
+    isGrounded = false;
+  }
 } else {
-isGrounded = false;
-}
-} else {
-stickman.position.y = 0;
+  // Check if still on a platform or fell off
+  let onSomething = false;
+  for (let plat of platforms) {
+    const px = plat.position.x;
+    const py = plat.position.y + plat.userData.height / 2;
+    const pz = plat.position.z;
+    const w = plat.userData.width / 2;
+    const d = plat.userData.depth / 2;
+
+    const sx = stickman.position.x;
+    const sz = stickman.position.z;
+
+    if (
+      sx > px - w && sx < px + w &&
+      sz > pz - d && sz < pz + d &&
+      Math.abs(stickman.position.y - py) < 0.05
+    ) {
+      onSomething = true;
+      break;
+    }
+  }
+  if (!onSomething && stickman.position.y <= 0.01) {
+    stickman.position.y = 0;
+    isGrounded = true;
+  } else if (!onSomething) {
+    isGrounded = false;
+  }
 }
 
 // Face direction of movement (except top-down)
