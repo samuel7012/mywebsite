@@ -37,7 +37,7 @@ const platforms = [];
 
 function createPlatform(x, y, z, w, h, d) {
   const geometry = new THREE.BoxGeometry(w, h, d);
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+  const material = new THREE.MeshStandardMaterial({ color: 0x696969 });
   const platform = new THREE.Mesh(geometry, material);
   platform.position.set(x, y, z);
   platform.receiveShadow = true;
