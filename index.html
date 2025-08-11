@@ -515,7 +515,7 @@ if(state === "walk" || state === "run") walkCycle += isRunning ? 0.025 : 0.024;
 else walkCycle += 0.012;
 
 updateCamera();
-  updateCollisions();
+updateCollisions();
 renderer.render(scene, camera);
 }
 animate();
