@@ -1,12 +1,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>im gonna upload this on steam guys PS steam guys pls give feedback</title>
+  <title>blah</title>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
-  
 // Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222233);
@@ -67,18 +66,24 @@ for (let i = 0; i < 10; i++) {
 
 // --- Collision detection function ---
 function updateCollisions() {
-  const playerBox = new THREE.Box3().setFromObject(player); // Use your existing player
+  const playerBox = new THREE.Box3().setFromObject(stickman);
   let onPlatform = false;
 
   platforms.forEach(p => {
     p.userData.boundingBox.setFromObject(p);
     if (playerBox.intersectsBox(p.userData.boundingBox)) {
-      player.position.y = p.position.y +
+      stickman.position.y = p.position.y +
         (p.geometry.parameters.height / 2) +
-        (player.geometry.parameters.height / 2);
+        (stickman.geometry?.parameters?.height || 1) / 2; // fallback height if undefined
       onPlatform = true;
     }
   });
+
+  if (!onPlatform) {
+    // Simple gravity if player is not on a platform
+    stickman.position.y -= 0.1;
+  }
+}
 
   if (!onPlatform) {
     // Simple gravity if player is not on a platform
