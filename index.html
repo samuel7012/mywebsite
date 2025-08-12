@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BTW me am 9 :P (no siriously litraly) :P :P</title>
+<title>TESTING IN PROGRES</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -12,7 +12,8 @@ body { margin: 0; overflow: hidden; }
 <b>W</b>: backward &nbsp; <b>S</b>: forward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
 Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
 <b>1</b>: Third-person &nbsp; <b>2</b>: First-person &nbsp; <b>3</b>: Top-down view<br>
-<b>Move mouse</b> to rotate camera, <b>Scroll</b> to zoom (except first-person)
+<b>Move mouse</b> to rotate camera, <b>Scroll</b> to zoom (except first-person)<br>
+<b>Arrow Keys</b>: Rotate camera
 </div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
@@ -43,207 +44,9 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
-// Stickman group (perfect stickman proportions and joints)
-const stickman = new THREE.Group();
-
-// Materials
-const stickMat = new THREE.MeshStandardMaterial({color: 0x181818});
-const headMat = new THREE.MeshStandardMaterial({color: 0xffffff});
-
-// Head (proportionally large)
-const head = new THREE.Mesh(
-new THREE.SphereGeometry(0.28, 32, 32),
-headMat
-);
-head.position.y = 2.25;
-stickman.add(head);
-
-// Body (spine)
-const body = new THREE.Mesh(
-new THREE.CylinderGeometry(0.06, 0.06, 0.95, 20),
-stickMat
-);
-body.position.y = 1.5;
-stickman.add(body);
-
-// Shoulders (joint)
-const shoulders = new THREE.Mesh(
-new THREE.SphereGeometry(0.09, 20, 16),
-stickMat
-);
-shoulders.position.y = 1.98;
-stickman.add(shoulders);
-
-// Hips (joint)
-const hips = new THREE.Mesh(
-new THREE.SphereGeometry(0.085, 18, 12),
-stickMat
-);
-hips.position.y = 1.02;
-stickman.add(hips);
-
-// Arms and Legs as groups for animation
-// LEFT ARM
-const leftArm = new THREE.Group();
-leftArm.position.set(-0.19, 1.9, 0);
-stickman.add(leftArm);
-
-// Upper arm
-const upperArmL = new THREE.Mesh(
-new THREE.CylinderGeometry(0.045, 0.045, 0.49, 14),
-stickMat
-);
-upperArmL.position.y = -0.245;
-leftArm.add(upperArmL);
-
-// Elbow
-const elbowL = new THREE.Mesh(
-new THREE.SphereGeometry(0.06, 12, 10),
-stickMat
-);
-elbowL.position.y = -0.49;
-leftArm.add(elbowL);
-
-// Forearm
-const leftForearm = new THREE.Group();
-leftForearm.position.y = -0.49;
-const lowerArmL = new THREE.Mesh(
-new THREE.CylinderGeometry(0.04, 0.04, 0.42, 12),
-stickMat
-);
-lowerArmL.position.y = -0.21;
-leftForearm.add(lowerArmL);
-
-// Wrist/Hand
-const handL = new THREE.Mesh(
-new THREE.SphereGeometry(0.045, 10, 8),
-stickMat
-);
-handL.position.y = -0.42;
-leftForearm.add(handL);
-
-leftArm.add(leftForearm);
-
-// RIGHT ARM
-const rightArm = new THREE.Group();
-rightArm.position.set(0.19, 1.9, 0);
-stickman.add(rightArm);
-
-const upperArmR = new THREE.Mesh(
-new THREE.CylinderGeometry(0.045, 0.045, 0.49, 14),
-stickMat
-);
-upperArmR.position.y = -0.245;
-rightArm.add(upperArmR);
-
-const elbowR = new THREE.Mesh(
-new THREE.SphereGeometry(0.06, 12, 10),
-stickMat
-);
-elbowR.position.y = -0.49;
-rightArm.add(elbowR);
-
-const rightForearm = new THREE.Group();
-rightForearm.position.y = -0.49;
-const lowerArmR = new THREE.Mesh(
-new THREE.CylinderGeometry(0.04, 0.04, 0.42, 12),
-stickMat
-);
-lowerArmR.position.y = -0.21;
-rightForearm.add(lowerArmR);
-
-const handR = new THREE.Mesh(
-new THREE.SphereGeometry(0.045, 10, 8),
-stickMat
-);
-handR.position.y = -0.42;
-rightForearm.add(handR);
-
-rightArm.add(rightForearm);
-
-// LEFT LEG
-const leftLeg = new THREE.Group();
-leftLeg.position.set(-0.07, 0.99, 0);
-stickman.add(leftLeg);
-
-// Thigh
-const upperLegL = new THREE.Mesh(
-new THREE.CylinderGeometry(0.055, 0.055, 0.58, 14),
-stickMat
-);
-upperLegL.position.y = -0.29;
-leftLeg.add(upperLegL);
-
-// Knee
-const kneeL = new THREE.Mesh(
-new THREE.SphereGeometry(0.07, 12, 8),
-stickMat
-);
-kneeL.position.y = -0.58;
-leftLeg.add(kneeL);
-
-// Shin
-const leftShin = new THREE.Group();
-leftShin.position.y = -0.58;
-const lowerLegL = new THREE.Mesh(
-new THREE.CylinderGeometry(0.045, 0.045, 0.49, 12),
-stickMat
-);
-lowerLegL.position.y = -0.245;
-leftShin.add(lowerLegL);
-
-// Foot
-const footL = new THREE.Mesh(
-new THREE.SphereGeometry(0.05, 10, 8),
-stickMat
-);
-footL.position.y = -0.49;
-leftShin.add(footL);
-
-leftLeg.add(leftShin);
-
-// RIGHT LEG
-const rightLeg = new THREE.Group();
-rightLeg.position.set(0.07, 0.99, 0);
-stickman.add(rightLeg);
-
-// Thigh
-const upperLegR = new THREE.Mesh(
-new THREE.CylinderGeometry(0.055, 0.055, 0.58, 14),
-stickMat
-);
-upperLegR.position.y = -0.29;
-rightLeg.add(upperLegR);
-
-// Knee
-const kneeR = new THREE.Mesh(
-new THREE.SphereGeometry(0.07, 12, 8),
-stickMat
-);
-kneeR.position.y = -0.58;
-rightLeg.add(kneeR);
-
-// Shin
-const rightShin = new THREE.Group();
-rightShin.position.y = -0.58;
-const lowerLegR = new THREE.Mesh(
-new THREE.CylinderGeometry(0.045, 0.045, 0.49, 12),
-stickMat
-);
-lowerLegR.position.y = -0.245;
-rightShin.add(lowerLegR);
-
-// Foot
-const footR = new THREE.Mesh(
-new THREE.SphereGeometry(0.05, 10, 8),
-stickMat
-);
-footR.position.y = -0.49;
-rightShin.add(footR);
-
-rightLeg.add(rightShin);
-
-scene.add(stickman);
+// Stickman setup (unchanged from your code) ...
+// [ ... stickman creation code here ... ] 
+// I won't repeat it here, but in your file it remains unchanged.
 
 // Movement state
 let moveBackward = false, moveForward = false, moveLeft = false, moveRight = false;
@@ -257,28 +60,36 @@ const jumpStrength = 0.24;
 const gravity = 0.012;
 let walkCycle = 0; // for gait animation
 
-// NEW camera rotation variables
-let rotateLeft = false, rotateRight = false;
-const cameraRotateSpeed = 0.03;
+// Camera control variables
+let azimuth = 0;
+let polar = Math.PI/5;
+let radius = 8;
+const minPolar = 0.1;
+const maxPolar = Math.PI/2 - 0.05;
 
+// Arrow key camera rotation
+const arrowRotationSpeed = 0.03;
 window.addEventListener('keydown', function(e){
 switch(e.key) {
 case 'w': moveBackward = true; break;
 case 's': moveForward = true; break;
 case 'a': moveLeft = true; break;
 case 'd': moveRight = true; break;
-case 'ArrowLeft': rotateLeft = true; break;       // NEW
-case 'ArrowRight': rotateRight = true; break;     // NEW
 case 'Shift': isRunning = true; break;
 case ' ': 
-if (isGrounded && !isJumping) {
-isJumping = true;
-velocityY = jumpStrength;
-}
-break;
+  if (isGrounded && !isJumping) {
+    isJumping = true;
+    velocityY = jumpStrength;
+  }
+  break;
 case '1': cameraMode = 1; break;
 case '2': cameraMode = 2; break;
 case '3': cameraMode = 3; break;
+// Arrow camera control
+case 'ArrowLeft': azimuth -= arrowRotationSpeed; break;
+case 'ArrowRight': azimuth += arrowRotationSpeed; break;
+case 'ArrowUp': polar -= arrowRotationSpeed; polar = Math.max(minPolar, Math.min(maxPolar, polar)); break;
+case 'ArrowDown': polar += arrowRotationSpeed; polar = Math.max(minPolar, Math.min(maxPolar, polar)); break;
 }
 });
 
@@ -288,86 +99,70 @@ case 'w': moveBackward = false; break;
 case 's': moveForward = false; break;
 case 'a': moveLeft = false; break;
 case 'd': moveRight = false; break;
-case 'ArrowLeft': rotateLeft = false; break;      // NEW
-case 'ArrowRight': rotateRight = false; break;    // NEW
 case 'Shift': isRunning = false; break;
 }
 });
 
-// Mouse orbit controls (unchanged) ...
-// [mouse control code stays exactly as in your original]
+// Mouse orbit controls (unchanged from your code) ...
+let lastMouse = {x: window.innerWidth/2, y: window.innerHeight/2};
+let mouseInitialized = false;
+const mouseSensitivity = 0.005;
 
-// updateCamera() function unchanged
+document.addEventListener('mousemove', function(e){
+if (cameraMode === 2) return;
+if (!mouseInitialized) {
+lastMouse.x = e.clientX; lastMouse.y = e.clientY;
+mouseInitialized = true;
+return;
+}
+let dx = e.clientX - lastMouse.x;
+let dy = e.clientY - lastMouse.y;
+azimuth -= dx * mouseSensitivity;
+polar -= dy * mouseSensitivity;
+polar = Math.max(minPolar, Math.min(maxPolar, polar));
+lastMouse.x = e.clientX;
+lastMouse.y = e.clientY;
+});
 
-// animateStickman() function unchanged
+document.addEventListener('mouseleave', function(){
+mouseInitialized = false;
+});
+
+renderer.domElement.addEventListener('wheel', function(e){
+if (cameraMode === 2) return;
+radius += e.deltaY * 0.01;
+radius = Math.max(2, Math.min(30, radius));
+});
+
+function updateCamera() {
+  if (cameraMode === 1) {
+    let camX = stickman.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
+    let camY = stickman.position.y + radius * Math.cos(polar) + 1;
+    let camZ = stickman.position.z + radius * Math.sin(polar) * Math.cos(azimuth);
+    camera.position.set(camX, camY, camZ);
+    camera.lookAt(stickman.position.x, stickman.position.y + 1.4, stickman.position.z);
+  } else if (cameraMode === 2) {
+    camera.position.set(stickman.position.x, stickman.position.y + 2.25, stickman.position.z);
+    const lookX = stickman.position.x + Math.sin(azimuth);
+    const lookY = stickman.position.y + 2.25;
+    const lookZ = stickman.position.z + Math.cos(azimuth);
+    camera.lookAt(lookX, lookY, lookZ);
+  } else if (cameraMode === 3) {
+    let camX = stickman.position.x + radius * Math.sin(azimuth);
+    let camY = stickman.position.y + 15;
+    let camZ = stickman.position.z + radius * Math.cos(azimuth);
+    camera.position.set(camX, camY, camZ);
+    camera.lookAt(stickman.position.x, stickman.position.y, stickman.position.z);
+  }
+}
+
+// animateStickman function stays as in your code
 
 // Animate
 function animate() {
 requestAnimationFrame(animate);
 
-// Camera-relative movement
-let dx = 0, dz = 0;
-if (moveForward) {
-dx += Math.sin(azimuth) * walkSpeed;
-dz += Math.cos(azimuth) * walkSpeed;
-}
-if (moveBackward) {
-dx -= Math.sin(azimuth) * walkSpeed;
-dz -= Math.cos(azimuth) * walkSpeed;
-}
-if (moveLeft) {
-dx += Math.sin(azimuth - Math.PI/2) * walkSpeed;
-dz += Math.cos(azimuth - Math.PI/2) * walkSpeed;
-}
-if (moveRight) {
-dx += Math.sin(azimuth + Math.PI/2) * walkSpeed;
-dz += Math.cos(azimuth + Math.PI/2) * walkSpeed;
-}
-
-if ((moveForward || moveBackward || moveLeft || moveRight) && isRunning) {
-dx *= runSpeed / walkSpeed;
-dz *= runSpeed / walkSpeed;
-}
-
-stickman.position.x += dx;
-stickman.position.z += dz;
-
-// Jumping/Gravity
-if(isJumping || !isGrounded) {
-stickman.position.y += velocityY;
-velocityY -= gravity;
-if(stickman.position.y <= 0) {
-stickman.position.y = 0;
-isJumping = false;
-isGrounded = true;
-velocityY = 0;
-} else {
-isGrounded = false;
-}
-} else {
-stickman.position.y = 0;
-}
-
-// Face direction of movement (except top-down)
-if (cameraMode !== 3 && (dx !== 0 || dz !== 0)) {
-stickman.rotation.y = Math.atan2(dx, dz);
-}
-
-// Animation state
-let state = "idle";
-if(isJumping || !isGrounded) state = "jump";
-else if(dx !== 0 || dz !== 0) state = isRunning ? "run" : "walk";
-animateStickman(state);
-
-// KEY CHANGE: run animation is slower
-if(state === "walk" || state === "run") walkCycle += isRunning ? 0.024 : 0.024;
-else walkCycle += 0.012;
-
-// NEW: Camera rotation from arrow keys
-if (cameraMode !== 3) {
-  if (rotateLeft)  azimuth += cameraRotateSpeed;
-  if (rotateRight) azimuth -= cameraRotateSpeed;
-}
+// Movement code unchanged from yours ...
 
 updateCamera();
 renderer.render(scene, camera);
