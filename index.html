@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TESTING IN PROGRES</title>
+<title>BTW me am 9 :P (no siriously litraly) :P :P</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -43,8 +43,207 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
-// Stickman setup (unchanged) ...
-// [stickman code is unchanged — skipped here for brevity, you keep your existing code]
+// Stickman group (perfect stickman proportions and joints)
+const stickman = new THREE.Group();
+
+// Materials
+const stickMat = new THREE.MeshStandardMaterial({color: 0x181818});
+const headMat = new THREE.MeshStandardMaterial({color: 0xffffff});
+
+// Head (proportionally large)
+const head = new THREE.Mesh(
+new THREE.SphereGeometry(0.28, 32, 32),
+headMat
+);
+head.position.y = 2.25;
+stickman.add(head);
+
+// Body (spine)
+const body = new THREE.Mesh(
+new THREE.CylinderGeometry(0.06, 0.06, 0.95, 20),
+stickMat
+);
+body.position.y = 1.5;
+stickman.add(body);
+
+// Shoulders (joint)
+const shoulders = new THREE.Mesh(
+new THREE.SphereGeometry(0.09, 20, 16),
+stickMat
+);
+shoulders.position.y = 1.98;
+stickman.add(shoulders);
+
+// Hips (joint)
+const hips = new THREE.Mesh(
+new THREE.SphereGeometry(0.085, 18, 12),
+stickMat
+);
+hips.position.y = 1.02;
+stickman.add(hips);
+
+// Arms and Legs as groups for animation
+// LEFT ARM
+const leftArm = new THREE.Group();
+leftArm.position.set(-0.19, 1.9, 0);
+stickman.add(leftArm);
+
+// Upper arm
+const upperArmL = new THREE.Mesh(
+new THREE.CylinderGeometry(0.045, 0.045, 0.49, 14),
+stickMat
+);
+upperArmL.position.y = -0.245;
+leftArm.add(upperArmL);
+
+// Elbow
+const elbowL = new THREE.Mesh(
+new THREE.SphereGeometry(0.06, 12, 10),
+stickMat
+);
+elbowL.position.y = -0.49;
+leftArm.add(elbowL);
+
+// Forearm
+const leftForearm = new THREE.Group();
+leftForearm.position.y = -0.49;
+const lowerArmL = new THREE.Mesh(
+new THREE.CylinderGeometry(0.04, 0.04, 0.42, 12),
+stickMat
+);
+lowerArmL.position.y = -0.21;
+leftForearm.add(lowerArmL);
+
+// Wrist/Hand
+const handL = new THREE.Mesh(
+new THREE.SphereGeometry(0.045, 10, 8),
+stickMat
+);
+handL.position.y = -0.42;
+leftForearm.add(handL);
+
+leftArm.add(leftForearm);
+
+// RIGHT ARM
+const rightArm = new THREE.Group();
+rightArm.position.set(0.19, 1.9, 0);
+stickman.add(rightArm);
+
+const upperArmR = new THREE.Mesh(
+new THREE.CylinderGeometry(0.045, 0.045, 0.49, 14),
+stickMat
+);
+upperArmR.position.y = -0.245;
+rightArm.add(upperArmR);
+
+const elbowR = new THREE.Mesh(
+new THREE.SphereGeometry(0.06, 12, 10),
+stickMat
+);
+elbowR.position.y = -0.49;
+rightArm.add(elbowR);
+
+const rightForearm = new THREE.Group();
+rightForearm.position.y = -0.49;
+const lowerArmR = new THREE.Mesh(
+new THREE.CylinderGeometry(0.04, 0.04, 0.42, 12),
+stickMat
+);
+lowerArmR.position.y = -0.21;
+rightForearm.add(lowerArmR);
+
+const handR = new THREE.Mesh(
+new THREE.SphereGeometry(0.045, 10, 8),
+stickMat
+);
+handR.position.y = -0.42;
+rightForearm.add(handR);
+
+rightArm.add(rightForearm);
+
+// LEFT LEG
+const leftLeg = new THREE.Group();
+leftLeg.position.set(-0.07, 0.99, 0);
+stickman.add(leftLeg);
+
+// Thigh
+const upperLegL = new THREE.Mesh(
+new THREE.CylinderGeometry(0.055, 0.055, 0.58, 14),
+stickMat
+);
+upperLegL.position.y = -0.29;
+leftLeg.add(upperLegL);
+
+// Knee
+const kneeL = new THREE.Mesh(
+new THREE.SphereGeometry(0.07, 12, 8),
+stickMat
+);
+kneeL.position.y = -0.58;
+leftLeg.add(kneeL);
+
+// Shin
+const leftShin = new THREE.Group();
+leftShin.position.y = -0.58;
+const lowerLegL = new THREE.Mesh(
+new THREE.CylinderGeometry(0.045, 0.045, 0.49, 12),
+stickMat
+);
+lowerLegL.position.y = -0.245;
+leftShin.add(lowerLegL);
+
+// Foot
+const footL = new THREE.Mesh(
+new THREE.SphereGeometry(0.05, 10, 8),
+stickMat
+);
+footL.position.y = -0.49;
+leftShin.add(footL);
+
+leftLeg.add(leftShin);
+
+// RIGHT LEG
+const rightLeg = new THREE.Group();
+rightLeg.position.set(0.07, 0.99, 0);
+stickman.add(rightLeg);
+
+// Thigh
+const upperLegR = new THREE.Mesh(
+new THREE.CylinderGeometry(0.055, 0.055, 0.58, 14),
+stickMat
+);
+upperLegR.position.y = -0.29;
+rightLeg.add(upperLegR);
+
+// Knee
+const kneeR = new THREE.Mesh(
+new THREE.SphereGeometry(0.07, 12, 8),
+stickMat
+);
+kneeR.position.y = -0.58;
+rightLeg.add(kneeR);
+
+// Shin
+const rightShin = new THREE.Group();
+rightShin.position.y = -0.58;
+const lowerLegR = new THREE.Mesh(
+new THREE.CylinderGeometry(0.045, 0.045, 0.49, 12),
+stickMat
+);
+lowerLegR.position.y = -0.245;
+rightShin.add(lowerLegR);
+
+// Foot
+const footR = new THREE.Mesh(
+new THREE.SphereGeometry(0.05, 10, 8),
+stickMat
+);
+footR.position.y = -0.49;
+rightShin.add(footR);
+
+rightLeg.add(rightShin);
+
+scene.add(stickman);
 
 // Movement state
 let moveBackward = false, moveForward = false, moveLeft = false, moveRight = false;
