@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>TESTING</title>
+  <title>TESTINgggG</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -284,10 +284,10 @@ case '1': cameraMode = 1; break;
 case '2': cameraMode = 2; break;
 case '3': cameraMode = 3; break;
 // Arrow camera control
-case 'ArrowLeft': azimuth -= arrowRotationSpeed; break;
-case 'ArrowRight': azimuth += arrowRotationSpeed; break;
-case 'ArrowUp': polar -= arrowRotationSpeed; polar = Math.max(minPolar, Math.min(maxPolar, polar)); break;
-case 'ArrowDown': polar += arrowRotationSpeed; polar = Math.max(minPolar, Math.min(maxPolar, polar)); break;
+case 'ArrowLeft': azimuth += arrowRotationSpeed; break; // FIXED: was -=
+case 'ArrowRight': azimuth -= arrowRotationSpeed; break; // FIXED: was +=
+case 'ArrowUp': polar += arrowRotationSpeed; polar = Math.max(minPolar, Math.min(maxPolar, polar)); break; // FIXED: was -=
+case 'ArrowDown': polar -= arrowRotationSpeed; polar = Math.max(minPolar, Math.min(maxPolar, polar)); break; // FIXED: was +=
 }
 });
 
@@ -333,8 +333,8 @@ return;
 }
 let dx = e.clientX - lastMouse.x;
 let dy = e.clientY - lastMouse.y;
-azimuth -= dx * mouseSensitivity;
-polar -= dy * mouseSensitivity;
+azimuth += dx * mouseSensitivity; // FIXED: was -=
+polar += dy * mouseSensitivity; // FIXED: was -=
 polar = Math.max(minPolar, Math.min(maxPolar, polar));
 lastMouse.x = e.clientX;
 lastMouse.y = e.clientY;
