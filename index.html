@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>TESTING IN PROGRE</title>
+  <title>TESTING</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -319,14 +319,7 @@ case 'd': moveRight = false; break;
 case 'Shift': isRunning = false; break;
 }
 });
-
-// Mouse orbit controls (always enabled)
-let azimuth = 0;
-let polar = Math.PI/5;
-let radius = 8;
-const minPolar = 0.1;
-const maxPolar = Math.PI/2 - 0.05;
-
+// Mouse orbit controls
 let lastMouse = {x: window.innerWidth/2, y: window.innerHeight/2};
 let mouseInitialized = false;
 const mouseSensitivity = 0.005;
