@@ -43,7 +43,48 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
+public class GrassGenerator : MonoBehaviour
+{
+    public Mesh grassBladeMesh;
+    public Material grassMaterial;
+    public int numberOfGrassBlades = 10000;
+    public float grassDensity = 1.0f;
+    public float maxGrassHeight = 1.0f;
 
+    private List<Matrix4x4> instanceMatrices;
+
+    void Start()
+    {
+        instanceMatrices = new List<Matrix4x4>();
+        GenerateGrass();
+    }
+
+    void GenerateGrass()
+    {
+        for (int i = 0; i < numberOfGrassBlades; i++)
+        {
+            // Example: Random placement within a certain area
+            Vector3 position = new Vector3(
+                Random.Range(-50f, 50f),
+                0f, // Adjust based on terrain height
+                Random.Range(-50f, 50f)
+            );
+
+            // Example: Random rotation and scale
+            Quaternion rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+            Vector3 scale = new Vector3(1f, Random.Range(0.5f, maxGrassHeight), 1f);
+
+            instanceMatrices.Add(Matrix4x4.TRS(position, rotation, scale));
+        }
+    }
+
+    void Update()
+    {
+        // Render all grass instances
+        Graphics.DrawMeshInstanced(grassBladeMesh, 0, grassMaterial, instanceMatrices);
+    }
+}
+  
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
 
