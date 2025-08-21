@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>Well i dont have any ideas soooo no more updates :)</title>
+  <title> :)</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -43,47 +43,32 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
-{
-    public Mesh grassBladeMesh;
-    public Material grassMaterial;
-    public int numberOfGrassBlades = 10000;
-    public float grassDensity = 1.0f;
-    public float maxGrassHeight = 1.0f;
+// Grass
+const grassGeometry = new THREE.PlaneGeometry(0.1, 1);
+const grassMaterial = new THREE.MeshStandardMaterial({
+  color: 0x228833,
+  side: THREE.DoubleSide
+});
 
-    private List<Matrix4x4> instanceMatrices;
+const grassCount = 5000;
+const dummy = new THREE.Object3D();
+const instancedGrass = new THREE.InstancedMesh(grassGeometry, grassMaterial, grassCount);
 
-    void Start()
-    {
-        instanceMatrices = new List<Matrix4x4>();
-        GenerateGrass();
-    }
+for (let i = 0; i < grassCount; i++) {
+  const x = (Math.random() - 0.5) * 100;
+  const z = (Math.random() - 0.5) * 100;
+  const y = 0;
 
-    void GenerateGrass()
-    {
-        for (int i = 0; i < numberOfGrassBlades; i++)
-        {
-            // Example: Random placement within a certain area
-            Vector3 position = new Vector3(
-                Random.Range(-50f, 50f),
-                0f, // Adjust based on terrain height
-                Random.Range(-50f, 50f)
-            );
+  dummy.position.set(x, y, z);
+  dummy.rotation.y = Math.random() * Math.PI;
+  dummy.scale.set(1, Math.random() * 2 + 0.5, 1);
+  dummy.updateMatrix();
 
-            // Example: Random rotation and scale
-            Quaternion rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-            Vector3 scale = new Vector3(1f, Random.Range(0.5f, maxGrassHeight), 1f);
-
-            instanceMatrices.Add(Matrix4x4.TRS(position, rotation, scale));
-        }
-    }
-
-    void Update()
-    {
-        // Render all grass instances
-        Graphics.DrawMeshInstanced(grassBladeMesh, 0, grassMaterial, instanceMatrices);
-    }
+  instancedGrass.setMatrixAt(i, dummy.matrix);
 }
-  
+
+scene.add(instancedGrass);
+
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
 
