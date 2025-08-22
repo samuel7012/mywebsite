@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>THIS IS JUST A PROJECT DONT THINK THAT IT'S GONNA GET FANISHED :P </title>
+  <title>:P</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -271,7 +271,6 @@ rightLeg.add(rightShin);
 
 scene.add(stickman);
 
-} else {
 // Movement state
 let moveBackward = false, moveForward = false, moveLeft = false, moveRight = false;
 let isRunning = false;
@@ -467,35 +466,6 @@ rightShin.rotation.x = 0.8;
 // Animate
 function animate() {
   requestAnimationFrame(animate);
-
-  if(inCar){
-    // Car physics
-    if(carMoveForward) carVel += carAcc;
-    if(carMoveBackward) carVel -= carAcc;
-    if(carVel > carMax) carVel = carMax;
-    if(carVel < -carMax/2) carVel = -carMax/2;
-
-    if(carMoveLeft) carAngle += carTurn * (carVel/carMax);
-    if(carMoveRight) carAngle -= carTurn * (carVel/carMax);
-
-    car.position.x += Math.sin(carAngle) * carVel * 60;
-    car.position.z += Math.cos(carAngle) * carVel * 60;
-    car.rotation.y = carAngle;
-
-    // friction
-    if(!carMoveForward && !carMoveBackward){
-      if(carVel>0) carVel = Math.max(0, carVel - carFriction);
-      else if(carVel<0) carVel = Math.min(0, carVel + carFriction);
-    }
-
-    // Camera follows car
-    const camTarget = new THREE.Vector3(
-      car.position.x - Math.sin(carAngle) * 8,
-      car.position.y + 4,
-      car.position.z - Math.cos(carAngle) * 8
-    );
-    camera.position.lerp(camTarget, 0.1);
-    camera.lookAt(car.position);
 
     // Original stickman movement & animation
     let speed = isRunning ? runSpeed : walkSpeed;
