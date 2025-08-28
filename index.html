@@ -42,6 +42,38 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
+  // 500 Green Triangles as Grass
+const grassBladeMaterial = new THREE.MeshStandardMaterial({ color: 0x38C94E, side: THREE.DoubleSide });
+
+for (let i = 0; i < 500; i++) {
+  // Random position in a 50x50 square
+  const x = (Math.random() - 0.5) * 50;
+  const z = (Math.random() - 0.5) * 50;
+  const y = 0.01 + Math.random() * 0.08; // Slight random height above ground
+
+  // Random size and orientation
+  const bladeHeight = 0.4 + Math.random() * 0.4;
+  const bladeWidth = 0.08 + Math.random() * 0.08;
+  const rotY = Math.random() * Math.PI * 2;
+
+  // Triangle geometry
+  const triangleGeometry = new THREE.BufferGeometry();
+  const vertices = new Float32Array([
+    0, 0, 0,
+    bladeWidth, 0, 0,
+    bladeWidth / 2, bladeHeight, 0
+  ]);
+  triangleGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  triangleGeometry.setIndex([0, 1, 2]);
+  triangleGeometry.computeVertexNormals();
+
+  const triangleMesh = new THREE.Mesh(triangleGeometry, grassBladeMaterial);
+  triangleMesh.position.set(x, y, z);
+  triangleMesh.rotation.y = rotY;
+
+  scene.add(triangleMesh);
+}
+
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
 
