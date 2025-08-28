@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>ply</title>
+  <title>TESTING IN PROGRES</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -35,68 +35,13 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
 
-  // === GRASS PATCH BLOCK (triangle geometry only, 500 blades) ===
-function createGrassPatchBlock(size, grassCount) {
-  const group = new THREE.Group();
+// Original Ground (Visual only)
+const groundGeometry = new THREE.PlaneGeometry(100, 100);
+const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = -Math.PI/2;
+scene.add(ground);
 
-  // Block - simple box for ground
-  const blockGeo = new THREE.BoxGeometry(size, 0.18, size);
-  const blockMat = new THREE.MeshStandardMaterial({color: 0x3e7d2a});
-  const block = new THREE.Mesh(blockGeo, blockMat);
-  block.position.y = 0; // base level
-  group.add(block);
-
-  // Grass triangles
-  for (let i = 0; i < grassCount; i++) {
-    // Random position on block
-    const x = (Math.random() - 0.5) * (size-0.25);
-    const z = (Math.random() - 0.5) * (size-0.25);
-    const height = 0.18 + Math.random() * 0.12;
-    const width = 0.08 + Math.random() * 0.07;
-
-    // 1 triangle blade
-    const grassGeo = new THREE.BufferGeometry();
-    const yBase = 0.09;
-    // Vertices for blade triangle (upright)
-    const vertices = new Float32Array([
-      0, yBase, 0,
-      -width/2, yBase, 0,
-      0, yBase + height, 0
-    ]);
-    grassGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    grassGeo.computeVertexNormals();
-
-    const grassMat = new THREE.MeshStandardMaterial({color: 0x6bbf4e, side: THREE.DoubleSide});
-    const grassBlade = new THREE.Mesh(grassGeo, grassMat);
-
-    grassBlade.position.set(x, 0.01, z);
-    grassBlade.rotation.y = Math.random() * Math.PI * 2;
-    group.add(grassBlade);
-
-    // Optional: add second triangle, crossing
-    if (Math.random() > 0.5) {
-      const grassGeo2 = new THREE.BufferGeometry();
-      const vertices2 = new Float32Array([
-        0, yBase, 0,
-        0, yBase, -width/2,
-        0, yBase + height, 0
-      ]);
-      grassGeo2.setAttribute('position', new THREE.BufferAttribute(vertices2, 3));
-      grassGeo2.computeVertexNormals();
-      const grassBlade2 = new THREE.Mesh(grassGeo2, grassMat.clone());
-      grassBlade2.position.set(x, 0.01, z);
-      grassBlade2.rotation.y = Math.random() * Math.PI * 2;
-      group.add(grassBlade2);
-    }
-  }
-
-  return group;
-}
-
-const grassBlock = createGrassPatchBlock(4, 50);
-grassBlock.position.set(0, -0.09, 0); // Adjust position as needed
-scene.add(grassBlock);
-  
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
 
@@ -498,6 +443,71 @@ stickman.position.z += dz;
 if (isJumping || !isGrounded) {
   stickman.position.y += velocityY;
   velocityY -= gravity;
+
+  // Check platform collisions
+  let landed = false;
+  for (let plat of platforms) {
+    const px = plat.position.x;
+    const py = plat.position.y + plat.userData.height / 2;
+    const pz = plat.position.z;
+    const w = plat.userData.width / 2;
+    const d = plat.userData.depth / 2;
+
+    const sx = stickman.position.x;
+    const sz = stickman.position.z;
+
+    if (
+      sx > px - w && sx < px + w &&
+      sz > pz - d && sz < pz + d &&
+      stickman.position.y <= py + 0.01 &&
+      velocityY <= 0
+    ) {
+      stickman.position.y = py;
+      velocityY = 0;
+      isJumping = false;
+      isGrounded = true;
+      landed = true;
+      break;
+    }
+  }
+
+  if (!landed && stickman.position.y <= 0) {
+    stickman.position.y = 0;
+    velocityY = 0;
+    isJumping = false;
+    isGrounded = true;
+  } else if (!landed) {
+    isGrounded = false;
+  }
+} else {
+  // Check if still on a platform or fell off
+  let onSomething = false;
+  for (let plat of platforms) {
+    const px = plat.position.x;
+    const py = plat.position.y + plat.userData.height / 2;
+    const pz = plat.position.z;
+    const w = plat.userData.width / 2;
+    const d = plat.userData.depth / 2;
+
+    const sx = stickman.position.x;
+    const sz = stickman.position.z;
+
+    if (
+      sx > px - w && sx < px + w &&
+      sz > pz - d && sz < pz + d &&
+      Math.abs(stickman.position.y - py) < 0.05
+    ) {
+      onSomething = true;
+      break;
+    }
+  }
+  if (!onSomething && stickman.position.y <= 0.01) {
+    stickman.position.y = 0;
+    isGrounded = true;
+  } else if (!onSomething) {
+    isGrounded = false;
+  }
+}
 
 // Face direction of movement (except top-down)
 if (cameraMode !== 3 && (dx !== 0 || dz !== 0)) {
