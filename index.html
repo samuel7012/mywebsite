@@ -42,7 +42,7 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
-  // 500 Green Triangles as Grass
+// 500 Green Triangles as Grass
 const grassBladeMaterial = new THREE.MeshStandardMaterial({ color: 0x38C94E, side: THREE.DoubleSide });
 
 for (let i = 0; i < 500; i++) {
@@ -73,6 +73,23 @@ for (let i = 0; i < 500; i++) {
 
   scene.add(triangleMesh);
 }
+
+// ======= PLATFORM CREATION (ADD THIS) =======
+const platforms = [];
+function createPlatform(x, y, z, width, height, depth) {
+  const geometry = new THREE.BoxGeometry(width, height, depth);
+  const material = new THREE.MeshStandardMaterial({ color: 0x8888ff });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(x, y + height / 2, z); // y is bottom height
+  mesh.userData = { width, height, depth };
+  scene.add(mesh);
+  platforms.push(mesh);
+}
+// Example platforms
+createPlatform(0, 0, 0, 5, 0.5, 5); // main ground platform
+createPlatform(3, 1, 2, 2, 0.3, 2); // a raised platform
+createPlatform(-4, 2, -1, 2, 0.3, 2); // another platform
+// ======= END PLATFORM CREATION =======
 
 // Stickman group (perfect stickman proportions and joints)
 const stickman = new THREE.Group();
