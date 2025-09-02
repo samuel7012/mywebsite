@@ -1,54 +1,86 @@
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8080 });
 
-let clients = {}; // playerId -> ws
+/**
+ * Structure:
+ * clients = {
+ *   playerId: { ws: WebSocket, color: Number }
+ * }
+ */
+let clients = {};
+
+// Helper: Send a message to one client safely
+function safeSend(ws, msgObj) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(msgObj));
+  }
+}
+
+// Helper: Broadcast a message to all clients except 'exceptId'
+function broadcast(msgObj, exceptId = null) {
+  Object.entries(clients).forEach(([id, client]) => {
+    if (id !== exceptId) {
+      safeSend(client.ws, msgObj);
+    }
+  });
+}
 
 wss.on('connection', function connection(ws) {
   let playerId = null;
+  let playerColor = null;
 
   ws.on('message', function incoming(message) {
-    const data = JSON.parse(message);
+    let data;
+    try {
+      data = JSON.parse(message);
+    } catch (err) {
+      safeSend(ws, { type: "error", message: "Invalid JSON" });
+      return;
+    }
 
-    if (data.join) {
-      playerId = data.join;
-      clients[playerId] = ws;
+    // Handle player joining
+    if (data.type === 'join' && typeof data.playerId === 'string') {
+      playerId = data.playerId;
+      playerColor = typeof data.color === 'number' ? data.color : 0xff44ff;
+      clients[playerId] = { ws, color: playerColor };
 
       // Notify all other clients about the new player
-      broadcast({ join: playerId, color: data.color }, playerId);
+      broadcast({ type: 'player_join', playerId, color: playerColor }, playerId);
 
-      // Send all existing players to the new player
-      Object.keys(clients).forEach(id => {
-        if (id !== playerId) {
-          ws.send(JSON.stringify({ join: id, color: 0xff44ff }));
-        }
-      });
+      // Send current player list to the new player
+      const currentPlayers = Object.entries(clients)
+        .filter(([id]) => id !== playerId)
+        .map(([id, client]) => ({ playerId: id, color: client.color }));
+      safeSend(ws, { type: 'player_list', players: currentPlayers });
+      return;
     }
 
-    if (data.move) {
+    // Handle player movement
+    if (data.type === 'move' && playerId && data.move) {
       // Broadcast movement to all except sender
-      broadcast(data, playerId);
+      broadcast({ type: 'player_move', playerId, move: data.move }, playerId);
+      return;
     }
 
-    if (data.leave) {
-      broadcast({ leave: data.leave }, playerId);
-      delete clients[data.leave];
+    // Handle player leaving (explicit)
+    if (data.type === 'leave' && playerId) {
+      broadcast({ type: 'player_leave', playerId }, playerId);
+      delete clients[playerId];
+      playerId = null;
+      return;
     }
+
+    // Unknown message type
+    safeSend(ws, { type: "error", message: "Unknown message type or not joined" });
   });
 
   ws.on('close', function() {
     if (playerId) {
-      broadcast({ leave: playerId }, playerId);
+      broadcast({ type: 'player_leave', playerId }, playerId);
       delete clients[playerId];
+      playerId = null;
     }
   });
 });
-
-function broadcast(msg, exceptId) {
-  Object.entries(clients).forEach(([id, clientWs]) => {
-    if (id !== exceptId && clientWs.readyState === WebSocket.OPEN) {
-      clientWs.send(JSON.stringify(msg));
-    }
-  });
-}
 
 console.log('WebSocket server running on ws://localhost:8080');
