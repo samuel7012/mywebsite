@@ -1,109 +1,113 @@
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8080 });
 
-// Store player info: playerId -> { ws, color, position }
-let clients = {};
+const clients = new Map(); // playerId -> { ws, color, position }
 
-/**
- * Send a message to a WebSocket safely.
- */
 function safeSend(ws, msgObj) {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(msgObj));
   }
 }
 
-/**
- * Broadcast a message to all clients except `exceptId` (if given).
- */
 function broadcast(msgObj, exceptId = null) {
-  Object.entries(clients).forEach(([id, client]) => {
+  for (const [id, client] of clients.entries()) {
     if (id !== exceptId) {
       safeSend(client.ws, msgObj);
     }
-  });
+  }
 }
 
-wss.on('connection', function connection(ws) {
-  let playerId = null;
-  let playerColor = null;
+function handleJoin(ws, data) {
+  const { playerId, color } = data;
+  if (!playerId || typeof playerId !== 'string') {
+    safeSend(ws, { type: 'error', message: 'Missing or invalid playerId' });
+    return;
+  }
 
-  ws.on('message', function incoming(message) {
+  const playerColor = typeof color === 'number' ? color : 0xff44ff;
+  clients.set(playerId, { ws, color: playerColor, position: { x: 0, y: 0 } });
+
+  console.log(`Player joined: ${playerId}`);
+
+  broadcast({ type: 'player_join', playerId, color: playerColor }, playerId);
+
+  const existingPlayers = [...clients.entries()]
+    .filter(([id]) => id !== playerId)
+    .map(([id, client]) => ({
+      playerId: id,
+      color: client.color,
+      position: client.position
+    }));
+
+  safeSend(ws, { type: 'player_list', players: existingPlayers });
+
+  return playerId;
+}
+
+function handleMove(playerId, data) {
+  const client = clients.get(playerId);
+  if (!client || !data.move || typeof data.move.x !== 'number' || typeof data.move.y !== 'number') {
+    return;
+  }
+
+  client.position = { x: data.move.x, y: data.move.y };
+  broadcast({ type: 'player_move', playerId, position: client.position }, playerId);
+}
+
+function handleLeave(playerId) {
+  if (clients.has(playerId)) {
+    broadcast({ type: 'player_leave', playerId }, playerId);
+    clients.delete(playerId);
+    console.log(`Player left: ${playerId}`);
+  }
+}
+
+wss.on('connection', (ws) => {
+  let playerId = null;
+
+  console.log('New connection established');
+
+  ws.on('message', (message) => {
     let data;
     try {
       data = JSON.parse(message);
     } catch (err) {
-      safeSend(ws, { type: "error", message: "Invalid JSON" });
+      safeSend(ws, { type: 'error', message: 'Invalid JSON format' });
       return;
     }
 
-    // JOIN message: { type: "join", playerId: "...", color: 0x.... }
-    if (data.type === 'join' && typeof data.playerId === 'string') {
-      playerId = data.playerId;
-      playerColor = typeof data.color === 'number' ? data.color : 0xff44ff;
-      clients[playerId] = { ws, color: playerColor, position: { x: 0, y: 0 } };
+    switch (data.type) {
+      case 'join':
+        playerId = handleJoin(ws, data);
+        break;
 
-      // Notify others about the new player
-      broadcast({ type: 'player_join', playerId, color: playerColor }, playerId);
+      case 'move':
+        if (playerId) handleMove(playerId, data);
+        break;
 
-      // Send all existing players to the new player
-      const existingPlayers = Object.entries(clients)
-        .filter(([id]) => id !== playerId)
-        .map(([id, client]) => ({
-          playerId: id,
-          color: client.color,
-          position: client.position
-        }));
-      safeSend(ws, { type: 'player_list', players: existingPlayers });
-      return;
+      case 'leave':
+        if (playerId) {
+          handleLeave(playerId);
+          playerId = null;
+        }
+        break;
+
+      default:
+        // Legacy move support
+        if (data.move && playerId) {
+          handleMove(playerId, data);
+        } else {
+          safeSend(ws, { type: 'error', message: 'Unknown message type or missing fields' });
+        }
     }
-
-    // MOVE message: { type: "move", move: { x, y } }
-    if (data.type === 'move' && playerId && data.move &&
-        typeof data.move.x === 'number' && typeof data.move.y === 'number') {
-      // Update server-side position
-      clients[playerId].position = { x: data.move.x, y: data.move.y };
-
-      // Broadcast movement
-      broadcast({
-        type: 'player_move',
-        playerId,
-        position: clients[playerId].position
-      }, playerId);
-      return;
-    }
-
-    // Explicit LEAVE: { type: "leave" }
-    if (data.type === 'leave' && playerId) {
-      broadcast({ type: 'player_leave', playerId }, playerId);
-      delete clients[playerId];
-      playerId = null;
-      return;
-    }
-
-    // Legacy move support: { move: { x, y } }
-    if (data.move && !data.type && playerId &&
-        typeof data.move.x === 'number' && typeof data.move.y === 'number') {
-      clients[playerId].position = { x: data.move.x, y: data.move.y };
-      broadcast({
-        type: 'player_move',
-        playerId,
-        position: clients[playerId].position
-      }, playerId);
-      return;
-    }
-
-    // Unknown or malformed message
-    safeSend(ws, { type: "error", message: "Unknown message type or missing fields" });
   });
 
-  ws.on('close', function() {
+  ws.on('close', () => {
     if (playerId) {
-      broadcast({ type: 'player_leave', playerId }, playerId);
-      delete clients[playerId];
-      playerId = null;
+      handleLeave(playerId);
     }
+    console.log('Connection closed');
   });
 });
 
-console.log('WebSocket server running on ws://localhost:8080');
+console.log('✅ WebSocket server running on ws://localhost:8080');
