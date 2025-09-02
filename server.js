@@ -1,49 +1,54 @@
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8080 });
 
-const players = {}; // id: {color}
+let clients = {}; // playerId -> ws
 
 wss.on('connection', function connection(ws) {
-  // When a new client connects, send them the list of currently connected players
-  ws.on('message', function incoming(data) {
-    let msg;
-    try { msg = JSON.parse(data); } catch { return; }
+  let playerId = null;
 
-    if (msg.join) {
-      players[msg.join] = msg.color || 0xffffff;
-      // Notify all clients about the new player
-      wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ join: msg.join, color: msg.color }));
-        }
-      });
-      // Send existing players to the new client
-      Object.keys(players).forEach(pid => {
-        if (pid !== msg.join && ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ join: pid, color: players[pid] }));
+  ws.on('message', function incoming(message) {
+    const data = JSON.parse(message);
+
+    if (data.join) {
+      playerId = data.join;
+      clients[playerId] = ws;
+
+      // Notify all other clients about the new player
+      broadcast({ join: playerId, color: data.color }, playerId);
+
+      // Send all existing players to the new player
+      Object.keys(clients).forEach(id => {
+        if (id !== playerId) {
+          ws.send(JSON.stringify({ join: id, color: 0xff44ff }));
         }
       });
     }
 
-    if (msg.move) {
-      // Broadcast movement to all clients except sender
-      wss.clients.forEach(function each(client) {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(data);
-        }
-      });
+    if (data.move) {
+      // Broadcast movement to all except sender
+      broadcast(data, playerId);
     }
 
-    if (msg.leave) {
-      delete players[msg.leave];
-      // Broadcast leave to all clients
-      wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ leave: msg.leave }));
-        }
-      });
+    if (data.leave) {
+      broadcast({ leave: data.leave }, playerId);
+      delete clients[data.leave];
+    }
+  });
+
+  ws.on('close', function() {
+    if (playerId) {
+      broadcast({ leave: playerId }, playerId);
+      delete clients[playerId];
     }
   });
 });
 
-console.log("WebSocket server running on ws://localhost:8080");
+function broadcast(msg, exceptId) {
+  Object.entries(clients).forEach(([id, clientWs]) => {
+    if (id !== exceptId && clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send(JSON.stringify(msg));
+    }
+  });
+}
+
+console.log('WebSocket server running on ws://localhost:8080');
