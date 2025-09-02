@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-  <title>Multiplayer Stickma</title>
+  <title>does this work?</title>
 <style>
 body { margin: 0; overflow: hidden; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -312,7 +312,7 @@ function animateStickman(player, dt) {
 
 // Multiplayer networking (DEMO)
 // Replace with your own WebSocket server for real multiplayer!
-const ws = new WebSocket("wss://echo.websocket.events"); // echo server for demo
+const ws = new WebSocket("https://samuelvaldez.website/"); // echo server for demo
 ws.onopen = () => {
   ws.send(JSON.stringify({join: playerId, color: 0xffffff}));
 };
