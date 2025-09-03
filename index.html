@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Multiplayer Stickman (bug fixing for mabey 1 hour)</title>
+<title>Multiplayer Stickman (nvm i fixed it already🤣)</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -155,11 +155,11 @@ window.addEventListener('keyup', e=>{
 });
 window.addEventListener('keydown', e=>{
   switch(e.key){
-    case 'w': moveForward=false; break;
-    case 's': moveBackward=false; break;
-    case 'a': moveLeft=false; break;
-    case 'd': moveRight=false; break;
-    case 'Shift': isRunning=false; break;
+    case 'w': moveForward=true; break;
+    case 's': moveBackward=true; break;
+    case 'a': moveLeft=true; break;
+    case 'd': moveRight=true; break;
+    case 'Shift': isRunning=true; break;
   }
 });
 
