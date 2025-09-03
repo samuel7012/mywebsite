@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Multiplayer Stickman (nvm i fixed it already🤣)</title>
+<title>try to relax in the baddest game in the world</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -139,33 +139,74 @@ function removePlayer(id) {
 addPlayer(playerId, 0xffffff);
 
 // ===== Movement =====
-let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
-let isRunning=false, isJumping=false, isGrounded=true, velocityY=0;
-const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
+// Movement flags initialized to false
+let moveForward = false;
+let moveBackward = false;
+let moveLeft = false;
+let moveRight = false;
+let isRunning = false;
+let isJumping = false;
+let velocityY = 0;
+const jumpStrength = 10;
+let isGrounded = true;
 
-window.addEventListener('keyup', e=>{
-  switch(e.key){
-    case 'w': moveForward=true; break;
-    case 's': moveBackward=true; break;
-    case 'a': moveLeft=true; break;
-    case 'd': moveRight=true; break;
-    case 'Shift': isRunning=true; break;
-    case ' ': if(isGrounded && !isJumping){ isJumping=true; velocityY=jumpStrength; } break;
+// Handle keydown: keys pressed --> set true
+window.addEventListener('keydown', (e) => {
+  switch (e.key.toLowerCase()) {
+    case 'w':
+      moveForward = true;
+      break;
+    case 's':
+      moveBackward = true;
+      break;
+    case 'a':
+      moveLeft = true;
+      break;
+    case 'd':
+      moveRight = true;
+      break;
+    case 'shift':
+      isRunning = true;
+      break;
+    case ' ':
+      // Jump only if grounded and not currently jumping
+      if (isGrounded &&!isJumping) {
+        isJumping = true;
+        velocityY = jumpStrength;
+      }
+      break;
+    default:
+      break;
   }
-});
-window.addEventListener('keydown', e=>{
-  switch(e.key){
-    case 'w': moveForward=true; break;
-    case 's': moveBackward=true; break;
-    case 'a': moveLeft=true; break;
-    case 'd': moveRight=true; break;
-    case 'Shift': isRunning=true; break;
-  }
+  // Optional: debug output
+  // console.log(`keydown: W=${moveForward}, S=${moveBackward}, A=${moveLeft}, D=${moveRight}, Shift=${isRunning}`);
 });
 
-// temporary (until i fix it)
-  console.log(`Forward: ${moveForward}, Backward: ${moveBackward}, Left: ${moveLeft}, Right: ${moveRight}`);
-  
+// Handle keyup: keys released --> set false
+window.addEventListener('keyup', (e) => {
+  switch (e.key.toLowerCase()) {
+    case 'w':
+      moveForward = false;
+      break;
+    case 's':
+      moveBackward = false;
+      break;
+    case 'a':
+      moveLeft = false;
+      break;
+    case 'd':
+      moveRight = false;
+      break;
+    case 'shift':
+      isRunning = false;
+      break;
+    default:
+      break;
+  }
+  // Optional: debug output
+  // console.log(`keyup: W=${moveForward}, S=${moveBackward}, A=${moveLeft}, D=${moveRight}, Shift=${isRunning}`);
+});
+
 // ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
 const minPolar=0.1, maxPolar=Math.PI/2-0.05;
