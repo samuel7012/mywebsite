@@ -97,10 +97,9 @@ function createStickman(color=0xffffff) {
   };
 }
 
-// ===== Multiplayer state =====
-const playerId = Math.random().toString(36).substr(2, 9);
+// ===== Player setup =====
+const playerId = "local"; 
 const players = {};
-
 function addPlayer(id, color) {
   if (!players[id]) {
     const parts = createStickman(color);
@@ -109,103 +108,42 @@ function addPlayer(id, color) {
       ...parts,
       x: 0, y: 0, z: 0,
       facing: 0,
-      targetX:0, targetY:0, targetZ:0,
-      movement: {running:false, jumping:false, grounded:true, velocityY:0},
       walkCycle: 0,
       state: "idle",
       color
     };
   }
 }
-
-function updatePlayerPosition(id, x, y, z, facing, state) {
-  if (players[id]) {
-    players[id].targetX = x;
-    players[id].targetY = y;
-    players[id].targetZ = z;
-    players[id].facing = facing;
-    players[id].state = state;
-  }
-}
-
-function removePlayer(id) {
-  if (players[id]) {
-    scene.remove(players[id].model);
-    delete players[id];
-  }
-}
-
-// Local player
 addPlayer(playerId, 0xffffff);
 
+// ===== Input handling =====
+const keys = {};
+document.addEventListener("keydown", (event) => { keys[event.key.toLowerCase()] = true; });
+document.addEventListener("keyup", (event) => { keys[event.key.toLowerCase()] = false; });
+
 // ===== Movement =====
-// Movement flags initialized to false
-let moveForward = false;
-let moveBackward = false;
-let moveLeft = false;
-let moveRight = false;
-let isRunning = false;
-let isJumping = false;
-let velocityY = 0;
-const jumpStrength = 10;
-let isGrounded = true;
+function handleMovement(dt) {
+  const player = players[playerId];
+  const speed = 5 * dt;
+  let dx=0, dz=0;
 
-// Handle keydown: keys pressed --> set true
-window.addEventListener('keydown', (e) => {
-  switch (e.key.toLowerCase()) {
-    case 'w':
-      moveForward = true;
-      break;
-    case 's':
-      moveBackward = true;
-      break;
-    case 'a':
-      moveLeft = true;
-      break;
-    case 'd':
-      moveRight = true;
-      break;
-    case 'shift':
-      isRunning = true;
-      break;
-    case ' ':
-      // Jump only if grounded and not currently jumping
-      if (isGrounded &&!isJumping) {
-        isJumping = true;
-        velocityY = jumpStrength;
-      }
-      break;
-    default:
-      break;
-  }
-  // Optional: debug output
-  // console.log(`keydown: W=${moveForward}, S=${moveBackward}, A=${moveLeft}, D=${moveRight}, Shift=${isRunning}`);
-});
+  if (keys["w"]) dz -= speed;
+  if (keys["s"]) dz += speed;
+  if (keys["a"]) dx -= speed;
+  if (keys["d"]) dx += speed;
 
-// Handle keyup: keys released --> set false
-window.addEventListener('keyup', (e) => {
-  switch (e.key.toLowerCase()) {
-    case 'w':
-      moveForward = false;
-      break;
-    case 's':
-      moveBackward = false;
-      break;
-    case 'a':
-      moveLeft = false;
-      break;
-    case 'd':
-      moveRight = false;
-      break;
-    case 'shift':
-      isRunning = false;
-      break;
-    default:
-      break;
+  player.x += dx;
+  player.z += dz;
+  player.model.position.set(player.x, player.y, player.z);
+
+  if (dx !== 0 || dz !== 0) {
+    player.facing = Math.atan2(dx, dz);
+    player.model.rotation.y = player.facing;
+    player.state = "walk";
+  } else {
+    player.state = "idle";
   }
-  // Optional: debug output
-  // console.log(`keyup: W=${moveForward}, S=${moveBackward}, A=${moveLeft}, D=${moveRight}, Shift=${isRunning}`);
-});
+}
 
 // ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
@@ -232,125 +170,15 @@ function updateCamera(target){
   camera.lookAt(target.x, target.y+1.4, target.z);
 }
 
-// ===== Stickman animation =====
-function animateStickman(player, dt){
-  let t=player.walkCycle;
-  let la=player.leftArm, ra=player.rightArm;
-  let lfa=player.leftForearm, rfa=player.rightForearm;
-  let ll=player.leftLeg, rl=player.rightLeg;
-  let ls=player.leftShin, rs=player.rightShin;
-  let state=player.state;
-
-  if(state==="idle"){
-    la.rotation.x=ra.rotation.x=lfa.rotation.x=rfa.rotation.x=0;
-    ll.rotation.x=rl.rotation.x=ls.rotation.x=rs.rotation.x=0;
-  } else if(state==="walk"){
-    let f=5, aa=0.65, al=0.7, sa=0.47, ph=t*f;
-    la.rotation.x=Math.sin(ph)*aa;
-    ra.rotation.x=Math.sin(ph+Math.PI)*aa;
-    ll.rotation.x=Math.sin(ph)*al;
-    rl.rotation.x=Math.sin(ph+Math.PI)*al;
-    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4))*sa;
-    rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4+Math.PI))*sa;
-    player.walkCycle += dt*(player.movement.running?1.04:1);
-  } else if(state==="run"){
-    let f=9.5, aa=1.6, al=1.8, sa=1.35, ph=t*f;
-    la.rotation.x=Math.sin(ph)*aa*0.6;
-    ra.rotation.x=Math.sin(ph+Math.PI)*aa*0.6;
-    lfa.rotation.x=Math.abs(Math.sin(ph))*0.9-1.1;
-    rfa.rotation.x=Math.abs(Math.sin(ph+Math.PI))*0.9-1.1;
-    ll.rotation.x=Math.sin(ph)*al;
-    rl.rotation.x=Math.sin(ph+Math.PI)*al;
-    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6))*sa +0.13*Math.abs(Math.sin(ph));
-    rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6+Math.PI))*sa +0.13*Math.abs(Math.sin(ph+Math.PI));
-    player.walkCycle += dt*1.3;
-  } else if(state==="jump"){
-    la.rotation.x=ra.rotation.x=-1.15;
-    lfa.rotation.x=rfa.rotation.x=-0.42;
-    ll.rotation.x=rl.rotation.x=0.88;
-    ls.rotation.x=rs.rotation.x=0.8;
-    player.walkCycle += dt*0.6;
-  }
-}
-
-// ===== WebSocket (PieSocket Free Relay) =====
-const ws = new WebSocket("wss://patient.my-doc.com:8080");
-
-ws.onopen = ()=>{
-  console.log("Connected ✅");
-  ws.send(JSON.stringify({join: playerId, color: 0xffffff}));
-};
-
-ws.onmessage = (msg)=>{
-  const data = JSON.parse(msg.data);
-  if(data.join && data.join!==playerId) addPlayer(data.join, data.color||0xff44ff);
-  if(data.move && data.id!==playerId) updatePlayerPosition(data.id, data.x, data.y, data.z, data.facing, data.movementState);
-  if(data.leave && data.leave!==playerId) removePlayer(data.leave);
-};
-
-ws.onerror = err => console.error(err);
-ws.onclose = ()=>console.log("Disconnected ❌");
-
-window.addEventListener('beforeunload', ()=>{
-  if(ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({leave: playerId}));
-});
-
 // ===== Main loop =====
-let prevTime = performance.now();
+const clock = new THREE.Clock();
 function animate(){
   requestAnimationFrame(animate);
-  let time = performance.now();
-  let dt = Math.min((time-prevTime)/1000,0.05);
-  prevTime = time;
+  let dt = clock.getDelta();
 
-  // Local player movement
-  const player = players[playerId];
-  let dx=0,dz=0;
-  if(moveForward){dx+=Math.sin(azimuth)*walkSpeed; dz+=Math.cos(azimuth)*walkSpeed;}
-  if(moveBackward){dx-=Math.sin(azimuth)*walkSpeed; dz-=Math.cos(azimuth)*walkSpeed;}
-  if(moveLeft){dx+=Math.sin(azimuth-Math.PI/2)*walkSpeed; dz+=Math.cos(azimuth-Math.PI/2)*walkSpeed;}
-  if(moveRight){dx+=Math.sin(azimuth+Math.PI/2)*walkSpeed; dz+=Math.cos(azimuth+Math.PI/2)*walkSpeed;}
-  if((moveForward||moveBackward||moveLeft||moveRight)&&isRunning){dx*=runSpeed/walkSpeed; dz*=runSpeed/walkSpeed;}
+  handleMovement(dt);
+  updateCamera(players[playerId]);
 
-  player.x += dx; player.z += dz;
-
-  // Jump & gravity
-  if(isJumping||!isGrounded){
-    player.y += velocityY;
-    velocityY -= gravity;
-    if(player.y<=0){player.y=0; velocityY=0; isJumping=false; isGrounded=true;}
-    else{isGrounded=false;}
-  }
-
-  player.model.position.set(player.x,player.y,player.z);
-  if(dx!==0||dz!==0){player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing;}
-
-  // Animation state
-  let state="idle";
-  if(isJumping||!isGrounded) state="jump";
-  else if(dx!==0||dz!==0) state=isRunning?"run":"walk";
-  player.state=state;
-  animateStickman(player, dt);
-
-  // Send local position
-  if(ws.readyState===WebSocket.OPEN){
-    //console.log(JSON.stringify({move:true, id:playerId, x:player.x, y:player.y, z:player.z, facing:player.facing, movementState:player.state}));
-    ws.send(JSON.stringify({move:true, id:playerId, x:player.x, y:player.y, z:player.z, facing:player.facing, movementState:player.state}));
-  }
-
-  // Animate remote players with interpolation
-  for(const [id,p] of Object.entries(players)){
-    if(id===playerId) continue;
-    // Smooth interpolation
-    p.x += (p.targetX - p.x)*0.15;
-    p.y += (p.targetY - p.y)*0.15;
-    p.z += (p.targetZ - p.z)*0.15;
-    p.model.position.set(p.x,p.y,p.z);
-    p.model.rotation.y = p.facing;
-    animateStickman(p, dt);
-  }
-
-  updateCamera(player);
   renderer.render(scene,camera);
 }
 animate();
