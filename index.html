@@ -293,6 +293,7 @@ function animate(){
 
   // Send local position
   if(ws.readyState===WebSocket.OPEN){
+    console.log(JSON.stringify({move:true, id:playerId, x:player.x, y:player.y, z:player.z, facing:player.facing, movementState:player.state}));
     ws.send(JSON.stringify({move:true, id:playerId, x:player.x, y:player.y, z:player.z, facing:player.facing, movementState:player.state}));
   }
 
