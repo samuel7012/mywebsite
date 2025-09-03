@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Multiplayer Stickman</title>
+<title>Multiplayer Stickman (bug fixing for mabey 1 hour)</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -293,7 +293,7 @@ function animate(){
 
   // Send local position
   if(ws.readyState===WebSocket.OPEN){
-    console.log(JSON.stringify({move:true, id:playerId, x:player.x, y:player.y, z:player.z, facing:player.facing, movementState:player.state}));
+    //console.log(JSON.stringify({move:true, id:playerId, x:player.x, y:player.y, z:player.z, facing:player.facing, movementState:player.state}));
     ws.send(JSON.stringify({move:true, id:playerId, x:player.x, y:player.y, z:player.z, facing:player.facing, movementState:player.state}));
   }
 
