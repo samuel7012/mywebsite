@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title><html lang="id"></title>
+<title>SKIBIDI</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -139,17 +139,17 @@ function removePlayer(id) {
 addPlayer(playerId, 0xffffff);
 
 // ===== Movement =====
-let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
+let moveForward=true, moveBackward=true, moveLeft=false, moveRight=false;
 let isRunning=false, isJumping=false, isGrounded=true, velocityY=0;
 const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
 
 window.addEventListener('keyup', e=>{
   switch(e.key){
-    case 'w': moveForward=false; break;
-    case 's': moveBackward=false; break;
-    case 'a': moveLeft=false; break;
-    case 'd': moveRight=false; break;
-    case 'Shift': isRunning=false; break;
+    case 'w': moveForward=true; break;
+    case 's': moveBackward=true; break;
+    case 'a': moveLeft=true; break;
+    case 'd': moveRight=true; break;
+    case 'Shift': isRunning=true; break;
     case ' ': if(isGrounded && !isJumping){ isJumping=true; velocityY=jumpStrength; } break;
   }
 });
