@@ -158,6 +158,15 @@ case 'a': moveLeft = true; break;
 case 'd': moveRight = true; break;
 case 'Shift': isRunning = true; break;
 case ' ': 
+
+    window.addEventListener('keyup', function(e){
+switch(e.key) {
+case 'w': moveBackward = false; break;
+case 's': moveForward = false; break;
+case 'a': moveLeft = false; break;
+case 'd': moveRight = false; break;
+case 'Shift': isRunning = false; break;
+case ' ': 
 if (isGrounded && !isJumping) {
 isJumping = true;
 velocityY = jumpStrength;
