@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SKIBIDI</title>
+<title>SKIBIDI UWUWUWUWUWUWU</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -139,30 +139,36 @@ function removePlayer(id) {
 addPlayer(playerId, 0xffffff);
 
 // ===== Movement =====
-let moveForward=true, moveBackward=true, moveLeft=false, moveRight=false;
-let isRunning=false, isJumping=false, isGrounded=true, velocityY=0;
-const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
+let moveBackward = false, moveForward = false, moveLeft = false, moveRight = false;
+let isRunning = false;
+let isJumping = false;
+let isGrounded = true;
+let velocityY = 0;
+const walkSpeed = 0.08;
+const runSpeed = 0.16;
+const jumpStrength = 0.24;
+const gravity = 0.012;
+let walkCycle = 0; // for gait animation
 
-window.addEventListener('keyup', e=>{
-  switch(e.key){
-    case 'w': moveForward=true; break;
-    case 's': moveBackward=true; break;
-    case 'a': moveLeft=true; break;
-    case 'd': moveRight=true; break;
-    case 'Shift': isRunning=true; break;
-    case ' ': if(isGrounded && !isJumping){ isJumping=true; velocityY=jumpStrength; } break;
-  }
+window.addEventListener('keydown', function(e){
+switch(e.key) {
+case 'w': moveBackward = true; break;
+case 's': moveForward = true; break;
+case 'a': moveLeft = true; break;
+case 'd': moveRight = true; break;
+case 'Shift': isRunning = true; break;
+case ' ': 
+if (isGrounded && !isJumping) {
+isJumping = true;
+velocityY = jumpStrength;
+}
+break;
+case '1': cameraMode = 1; break;
+case '2': cameraMode = 2; break;
+case '3': cameraMode = 3; break;
+}
 });
-window.addEventListener('keydown', e=>{
-  switch(e.key){
-    case 'w': moveForward=true; break;
-    case 's': moveBackward=true; break;
-    case 'a': moveLeft=true; break;
-    case 'd': moveRight=true; break;
-    case 'Shift': isRunning=true; break;
-  }
-});
-
+  
 // ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
 const minPolar=0.1, maxPolar=Math.PI/2-0.05;
