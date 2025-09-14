@@ -138,45 +138,91 @@ function removePlayer(id) {
 // Local player
 addPlayer(playerId, 0xffffff);
 
-// ===== Movement =====
-let moveBackward = false, moveForward = false, moveLeft = false, moveRight = false;
+// move it
+let moveForward = false,
+    moveBackward = false,
+    moveLeft = false,
+    moveRight = false;
+
 let isRunning = false;
 let isJumping = false;
 let isGrounded = true;
+
 let velocityY = 0;
-const walkSpeed = 0.08;
-const runSpeed = 0.16;
+
+const walkSpeed   = 0.08;
+const runSpeed    = 0.16;
 const jumpStrength = 0.24;
-const gravity = 0.012;
+const gravity      = 0.012;
+
 let walkCycle = 0; // for gait animation
 
-window.addEventListener('keydown', function(e){
-switch(e.key) {
-case 'w': moveBackward = true; break;
-case 's': moveForward = true; break;
-case 'a': moveLeft = true; break;
-case 'd': moveRight = true; break;
-case 'Shift': isRunning = true; break;
-case ' ': 
-
-    window.addEventListener('keyup', function(e){
-switch(e.key) {
-case 'w': moveBackward = false; break;
-case 's': moveForward = false; break;
-case 'a': moveLeft = false; break;
-case 'd': moveRight = false; break;
-case 'Shift': isRunning = false; break;
-case ' ': 
-if (isGrounded && !isJumping) {
-isJumping = true;
-velocityY = jumpStrength;
-}
-break;
-case '1': cameraMode = 1; break;
-case '2': cameraMode = 2; break;
-case '3': cameraMode = 3; break;
-}
+// --- Input ---
+window.addEventListener('keydown', (e) => {
+  switch (e.key) {
+    case 'w': moveForward = true; break;
+    case 's': moveBackward = true; break;
+    case 'a': moveLeft = true; break;
+    case 'd': moveRight = true; break;
+    case 'Shift': isRunning = true; break;
+    case ' ': // jump
+      if (isGrounded && !isJumping) {
+        isJumping = true;
+        velocityY = jumpStrength;
+      }
+      break;
+    case '1': cameraMode = 1; break;
+    case '2': cameraMode = 2; break;
+    case '3': cameraMode = 3; break;
+  }
 });
+
+window.addEventListener('keyup', (e) => {
+  switch (e.key) {
+    case 'w': moveForward = false; break;
+    case 's': moveBackward = false; break;
+    case 'a': moveLeft = false; break;
+    case 'd': moveRight = false; break;
+    case 'Shift': isRunning = false; break;
+  }
+});
+
+// --- Update (call every frame) ---
+function updateMovement(player) {
+  let speed = isRunning ? runSpeed : walkSpeed;
+  let moveX = 0, moveZ = 0;
+
+  if (moveForward)  moveZ -= speed;
+  if (moveBackward) moveZ += speed;
+  if (moveLeft)     moveX -= speed;
+  if (moveRight)    moveX += speed;
+
+  // Apply horizontal movement (simple example, assumes Z forward, X right)
+  player.position.x += moveX;
+  player.position.z += moveZ;
+
+  // Vertical physics
+  if (isJumping || !isGrounded) {
+    velocityY -= gravity;
+    player.position.y += velocityY;
+
+    if (player.position.y <= 0) { // ground collision at y=0
+      player.position.y = 0;
+      isGrounded = true;
+      isJumping = false;
+      velocityY = 0;
+    } else {
+      isGrounded = false;
+    }
+  }
+
+  // Walk cycle increment (if moving)
+  if (moveForward || moveBackward || moveLeft || moveRight) {
+    walkCycle += speed * 10;
+  } else {
+    walkCycle = 0;
+  }
+}
   
 // ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
