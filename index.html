@@ -291,8 +291,9 @@ function animateStickman(player, dt){
   }
 }
 
-// ===== WebSocket (PieSocket Free Relay) =====
-window.ws = new WebSocket(location.protocol === "https:" ? "wss://18.162.210.89:8080" : "ws://18.162.210.89:8080");
+// ===== WebSocket (conection) =====
+const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+window.ws = new WebSocket(protocol + "18.162.210.89:8080");
 
 ws.onopen = ()=>{
   console.log("Connected ✅");
