@@ -139,8 +139,8 @@ function removePlayer(id) {
 addPlayer(playerId, 0xffffff);
 
 // move it
-let moveForward = true,
-    moveBackward = true,
+let moveForward = false,
+    moveBackward = false,
     moveLeft = false,
     moveRight = false;
 
@@ -160,8 +160,8 @@ let walkCycle = 0; // for gait animation
 // --- Input ---
 window.addEventListener('keydown', (e) => {
   switch (e.key) {
-    case 'w': moveForward = true; break;
-    case 's': moveBackward = true; break;
+    case 's': moveForward = true; break;
+    case 'w': moveBackward = true; break;
     case 'a': moveLeft = true; break;
     case 'd': moveRight = true; break;
     case 'Shift': isRunning = true; break;
@@ -179,8 +179,8 @@ window.addEventListener('keydown', (e) => {
 
 window.addEventListener('keyup', (e) => {
   switch (e.key) {
-    case 'w': moveForward = false; break;
-    case 's': moveBackward = false; break;
+    case 's': moveForward = false; break;
+    case 'w': moveBackward = false; break;
     case 'a': moveLeft = false; break;
     case 'd': moveRight = false; break;
     case 'Shift': isRunning = false; break;
