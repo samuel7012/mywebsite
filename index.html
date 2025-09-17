@@ -9,11 +9,17 @@ body { margin: 0; overflow: hidden; background: #111; }
 </head>
 <body>
 <div id="info" style="width:98%; height:11%;">
-<marquee><small><ol><li><b>W</b></li>: forward &nbsp; <li><b>S</b></li>: backward &nbsp; <li><b>A</b></li>: left &nbsp; <li><b>D</b></li>: right<br>
-Hold <li><b>Shift</b></li> to run, <li><b>Space</b></li> to jump<br>
-Move mouse to rotate camera, scroll to zoom<br>
-Multiplayer stickman demo!
-</div></ol></small><marquee>
+  <marquee direction="right">
+    <small>
+      <ol style="display:inline; margin:0; padding:0; list-style:none;">
+        <li style="display:inline;"><b>W</b>: forward &nbsp;</li>
+        <li style="display:inline;"><b>S</b>: backward &nbsp;</li>
+        <li style="display:inline;"><b>A</b>: left &nbsp;</li>
+        <li style="display:inline;"><b>D</b>: right &nbsp;</li>
+        | Hold <b>Shift</b> to run, <b>Space</b> to jump |
+        Move mouse to rotate camera, scroll to zoom |
+        Multiplayer stickman demo!
+      </ol></small></marquee></div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
