@@ -162,7 +162,7 @@ function spawnNPCInFront(player, color = 0xffaa00, text = "Hello there!") {
 spawnNPCInFront(players[playerId], 0xff0000, "Welcome to the world!");
 
 // ===== Movement state =====
-let moveForward=true, moveBackward=true, moveLeft=false, moveRight=false;
+let moveForward=true, moveBackward=false, moveLeft=false, moveRight=false;
 let isRunning=false, isJumping=false, isGrounded=true;
 let velocityY=0;
 const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
