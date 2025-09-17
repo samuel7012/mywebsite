@@ -1,4 +1,3 @@
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,12 +8,12 @@ body { margin: 0; overflow: hidden; background: #111; }
 </style>
 </head>
 <body>
-<div id="info">
-<b>W</b>: forward &nbsp; <b>S</b>: backward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
+<div id="info" style="width:95%">
+<marquee><b>W</b>: forward &nbsp; <b>S</b>: backward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
 Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
 Move mouse to rotate camera, scroll to zoom<br>
 Multiplayer stickman demo!
-</div>
+</div><marquee>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
@@ -101,6 +100,7 @@ function createStickman(color=0xffffff) {
 // ===== Multiplayer state =====
 const playerId = Math.random().toString(36).substr(2, 9);
 const players = {};
+const npcs = []; // list of NPCs
 
 function addPlayer(id, color) {
   if (!players[id]) {
@@ -119,112 +119,75 @@ function addPlayer(id, color) {
   }
 }
 
-function updatePlayerPosition(id, x, y, z, facing, state) {
-  if (players[id]) {
-    players[id].targetX = x;
-    players[id].targetY = y;
-    players[id].targetZ = z;
-    players[id].facing = facing;
-    players[id].state = state;
-  }
-}
-
-function removePlayer(id) {
-  if (players[id]) {
-    scene.remove(players[id].model);
-    delete players[id];
-  }
-}
-
 // Local player
 addPlayer(playerId, 0xffffff);
 
-// move it
-let moveForward = false,
-    moveBackward = false,
-    moveLeft = false,
-    moveRight = false;
+// ===== Spawn NPC in front of player =====
+function spawnNPCInFront(player, color = 0xffaa00, text = "Hello there!") {
+  const npc = createStickman(color);
 
-let isRunning = false;
-let isJumping = false;
-let isGrounded = true;
+  const forward = new THREE.Vector3(0, 0, -1)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.facing);
+  npc.model.position.copy(player.model.position).add(forward.multiplyScalar(2));
+  scene.add(npc.model);
 
-let velocityY = 0;
+  const speech = document.createElement("div");
+  speech.innerText = text;
+  speech.style.position = "absolute";
+  speech.style.padding = "4px 8px";
+  speech.style.background = "rgba(0,0,0,0.7)";
+  speech.style.color = "#fff";
+  speech.style.borderRadius = "6px";
+  speech.style.fontFamily = "sans-serif";
+  speech.style.fontSize = "14px";
+  document.body.appendChild(speech);
 
-const walkSpeed   = 0.08;
-const runSpeed    = 0.16;
-const jumpStrength = 0.24;
-const gravity      = 0.012;
+  function updateSpeechBox() {
+    const pos = npc.model.position.clone();
+    pos.y += 2.6;
+    const projected = pos.project(camera);
+    const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+    speech.style.left = `${x - speech.offsetWidth / 2}px`;
+    speech.style.top = `${y - 30}px`;
+  }
 
-let walkCycle = 0; // for gait animation
+  npc.updateSpeechBox = updateSpeechBox;
+  npc.speechElement = speech;
+  npcs.push(npc);
+  return npc;
+}
+
+// Spawn one NPC at start
+spawnNPCInFront(players[playerId], 0xff0000, "Welcome to the world!");
+
+// ===== Movement state =====
+let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
+let isRunning=false, isJumping=false, isGrounded=true;
+let velocityY=0;
+const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
 
 // --- Input ---
 window.addEventListener('keydown', (e) => {
   switch (e.key) {
-    case 's': moveForward = true; break;
-    case 'w': moveBackward = true; break;
+    case 'w': moveForward = true; break;
+    case 's': moveBackward = true; break;
     case 'a': moveLeft = true; break;
     case 'd': moveRight = true; break;
     case 'Shift': isRunning = true; break;
-    case ' ': // jump
-      if (isGrounded && !isJumping) {
-        isJumping = true;
-        velocityY = jumpStrength;
-      }
-      break;
-    case '1': cameraMode = 1; break;
-    case '2': cameraMode = 2; break;
-    case '3': cameraMode = 3; break;
+    case ' ': if (isGrounded && !isJumping) {isJumping=true; velocityY=jumpStrength;} break;
   }
 });
-
 window.addEventListener('keyup', (e) => {
   switch (e.key) {
-    case 's': moveForward = false; break;
-    case 'w': moveBackward = false; break;
+    case 'w': moveForward = false; break;
+    case 's': moveBackward = false; break;
     case 'a': moveLeft = false; break;
     case 'd': moveRight = false; break;
     case 'Shift': isRunning = false; break;
   }
 });
 
-// --- Update (call every frame) ---
-function updateMovement(player) {
-  let speed = isRunning ? runSpeed : walkSpeed;
-  let moveX = 0, moveZ = 0;
-
-  if (moveForward)  moveZ -= speed;
-  if (moveBackward) moveZ += speed;
-  if (moveLeft)     moveX -= speed;
-  if (moveRight)    moveX += speed;
-
-  // Apply horizontal movement (simple example, assumes Z forward, X right)
-  player.position.x += moveX;
-  player.position.z += moveZ;
-
-  // Vertical physics
-  if (isJumping || !isGrounded) {
-    velocityY -= gravity;
-    player.position.y += velocityY;
-
-    if (player.position.y <= 0) { // ground collision at y=0
-      player.position.y = 0;
-      isGrounded = true;
-      isJumping = false;
-      velocityY = 0;
-    } else {
-      isGrounded = false;
-    }
-  }
-
-  // Walk cycle increment (if moving)
-  if (moveForward || moveBackward || moveLeft || moveRight) {
-    walkCycle += speed * 10;
-  } else {
-    walkCycle = 0;
-  }
-}
-  
 // ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
 const minPolar=0.1, maxPolar=Math.PI/2-0.05;
@@ -291,29 +254,6 @@ function animateStickman(player, dt){
   }
 }
 
-// ===== WebSocket (conection) =====
-const protocol = location.protocol === "https:" ? "wss://" : "ws://";
-window.ws = new WebSocket(protocol + "18.162.210.89:8080");
-
-ws.onopen = ()=>{
-  console.log("Connected ✅");
-  ws.send(JSON.stringify({join: playerId, color: 0xffffff}));
-};
-
-ws.onmessage = (msg)=>{
-  const data = JSON.parse(msg.data);
-  if(data.join && data.join!==playerId) addPlayer(data.join, data.color||0xff44ff);
-  if(data.move && data.id!==playerId) updatePlayerPosition(data.id, data.x, data.y, data.z, data.facing, data.movementState);
-  if(data.leave && data.leave!==playerId) removePlayer(data.leave);
-};
-
-ws.onerror = err => console.error(err);
-ws.onclose = ()=>console.log("Disconnected ❌");
-
-window.addEventListener('beforeunload', ()=>{
-  if(ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({leave: playerId}));
-});
-
 // ===== Main loop =====
 let prevTime = performance.now();
 function animate(){
@@ -322,18 +262,16 @@ function animate(){
   let dt = Math.min((time-prevTime)/1000,0.05);
   prevTime = time;
 
-  // Local player movement
+  // Local player
   const player = players[playerId];
   let dx=0,dz=0;
-  if(moveForward){dx+=Math.sin(azimuth)*walkSpeed; dz+=Math.cos(azimuth)*walkSpeed;}
-  if(moveBackward){dx-=Math.sin(azimuth)*walkSpeed; dz-=Math.cos(azimuth)*walkSpeed;}
-  if(moveLeft){dx+=Math.sin(azimuth-Math.PI/2)*walkSpeed; dz+=Math.cos(azimuth-Math.PI/2)*walkSpeed;}
-  if(moveRight){dx+=Math.sin(azimuth+Math.PI/2)*walkSpeed; dz+=Math.cos(azimuth+Math.PI/2)*walkSpeed;}
-  if((moveForward||moveBackward||moveLeft||moveRight)&&isRunning){dx*=runSpeed/walkSpeed; dz*=runSpeed/walkSpeed;}
+  let speed = isRunning ? runSpeed : walkSpeed;
+  if(moveForward){dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed;}
+  if(moveBackward){dx-=Math.sin(azimuth)*speed; dz-=Math.cos(azimuth)*speed;}
+  if(moveLeft){dx+=Math.sin(azimuth-Math.PI/2)*speed; dz+=Math.cos(azimuth-Math.PI/2)*speed;}
+  if(moveRight){dx+=Math.sin(azimuth+Math.PI/2)*speed; dz+=Math.cos(azimuth+Math.PI/2)*speed;}
 
   player.x += dx; player.z += dz;
-
-  // Jump & gravity
   if(isJumping||!isGrounded){
     player.y += velocityY;
     velocityY -= gravity;
@@ -344,29 +282,17 @@ function animate(){
   player.model.position.set(player.x,player.y,player.z);
   if(dx!==0||dz!==0){player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing;}
 
-  // Animation state
+  // State
   let state="idle";
   if(isJumping||!isGrounded) state="jump";
   else if(dx!==0||dz!==0) state=isRunning?"run":"walk";
   player.state=state;
   animateStickman(player, dt);
 
-  // Send local position
-  if(ws.readyState===WebSocket.OPEN){
-    ws.send(JSON.stringify({move:true, id:playerId, x:player.x, y:player.y, z:player.z, facing:player.facing, movementState:player.state}));
-  }
-
-  // Animate remote players with interpolation
-  for(const [id,p] of Object.entries(players)){
-    if(id===playerId) continue;
-    // Smooth interpolation
-    p.x += (p.targetX - p.x)*0.15;
-    p.y += (p.targetY - p.y)*0.15;
-    p.z += (p.targetZ - p.z)*0.15;
-    p.model.position.set(p.x,p.y,p.z);
-    p.model.rotation.y = p.facing;
-    animateStickman(p, dt);
-  }
+  // Update NPC speech boxes
+  npcs.forEach(npc=>{
+    if(npc.updateSpeechBox) npc.updateSpeechBox();
+  });
 
   updateCamera(player);
   renderer.render(scene,camera);
@@ -374,7 +300,7 @@ function animate(){
 animate();
 
 window.addEventListener('resize', ()=>{
-  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.aspect=window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
