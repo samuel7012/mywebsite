@@ -211,7 +211,35 @@ window.addEventListener('keyup', (e) => {
     case 'Shift': isRunning = false; break;
   }
 });
-  
+
+  // === Teleport player where cursor points (press "E") ===
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // y=0 plane
+
+window.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "e") {
+    // Ray from camera through mouse cursor
+    mouse.x = (window.innerWidth / 2) / window.innerWidth * 2 - 1;  // center X
+    mouse.y = -(window.innerHeight / 2) / window.innerHeight * 2 + 1; // center Y
+    raycaster.setFromCamera(mouse, camera);
+
+    // Intersect with ground plane (y=0)
+    const hitPoint = new THREE.Vector3();
+    raycaster.ray.intersectPlane(groundPlane, hitPoint);
+
+    if (hitPoint) {
+      const player = players[playerId];
+      player.x = hitPoint.x;
+      player.y = 0;
+      player.z = hitPoint.z;
+      player.model.position.set(player.x, player.y, player.z);
+
+      console.log("Teleported to:", hitPoint);
+    }
+  }
+});
+
 // ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
 const minPolar=0.1, maxPolar=Math.PI/2-0.05;
