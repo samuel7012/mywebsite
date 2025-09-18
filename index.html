@@ -40,13 +40,46 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
+// === Ground Setup ===
 
-// Ground
-const groundGeometry = new THREE.PlaneGeometry(60, 60);
-const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x696969 });
-const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-ground.rotation.x = -Math.PI/2;
-scene.add(ground);
+// 1️⃣ Flat ground
+const flatGroundGeom = new THREE.PlaneGeometry(60, 60);
+const flatGroundMat = new THREE.MeshStandardMaterial({ color: 0x696969 });
+const flatGround = new THREE.Mesh(flatGroundGeom, flatGroundMat);
+flatGround.rotation.x = -Math.PI/2;
+scene.add(flatGround);
+
+// 2️⃣ Mountain terrain
+const size = 200;
+const divisions = 256;
+const terrainGeom = new THREE.PlaneGeometry(size, size, divisions, divisions);
+
+// Displace vertices for mountain-like terrain
+for (let i = 0; i < terrainGeom.attributes.position.count; i++) {
+  const x = terrainGeom.attributes.position.getX(i);
+  const z = terrainGeom.attributes.position.getZ(i);
+  let y = (Math.sin(x * 0.05) + Math.cos(z * 0.05)) * 2;
+  y += (Math.random() - 0.5) * 1;
+  terrainGeom.attributes.position.setY(i, y);
+}
+terrainGeom.computeVertexNormals();
+
+const terrainMat = new THREE.MeshStandardMaterial({ 
+  color: 0x228833,
+  flatShading: true 
+});
+const terrain = new THREE.Mesh(terrainGeom, terrainMat);
+terrain.rotation.x = -Math.PI/2;
+terrain.visible = false; // start hidden
+scene.add(terrain);
+
+// --- Toggle terrain on E ---
+window.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() === 'e') {
+    flatGround.visible = !flatGround.visible;
+    terrain.visible = !terrain.visible;
+  }
+});
 
 // ===== Stickman factory =====
 function createStickman(color=0xffffff) {
@@ -209,34 +242,6 @@ window.addEventListener('keyup', (e) => {
     case 'a': moveLeft = false; break;
     case 'd': moveRight = false; break;
     case 'Shift': isRunning = false; break;
-  }
-});
-
-  // === Teleport player where cursor points (press "E") ===
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // y=0 plane
-
-window.addEventListener("keydown", (e) => {
-  if (e.key.toLowerCase() === "e") {
-    // Ray from camera through mouse cursor
-    mouse.x = (window.innerWidth / 2) / window.innerWidth * 2 - 1;  // center X
-    mouse.y = -(window.innerHeight / 2) / window.innerHeight * 2 + 1; // center Y
-    raycaster.setFromCamera(mouse, camera);
-
-    // Intersect with ground plane (y=0)
-    const hitPoint = new THREE.Vector3();
-    raycaster.ray.intersectPlane(groundPlane, hitPoint);
-
-    if (hitPoint) {
-      const player = players[playerId];
-      player.x = hitPoint.x;
-      player.y = 0;
-      player.z = hitPoint.z;
-      player.model.position.set(player.x, player.y, player.z);
-
-      console.log("Teleported to:", hitPoint);
-    }
   }
 });
 
