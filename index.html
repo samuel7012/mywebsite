@@ -297,8 +297,8 @@ function animate(){
   let dt = Math.min((time-prevTime)/1000,0.05);
   prevTime = time;
 
-// Step size for camera movement (like "1px")
-const CAMERA_STEP = 0.1;
+// Step size for arrow key camera rotation
+const ROTATION_STEP = 0.03;
 
 const keyActions = {
   w: () => (moveBackward = true),
@@ -317,21 +317,25 @@ const keyActions = {
   3: () => (cameraMode = 3),
 
   // Arrow camera controls (1 step per press)
-  ArrowLeft: () => (camera.position.x -= CAMERA_STEP),
-  ArrowRight: () => (camera.position.x += CAMERA_STEP),
-  ArrowUp: () => (camera.position.z -= CAMERA_STEP),
-  ArrowDown: () => (camera.position.z += CAMERA_STEP),
+  ArrowLeft: () => (azimuth -= ROTATION_STEP),
+  ArrowRight: () => (azimuth += ROTATION_STEP),
+  ArrowUp: () => {
+    polar = Math.max(minPolar, Math.min(maxPolar, polar - ROTATION_STEP));
+  },
+  ArrowDown: () => {
+    polar = Math.max(minPolar, Math.min(maxPolar, polar + ROTATION_STEP));
+  },
 };
 
-// Use keyup so it triggers only once per press
+// Use keyup so it triggers once per press (not continuous)
 window.addEventListener('keyup', (e) => {
   const action = keyActions[e.key];
   if (action) {
-    e.preventDefault();
+    e.preventDefault(); // stop page scrolling
     action();
   }
 });
-  
+
   // Local player
   const player = players[playerId];
   let dx=0,dz=0;
