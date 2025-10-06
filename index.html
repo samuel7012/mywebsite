@@ -4,33 +4,33 @@
 <title>Stickman :P</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
-#info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
+#info {
+  position: absolute; top: 10px; left: 10px;
+  color: #fff; background: rgba(0,0,0,0.5);
+  padding: 8px; border-radius: 5px; font-family: sans-serif;
+}
 </style>
 </head>
 <body>
 <div id="info" style="width:98%; height:11%;">
   <marquee direction="right">
-      <span class="flashEm"><ol style="margin:0; padding:0; list-style:decimal inside; display:inline-flex; gap:15px;">
-        <li><b>W</b>: forward</li>
-        <li><b>S</b>: backward</li>
-        <li><b>A</b>: left</li>
-        <li><b>D</b>: right</li>
-      </ol>
-      &nbsp;| Hold <b>Shift</b> to run, <b>Space</b> to jump |
+    <span class="flashEm">
+      <b>W</b>/<b>A</b>/<b>S</b>/<b>D</b> to move |
+      Hold <b>Shift</b> to run, <b>Space</b> to jump |
       Move mouse to rotate camera, scroll to zoom |
-      Multiplayer stickman demo!</span>
+      Stickman single-player demo
+    </span>
   </marquee>
 </div>
 
 <style>
-  .flashEm {
-    animation: flashItalic 1s infinite steps(1, start);
-  }
-
-  @keyframes flashItalic {
-    0%, 100% { font-style: normal; }
-    50% { font-style: italic; }
-  }
+.flashEm {
+  animation: flashItalic 1s infinite steps(1, start);
+}
+@keyframes flashItalic {
+  0%, 100% { font-style: normal; }
+  50% { font-style: italic; }
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
@@ -115,87 +115,28 @@ function createStickman(color=0xffffff) {
   };
 }
 
-// ===== Multiplayer state =====
-const playerId = Math.random().toString(36).substr(2, 9);
-const players = {};
-const npcs = []; // list of NPCs
+// ===== Player setup =====
+const player = createStickman(0xffffff);
+scene.add(player.model);
+player.x = 0; player.y = 0; player.z = 0;
+player.facing = 0;
+player.walkCycle = 0;
+player.state = "idle";
 
-function addPlayer(id, color) {
-  if (!players[id]) {
-    const parts = createStickman(color);
-    scene.add(parts.model);
-    players[id] = {
-      ...parts,
-      x: 0, y: 0, z: 0,
-      facing: 0,
-      targetX:0, targetY:0, targetZ:0,
-      movement: {running:false, jumping:false, grounded:true, velocityY:0},
-      walkCycle: 0,
-      state: "idle",
-      color
-    };
-  }
-}
-
-// Local player
-addPlayer(playerId, 0xffffff);
-
-// ===== Spawn NPC in front of player =====
-function spawnNPCInFront(player, color = 0xffaa00, text = "Hello there!") {
-  const npc = createStickman(color);
-
-  const forward = new THREE.Vector3(0, 0, -1)
-    .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.facing);
-  npc.model.position.copy(player.model.position).add(forward.multiplyScalar(2));
-  scene.add(npc.model);
-
-  const speech = document.createElement("div");
-  speech.innerHTML = text;
-  speech.style.position = "absolute";
-  speech.style.padding = "4px 8px";
-  speech.style.background = "rgba(0,0,0,0.7)";
-  speech.style.color = "#fff";
-  speech.style.borderRadius = "6px";
-  speech.style.fontFamily = "sans-serif";
-  speech.style.fontSize = "14px";
-  document.body.appendChild(speech);
-
-  function updateSpeechBox() {
-    const pos = npc.model.position.clone();
-    pos.y += 2.6;
-    const projected = pos.project(camera);
-    const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
-    const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
-    speech.style.left = `${x - speech.offsetWidth / 2}px`;
-    speech.style.top = `${y - 30}px`;
-  }
-
-  npc.updateSpeechBox = updateSpeechBox;
-  npc.speechElement = speech;
-  npcs.push(npc);
-  return npc;
-}
-
-spawnNPCInFront(players[playerId], 0xff000, "Welcome to the Tutorial! <mark>Look at the top of your screen</mark>, and once you are done moving around just leave!");
-  
-//  MOVE ITT
+// ===== Controls =====
 let moveForward = false,
     moveBackward = false,
     moveLeft = false,
     moveRight = false;
-
 let isRunning = false;
 let isJumping = false;
 let isGrounded = true;
-
 let velocityY = 0;
 
 const walkSpeed   = 0.08;
 const runSpeed    = 0.16;
 const jumpStrength = 0.24;
 const gravity      = 0.012;
-
-let walkCycle = 0; // for gait animation
 
 window.addEventListener('keydown', (e) => {
   switch (e.key) {
@@ -222,7 +163,7 @@ window.addEventListener('keyup', (e) => {
     case 'Shift': isRunning = false; break;
   }
 });
-  
+
 // ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
 const minPolar=0.1, maxPolar=Math.PI/2-0.05;
@@ -240,6 +181,7 @@ document.addEventListener('mouseleave', ()=>mouseInitialized=false);
 renderer.domElement.addEventListener('wheel', e=>{
   radius += e.deltaY*0.01; radius=Math.max(2, Math.min(30, radius));
 });
+
 function updateCamera(target){
   let camX=target.x+radius*Math.sin(polar)*Math.sin(azimuth);
   let camY=target.y+radius*Math.cos(polar)+1;
@@ -268,7 +210,7 @@ function animateStickman(player, dt){
     rl.rotation.x=Math.sin(ph+Math.PI)*al;
     ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4))*sa;
     rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4+Math.PI))*sa;
-    player.walkCycle += dt*(player.movement.running?1.04:1);
+    player.walkCycle += dt*(isRunning?1.04:1);
   } else if(state==="run"){
     let f=9.5, aa=1.6, al=1.8, sa=1.35, ph=t*f;
     la.rotation.x=Math.sin(ph)*aa*0.6;
@@ -297,8 +239,7 @@ function animate(){
   let dt = Math.min((time-prevTime)/1000,0.05);
   prevTime = time;
 
-  // Local player
-  const player = players[playerId];
+  // Movement
   let dx=0,dz=0;
   let speed = isRunning ? runSpeed : walkSpeed;
   if(moveForward){dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed;}
@@ -324,11 +265,6 @@ function animate(){
   player.state=state;
   animateStickman(player, dt);
 
-  // Update NPC speech boxes
-  npcs.forEach(npc=>{
-    if(npc.updateSpeechBox) npc.updateSpeechBox();
-  });
-
   updateCamera(player);
   renderer.render(scene,camera);
 }
@@ -342,3 +278,4 @@ window.addEventListener('resize', ()=>{
 </script>
 </body>
 </html>
+
