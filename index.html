@@ -169,7 +169,6 @@ function createHandleMesh() {
   return new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), handleMaterial);
 }
 
-// For each important limb joint, assign a handle mesh and store link to the joint object
 function addLimbHandles(npc) {
   const handles = [];
   function makeHandle(joint, parentModel, label) {
@@ -179,12 +178,10 @@ function addLimbHandles(npc) {
     parentModel.add(mesh);
     handles.push({mesh, joint, parentModel, label});
   }
-  // Main joints for arms and legs
   makeHandle(npc.leftArm, npc.model, "leftArm");
   makeHandle(npc.rightArm, npc.model, "rightArm");
   makeHandle(npc.leftLeg, npc.model, "leftLeg");
   makeHandle(npc.rightLeg, npc.model, "rightLeg");
-  // Forearms/shins
   makeHandle(npc.leftForearm, npc.leftArm, "leftForearm");
   makeHandle(npc.rightForearm, npc.rightArm, "rightForearm");
   makeHandle(npc.leftShin, npc.leftLeg, "leftShin");
@@ -199,10 +196,8 @@ function showHandles(npc, visible) {
 function updateHandlePositions(npc) {
   if (!npc.limbHandles) return;
   npc.limbHandles.forEach(h => {
-    // Get joint's world position relative to parent
     let worldPos = new THREE.Vector3();
     h.joint.getWorldPosition(worldPos);
-    // Convert to parent coordinates
     h.parentModel.worldToLocal(worldPos);
     h.mesh.position.copy(worldPos);
   });
@@ -253,7 +248,6 @@ function showNpcControlHint() {
 window.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 'e') {
     if (npcs.length > 0) {
-      // Hide handles for previous
       if (npcActiveIdx >= 0) showHandles(npcs[npcActiveIdx], false);
       npcActiveIdx = (npcActiveIdx+1)%npcs.length;
       npcControlMode = true;
@@ -265,12 +259,10 @@ window.addEventListener('keydown', (e) => {
 
 // NPC drag controls
 renderer.domElement.addEventListener('mousedown', (e)=>{
-  // Find if a handle was clicked
   let handleClicked = false;
   if(npcControlMode && npcActiveIdx>=0) {
     let npc = npcs[npcActiveIdx];
     updateHandlePositions(npc);
-    // Project mouse to ray
     let rect = renderer.domElement.getBoundingClientRect();
     let mouse = {
       x: ((e.clientX-rect.left)/rect.width)*2-1,
@@ -281,17 +273,15 @@ renderer.domElement.addEventListener('mousedown', (e)=>{
     let objects = npc.limbHandles.map(h=>h.mesh).filter(m=>m.visible);
     let intersects = raycaster.intersectObjects(objects);
     if(intersects.length) {
-      // Handle drag
       handleClicked = true;
       limbDrag.active = true;
       limbDrag.npc = npc;
       limbDrag.handle = npc.limbHandles.find(h=>h.mesh === intersects[0].object);
-      limbDrag.startX = e.clientX; // store X for horizontal movement
-      limbDrag.startRot = limbDrag.handle.joint.rotation.y; // use .y for horizontal
+      limbDrag.startX = e.clientX;
+      limbDrag.startRot = limbDrag.handle.joint.rotation.y;
       return;
     }
   }
-  // If not handle, drag NPC on ground
   if(npcControlMode && npcActiveIdx>=0 && !handleClicked){
     npcDrag = true;
     let npc = npcs[npcActiveIdx];
@@ -316,17 +306,13 @@ renderer.domElement.addEventListener('mouseup', ()=>{
 });
 
 renderer.domElement.addEventListener('mousemove', (e)=>{
-  // Limb drag
   if(limbDrag.active && limbDrag.npc && limbDrag.handle){
-    // Mouse X delta controls rotation.y (horizontal)
     let deltaX = e.clientX - limbDrag.startX;
     let newRot = limbDrag.startRot + deltaX * 0.01;
-    // Clamp the rotation for arms and legs
     newRot = Math.max(-2.5, Math.min(2.5, newRot));
     limbDrag.handle.joint.rotation.y = newRot;
     return;
   }
-  // NPC drag
   if(npcDrag && npcActiveIdx>=0){
     let npc = npcs[npcActiveIdx];
     let rect = renderer.domElement.getBoundingClientRect();
@@ -349,102 +335,142 @@ const limbDrag = {
   active: false,
   npc: null,
   handle: null,
-  startX: 0, // use X instead of Y
+  startX: 0,
   startRot: 0
 };
 
 // ===== Monster Management =====
 const monsters = [];
+
+// Dinosaur
 function createDinosaur() {
-  // Simple stylized dinosaur - green, long tail, big head
   const group = new THREE.Group();
-  // body
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.5, 1.7, 16), new THREE.MeshStandardMaterial({color:0x228833}));
-  body.position.y = 1.1;
-  group.add(body);
-  // head
+  body.position.y = 1.1; group.add(body);
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 14), new THREE.MeshStandardMaterial({color:0x44cc66}));
-  head.position.set(0, 1.7, 0.45);
-  group.add(head);
-  // tail
+  head.position.set(0, 1.7, 0.45); group.add(head);
   const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.15, 1.2, 8), new THREE.MeshStandardMaterial({color:0x228833}));
-  tail.position.set(0, 1.05, -0.8);
-  tail.rotation.x = Math.PI/2.4;
-  group.add(tail);
-  // legs
+  tail.position.set(0, 1.05, -0.8); tail.rotation.x = Math.PI/2.4; group.add(tail);
   function leg(x,z) {
     const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.13, 0.7, 10), new THREE.MeshStandardMaterial({color:0x228833}));
-    leg.position.set(x, 0.4, z);
-    group.add(leg);
+    leg.position.set(x, 0.4, z); group.add(leg);
   }
-  leg(-0.23, 0.25);
-  leg(0.23, 0.25);
-  leg(-0.23, -0.22);
-  leg(0.23, -0.22);
-  // arms
+  leg(-0.23, 0.25); leg(0.23, 0.25); leg(-0.23, -0.22); leg(0.23, -0.22);
   function arm(x,z) {
     const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.35, 8), new THREE.MeshStandardMaterial({color:0x44cc66}));
-    arm.position.set(x, 1.2, z);
-    arm.rotation.z = Math.PI/4 * (x>0?1:-1);
-    group.add(arm);
+    arm.position.set(x, 1.2, z); arm.rotation.z = Math.PI/4 * (x>0?1:-1); group.add(arm);
   }
-  arm(-0.18, 0.36);
-  arm(0.18, 0.36);
-  return group;
-}
-function createLochNess() {
-  // Simple stylized loch ness monster - long neck, small head, wavy body
-  const group = new THREE.Group();
-  // body
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.31,1.9,12), new THREE.MeshStandardMaterial({color:0x2e6687}));
-  body.position.y = 0.55;
-  group.add(body);
-  // neck
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.13,0.7,10), new THREE.MeshStandardMaterial({color:0x69cbe8}));
-  neck.position.set(0,1.4,0.45);
-  neck.rotation.x = -Math.PI/7;
-  group.add(neck);
-  // head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshStandardMaterial({color:0x69cbe8}));
-  head.position.set(0,1.75,0.8);
-  group.add(head);
-  // tail
-  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.12,0.8,7), new THREE.MeshStandardMaterial({color:0x2e6687}));
-  tail.position.set(0,0.5,-0.85);
-  tail.rotation.x = Math.PI/4.5;
-  group.add(tail);
-  // fins
-  function fin(x,z) {
-    const fin = new THREE.Mesh(new THREE.SphereGeometry(0.11,8,7,0,Math.PI), new THREE.MeshStandardMaterial({color:0x69cbe8}));
-    fin.position.set(x,0.2,z);
-    group.add(fin);
-  }
-  fin(-0.15,0.2);
-  fin(0.15,0.2);
-  fin(-0.13,-0.22);
-  fin(0.13,-0.22);
+  arm(-0.18, 0.36); arm(0.18, 0.36);
   return group;
 }
 
-document.getElementById('monster-btn').onclick = function() {
-  // Randomly choose a monster type
-  const type = Math.random() > 0.5 ? "dino" : "ness";
-  let monster;
-  if (type === "dino") {
-    monster = createDinosaur();
-  } else {
-    monster = createLochNess();
+// Loch Ness Monster
+function createLochNess() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.31,1.9,12), new THREE.MeshStandardMaterial({color:0x2e6687}));
+  body.position.y = 0.55; group.add(body);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.13,0.7,10), new THREE.MeshStandardMaterial({color:0x69cbe8}));
+  neck.position.set(0,1.4,0.45); neck.rotation.x = -Math.PI/7; group.add(neck);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshStandardMaterial({color:0x69cbe8}));
+  head.position.set(0,1.75,0.8); group.add(head);
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.12,0.8,7), new THREE.MeshStandardMaterial({color:0x2e6687}));
+  tail.position.set(0,0.5,-0.85); tail.rotation.x = Math.PI/4.5; group.add(tail);
+  function fin(x,z) {
+    const fin = new THREE.Mesh(new THREE.SphereGeometry(0.11,8,7,0,Math.PI), new THREE.MeshStandardMaterial({color:0x69cbe8}));
+    fin.position.set(x,0.2,z); group.add(fin);
   }
+  fin(-0.15,0.2); fin(0.15,0.2); fin(-0.13,-0.22); fin(0.13,-0.22);
+  return group;
+}
+
+// Spider
+function createSpider() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 10), new THREE.MeshStandardMaterial({color:0x222222}));
+  body.position.y = 0.22; group.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 7), new THREE.MeshStandardMaterial({color:0x333333}));
+  head.position.set(0, 0.22, 0.19); group.add(head);
+  function leg(angle) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.027, 0.5, 7), new THREE.MeshStandardMaterial({color:0x222222}));
+    leg.position.set(Math.sin(angle)*0.19, 0.17, Math.cos(angle)*0.19);
+    leg.rotation.z = Math.PI/2;
+    leg.rotation.y = angle;
+    group.add(leg);
+  }
+  for(let i=0;i<8;i++) leg(i*Math.PI/4);
+  return group;
+}
+
+// Slime
+function createSlime() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 14), new THREE.MeshStandardMaterial({color:0x00ff99, transparent:true, opacity:0.7}));
+  body.position.y = 0.32; group.add(body);
+  const face = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 7), new THREE.MeshStandardMaterial({color:0x005544}));
+  face.position.set(0, 0.32, 0.21); group.add(face);
+  return group;
+}
+
+// Ghost
+function createGhost() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 14), new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:0.6}));
+  body.position.y = 0.22; group.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:0.7}));
+  head.position.set(0, 0.37, 0); group.add(head);
+  const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), new THREE.MeshStandardMaterial({color:0x222222}));
+  eye1.position.set(-0.04,0.42,0.11); group.add(eye1);
+  const eye2 = eye1.clone(); eye2.position.x = 0.04; group.add(eye2);
+  return group;
+}
+
+// Dragon
+function createDragon() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.34, 1.5, 18), new THREE.MeshStandardMaterial({color:0x991111}));
+  body.position.y = 1.0; group.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 15, 10), new THREE.MeshStandardMaterial({color:0xff3333}));
+  head.position.set(0, 1.6, 0.3); group.add(head);
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.13, 1.2, 10), new THREE.MeshStandardMaterial({color:0x991111}));
+  tail.position.set(0, 1.0, -0.8); tail.rotation.x = Math.PI/2.6; group.add(tail);
+  const wingMat = new THREE.MeshStandardMaterial({color:0xdd2222, side:THREE.DoubleSide});
+  function wing(sign) {
+    const wing = new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.3), wingMat);
+    wing.position.set(sign*0.33, 1.4, 0.1);
+    wing.rotation.z = sign*-0.7;
+    group.add(wing);
+  }
+  wing(1); wing(-1);
+  function leg(x,z) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.6, 8), new THREE.MeshStandardMaterial({color:0x991111}));
+    leg.position.set(x, 0.4, z); group.add(leg);
+  }
+  leg(-0.17, 0.24); leg(0.17, 0.24); leg(-0.17, -0.16); leg(0.17, -0.16);
+  return group;
+}
+
+const monsterTypes = [
+  { label: "Dinosaur", fn: createDinosaur },
+  { label: "Loch Ness Monster", fn: createLochNess },
+  { label: "Spider", fn: createSpider },
+  { label: "Slime", fn: createSlime },
+  { label: "Ghost", fn: createGhost },
+  { label: "Dragon", fn: createDragon }
+];
+
+document.getElementById('monster-btn').onclick = function() {
+  const idx = Math.floor(Math.random() * monsterTypes.length);
+  const monster = monsterTypes[idx].fn();
   monster.position.set(Math.random()*8-4, 0, Math.random()*8-4);
   scene.add(monster);
   monsters.push(monster);
-  showMonsterHint(type);
+  showMonsterHint(monsterTypes[idx].label);
 };
-function showMonsterHint(type) {
+function showMonsterHint(label) {
   if (!document.getElementById("monster-hint")) {
     let hint = document.createElement("div");
     hint.id = "monster-hint";
-    hint.innerHTML = type === "dino" ? 'Dinosaur spawned!' : 'Loch Ness Monster spawned!';
+    hint.innerHTML = label + " spawned!";
     hint.style.position = "fixed";
     hint.style.bottom = "70px";
     hint.style.left = "50%";
@@ -505,12 +531,11 @@ window.addEventListener('keydown', (e) => {
       polar += camPolarStep;
       polar = Math.max(minPolar, Math.min(maxPolar, polar));
       break;
-    case '+': // Zoom in
-    case '=':
+    case '+': case '=':
       radius -= camRadiusStep;
       radius = Math.max(minRadius, Math.min(maxRadius, radius));
       break;
-    case '-': // Zoom out
+    case '-':
       radius += camRadiusStep;
       radius = Math.max(minRadius, Math.min(maxRadius, radius));
       break;
@@ -532,8 +557,6 @@ window.addEventListener('keyup', (e) => {
     case 'Shift': isRunning = false; break;
   }
 });
-
-// Remove mouse camera controls
 
 function updateCamera(target){
   let camX=target.x+radius*Math.sin(polar)*Math.sin(azimuth);
@@ -592,7 +615,6 @@ function animate(){
   let dt = Math.min((time-prevTime)/1000,0.05);
   prevTime = time;
 
-  // Movement
   let dx=0,dz=0;
   let speed = isRunning ? runSpeed : walkSpeed;
   if(moveForward){dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed;}
@@ -611,17 +633,14 @@ function animate(){
   player.model.position.set(player.x,player.y,player.z);
   if(dx!==0||dz!==0){player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing;}
 
-  // State
   let state="idle";
   if(isJumping||!isGrounded) state="jump";
   else if(dx!==0||dz!==0) state=isRunning?"run":"walk";
   player.state=state;
   animateStickman(player, dt);
 
-  // Animate NPCs
   for(let i=0;i<npcs.length;i++){
     let npc = npcs[i];
-    // If dragging, show arms up
     if(npcActiveIdx===i && npcDrag){
       npc.state = "jump";
     } else {
@@ -629,11 +648,9 @@ function animate(){
     }
     animateStickman(npc, dt);
     npc.model.position.set(npc.x, npc.y, npc.z);
-    // Update handles
     if(npc.limbHandles) updateHandlePositions(npc);
   }
 
-  // Show only active NPC handles
   for(let i=0;i<npcs.length;i++){
     if(npcs[i].limbHandles) showHandles(npcs[i], i === npcActiveIdx && npcControlMode);
   }
