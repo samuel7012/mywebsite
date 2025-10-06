@@ -9,6 +9,30 @@ body { margin: 0; overflow: hidden; background: #111; }
   color: #fff; background: rgba(0,0,0,0.5);
   padding: 8px; border-radius: 5px; font-family: sans-serif;
 }
+#bottom-bar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 60px;
+  background: rgba(40,40,40,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+#npc-btn {
+  background: #2e8bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 24px;
+  font-size: 17px;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px #0005;
+}
+#npc-btn:hover {
+  background: #1768c9;
+}
 </style>
 </head>
 <body>
@@ -21,6 +45,9 @@ body { margin: 0; overflow: hidden; background: #111; }
       Stickman single-player demo
     </span>
   </marquee>
+</div>
+<div id="bottom-bar">
+  <button id="npc-btn">Spawn NPC</button>
 </div>
 
 <style>
@@ -97,7 +124,7 @@ function createStickman(color=0xffffff) {
     lower.add(end);
 
     root.add(lower);
-    return {root, lower};
+    return {root, lower, joint};
   }
 
   const leftArm = addLimb(new THREE.Vector3(-0.19, 1.9, 0), 0.49, 0.42);
@@ -111,7 +138,12 @@ function createStickman(color=0xffffff) {
     leftArm: leftArm.root, rightArm: rightArm.root,
     leftForearm: leftArm.lower, rightForearm: rightArm.lower,
     leftLeg: leftLeg.root, rightLeg: rightLeg.root,
-    leftShin: leftLeg.lower, rightShin: rightLeg.lower
+    leftShin: leftLeg.lower, rightShin: rightLeg.lower,
+    // For handle mapping
+    leftArmJoint: leftArm.joint, rightArmJoint: rightArm.joint,
+    leftLegJoint: leftLeg.joint, rightLegJoint: rightLeg.joint,
+    leftForearmJoint: leftArm.lower, rightForearmJoint: rightArm.lower,
+    leftShinJoint: leftLeg.lower, rightShinJoint: rightLeg.lower
   };
 }
 
@@ -122,6 +154,207 @@ player.x = 0; player.y = 0; player.z = 0;
 player.facing = 0;
 player.walkCycle = 0;
 player.state = "idle";
+
+// ===== NPC management + Limb Handles =====
+let npcs = [];
+let npcActiveIdx = -1; // -1 means no npc selected
+let npcDrag = false;
+let dragOffset = {x:0, z:0};
+let npcControlMode = false;
+
+const handleMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444 });
+function createHandleMesh() {
+  return new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), handleMaterial);
+}
+
+// For each important limb joint, assign a handle mesh and store link to the joint object
+function addLimbHandles(npc) {
+  const handles = [];
+  function makeHandle(joint, parentModel, label) {
+    const mesh = createHandleMesh();
+    mesh.visible = false;
+    mesh.userData.label = label;
+    parentModel.add(mesh);
+    handles.push({mesh, joint, parentModel, label});
+  }
+  // Main joints for arms and legs
+  makeHandle(npc.leftArm, npc.model, "leftArm");
+  makeHandle(npc.rightArm, npc.model, "rightArm");
+  makeHandle(npc.leftLeg, npc.model, "leftLeg");
+  makeHandle(npc.rightLeg, npc.model, "rightLeg");
+  // Forearms/shins
+  makeHandle(npc.leftForearm, npc.leftArm, "leftForearm");
+  makeHandle(npc.rightForearm, npc.rightArm, "rightForearm");
+  makeHandle(npc.leftShin, npc.leftLeg, "leftShin");
+  makeHandle(npc.rightShin, npc.rightLeg, "rightShin");
+  npc.limbHandles = handles;
+}
+function showHandles(npc, visible) {
+  if (npc.limbHandles) {
+    npc.limbHandles.forEach(h => h.mesh.visible = visible);
+  }
+}
+function updateHandlePositions(npc) {
+  if (!npc.limbHandles) return;
+  npc.limbHandles.forEach(h => {
+    // Get joint's world position relative to parent
+    let worldPos = new THREE.Vector3();
+    h.joint.getWorldPosition(worldPos);
+    // Convert to parent coordinates
+    h.parentModel.worldToLocal(worldPos);
+    h.mesh.position.copy(worldPos);
+  });
+}
+
+// Spawn NPC button
+document.getElementById('npc-btn').onclick = function() {
+  const npc = createStickman(0xffdd22);
+  npc.x = Math.random()*6-3;
+  npc.z = Math.random()*6-3;
+  npc.y = 0;
+  npc.facing = 0;
+  npc.walkCycle = 0;
+  npc.state = "idle";
+  scene.add(npc.model);
+  npc.model.position.set(npc.x, npc.y, npc.z);
+  npcs.push(npc);
+  npcActiveIdx = npcs.length-1;
+  npcControlMode = true;
+  addLimbHandles(npc);
+  showHandles(npc, true);
+  showNpcControlHint();
+};
+
+// Control hint
+function showNpcControlHint() {
+  if (!document.getElementById("npc-hint")) {
+    let hint = document.createElement("div");
+    hint.id = "npc-hint";
+    hint.innerHTML = 'Press <b>E</b> to control NPC (drag with mouse, drag red dots to move limbs)';
+    hint.style.position = "fixed";
+    hint.style.bottom = "70px";
+    hint.style.left = "50%";
+    hint.style.transform = "translateX(-50%)";
+    hint.style.background = "rgba(0,0,0,0.7)";
+    hint.style.color = "#ffe";
+    hint.style.padding = "9px 20px";
+    hint.style.borderRadius = "7px";
+    hint.style.fontFamily = "sans-serif";
+    hint.style.fontSize = "17px";
+    hint.style.zIndex = "100";
+    document.body.appendChild(hint);
+    setTimeout(() => { if(hint.parentNode) hint.parentNode.removeChild(hint); }, 3700);
+  }
+}
+
+// NPC activation by E
+window.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() === 'e') {
+    if (npcs.length > 0) {
+      // Hide handles for previous
+      if (npcActiveIdx >= 0) showHandles(npcs[npcActiveIdx], false);
+      npcActiveIdx = (npcActiveIdx+1)%npcs.length;
+      npcControlMode = true;
+      showHandles(npcs[npcActiveIdx], true);
+      showNpcControlHint();
+    }
+  }
+});
+
+// NPC drag controls
+renderer.domElement.addEventListener('mousedown', (e)=>{
+  // Find if a handle was clicked
+  let handleClicked = false;
+  let selectedHandle = null;
+  if(npcControlMode && npcActiveIdx>=0) {
+    let npc = npcs[npcActiveIdx];
+    updateHandlePositions(npc);
+    // Project mouse to ray
+    let rect = renderer.domElement.getBoundingClientRect();
+    let mouse = {
+      x: ((e.clientX-rect.left)/rect.width)*2-1,
+      y: -((e.clientY-rect.top)/rect.height)*2+1
+    };
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    let objects = npc.limbHandles.map(h=>h.mesh).filter(m=>m.visible);
+    let intersects = raycaster.intersectObjects(objects);
+    if(intersects.length) {
+      // Handle drag
+      handleClicked = true;
+      limbDrag.active = true;
+      limbDrag.npc = npc;
+      limbDrag.handle = npc.limbHandles.find(h=>h.mesh === intersects[0].object);
+      limbDrag.startY = e.clientY;
+      limbDrag.startRot = limbDrag.handle.joint.rotation.x;
+      return;
+    }
+  }
+  // If not handle, drag NPC on ground
+  if(npcControlMode && npcActiveIdx>=0 && !handleClicked){
+    npcDrag = true;
+    let npc = npcs[npcActiveIdx];
+    let rect = renderer.domElement.getBoundingClientRect();
+    let mouse = {
+      x: ((e.clientX-rect.left)/rect.width)*2-1,
+      y: -((e.clientY-rect.top)/rect.height)*2+1
+    };
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    let intersects = raycaster.intersectObject(ground);
+    if(intersects.length){
+      dragOffset.x = npc.x - intersects[0].point.x;
+      dragOffset.z = npc.z - intersects[0].point.z;
+    }
+  }
+});
+
+renderer.domElement.addEventListener('mouseup', ()=>{
+  npcDrag=false;
+  limbDrag.active=false;
+});
+
+renderer.domElement.addEventListener('mousemove', (e)=>{
+  // Limb drag
+  if(limbDrag.active && limbDrag.npc && limbDrag.handle){
+    // Mouse Y delta controls rotation.x
+    let deltaY = e.clientY - limbDrag.startY;
+    let newRot = limbDrag.startRot + deltaY * 0.01;
+    // Clamp for legs
+    if(limbDrag.handle.label.includes("Leg") || limbDrag.handle.label.includes("Shin")) {
+      newRot = Math.max(-2, Math.min(2, newRot));
+    } else {
+      newRot = Math.max(-2.5, Math.min(2.5, newRot));
+    }
+    limbDrag.handle.joint.rotation.x = newRot;
+    return;
+  }
+  // NPC drag
+  if(npcDrag && npcActiveIdx>=0){
+    let npc = npcs[npcActiveIdx];
+    let rect = renderer.domElement.getBoundingClientRect();
+    let mouse = {
+      x: ((e.clientX-rect.left)/rect.width)*2-1,
+      y: -((e.clientY-rect.top)/rect.height)*2+1
+    };
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    let intersects = raycaster.intersectObject(ground);
+    if(intersects.length){
+      npc.x = intersects[0].point.x + dragOffset.x;
+      npc.z = intersects[0].point.z + dragOffset.z;
+      npc.model.position.set(npc.x, npc.y, npc.z);
+    }
+  }
+});
+
+const limbDrag = {
+  active: false,
+  npc: null,
+  handle: null,
+  startY: 0,
+  startRot: 0
+};
 
 // ===== Controls =====
 let moveForward = false,
@@ -265,6 +498,26 @@ function animate(){
   player.state=state;
   animateStickman(player, dt);
 
+  // Animate NPCs
+  for(let i=0;i<npcs.length;i++){
+    let npc = npcs[i];
+    // If dragging, show arms up
+    if(npcActiveIdx===i && npcDrag){
+      npc.state = "jump";
+    } else {
+      npc.state = "idle";
+    }
+    animateStickman(npc, dt);
+    npc.model.position.set(npc.x, npc.y, npc.z);
+    // Update handles
+    if(npc.limbHandles) updateHandlePositions(npc);
+  }
+
+  // Show only active NPC handles
+  for(let i=0;i<npcs.length;i++){
+    if(npcs[i].limbHandles) showHandles(npcs[i], i === npcActiveIdx && npcControlMode);
+  }
+
   updateCamera(player);
   renderer.render(scene,camera);
 }
@@ -278,4 +531,3 @@ window.addEventListener('resize', ()=>{
 </script>
 </body>
 </html>
-
