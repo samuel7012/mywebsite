@@ -18,8 +18,9 @@ body { margin: 0; overflow: hidden; background: #111; }
   align-items: center;
   justify-content: center;
   z-index: 99;
+  gap: 24px;
 }
-#npc-btn {
+#npc-btn, #monster-btn {
   background: #2e8bff;
   color: #fff;
   border: none;
@@ -30,7 +31,7 @@ body { margin: 0; overflow: hidden; background: #111; }
   transition: background 0.2s;
   box-shadow: 0 2px 8px #0005;
 }
-#npc-btn:hover {
+#npc-btn:hover, #monster-btn:hover {
   background: #1768c9;
 }
 </style>
@@ -41,13 +42,14 @@ body { margin: 0; overflow: hidden; background: #111; }
     <span class="flashEm">
       <b>W</b>/<b>A</b>/<b>S</b>/<b>D</b> to move |
       Hold <b>Shift</b> to run, <b>Space</b> to jump |
-      Move mouse to rotate camera, scroll to zoom |
+      Arrow keys to rotate/zoom camera |
       Stickman single-player demo
     </span>
   </marquee>
 </div>
 <div id="bottom-bar">
   <button id="npc-btn">Spawn NPC</button>
+  <button id="monster-btn">Spawn Monster</button>
 </div>
 
 <style>
@@ -265,7 +267,6 @@ window.addEventListener('keydown', (e) => {
 renderer.domElement.addEventListener('mousedown', (e)=>{
   // Find if a handle was clicked
   let handleClicked = false;
-  let selectedHandle = null;
   if(npcControlMode && npcActiveIdx>=0) {
     let npc = npcs[npcActiveIdx];
     updateHandlePositions(npc);
@@ -285,8 +286,8 @@ renderer.domElement.addEventListener('mousedown', (e)=>{
       limbDrag.active = true;
       limbDrag.npc = npc;
       limbDrag.handle = npc.limbHandles.find(h=>h.mesh === intersects[0].object);
-      limbDrag.startY = e.clientY;
-      limbDrag.startRot = limbDrag.handle.joint.rotation.x;
+      limbDrag.startX = e.clientX; // store X for horizontal movement
+      limbDrag.startRot = limbDrag.handle.joint.rotation.y; // use .y for horizontal
       return;
     }
   }
@@ -317,16 +318,12 @@ renderer.domElement.addEventListener('mouseup', ()=>{
 renderer.domElement.addEventListener('mousemove', (e)=>{
   // Limb drag
   if(limbDrag.active && limbDrag.npc && limbDrag.handle){
-    // Mouse Y delta controls rotation.x
-    let deltaY = e.clientY - limbDrag.startY;
-    let newRot = limbDrag.startRot + deltaY * 0.01;
-    // Clamp for legs
-    if(limbDrag.handle.label.includes("Leg") || limbDrag.handle.label.includes("Shin")) {
-      newRot = Math.max(-2, Math.min(2, newRot));
-    } else {
-      newRot = Math.max(-2.5, Math.min(2.5, newRot));
-    }
-    limbDrag.handle.joint.rotation.x = newRot;
+    // Mouse X delta controls rotation.y (horizontal)
+    let deltaX = e.clientX - limbDrag.startX;
+    let newRot = limbDrag.startRot + deltaX * 0.01;
+    // Clamp the rotation for arms and legs
+    newRot = Math.max(-2.5, Math.min(2.5, newRot));
+    limbDrag.handle.joint.rotation.y = newRot;
     return;
   }
   // NPC drag
@@ -352,9 +349,117 @@ const limbDrag = {
   active: false,
   npc: null,
   handle: null,
-  startY: 0,
+  startX: 0, // use X instead of Y
   startRot: 0
 };
+
+// ===== Monster Management =====
+const monsters = [];
+function createDinosaur() {
+  // Simple stylized dinosaur - green, long tail, big head
+  const group = new THREE.Group();
+  // body
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.5, 1.7, 16), new THREE.MeshStandardMaterial({color:0x228833}));
+  body.position.y = 1.1;
+  group.add(body);
+  // head
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 14), new THREE.MeshStandardMaterial({color:0x44cc66}));
+  head.position.set(0, 1.7, 0.45);
+  group.add(head);
+  // tail
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.15, 1.2, 8), new THREE.MeshStandardMaterial({color:0x228833}));
+  tail.position.set(0, 1.05, -0.8);
+  tail.rotation.x = Math.PI/2.4;
+  group.add(tail);
+  // legs
+  function leg(x,z) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.13, 0.7, 10), new THREE.MeshStandardMaterial({color:0x228833}));
+    leg.position.set(x, 0.4, z);
+    group.add(leg);
+  }
+  leg(-0.23, 0.25);
+  leg(0.23, 0.25);
+  leg(-0.23, -0.22);
+  leg(0.23, -0.22);
+  // arms
+  function arm(x,z) {
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.35, 8), new THREE.MeshStandardMaterial({color:0x44cc66}));
+    arm.position.set(x, 1.2, z);
+    arm.rotation.z = Math.PI/4 * (x>0?1:-1);
+    group.add(arm);
+  }
+  arm(-0.18, 0.36);
+  arm(0.18, 0.36);
+  return group;
+}
+function createLochNess() {
+  // Simple stylized loch ness monster - long neck, small head, wavy body
+  const group = new THREE.Group();
+  // body
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.31,1.9,12), new THREE.MeshStandardMaterial({color:0x2e6687}));
+  body.position.y = 0.55;
+  group.add(body);
+  // neck
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.13,0.7,10), new THREE.MeshStandardMaterial({color:0x69cbe8}));
+  neck.position.set(0,1.4,0.45);
+  neck.rotation.x = -Math.PI/7;
+  group.add(neck);
+  // head
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshStandardMaterial({color:0x69cbe8}));
+  head.position.set(0,1.75,0.8);
+  group.add(head);
+  // tail
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.12,0.8,7), new THREE.MeshStandardMaterial({color:0x2e6687}));
+  tail.position.set(0,0.5,-0.85);
+  tail.rotation.x = Math.PI/4.5;
+  group.add(tail);
+  // fins
+  function fin(x,z) {
+    const fin = new THREE.Mesh(new THREE.SphereGeometry(0.11,8,7,0,Math.PI), new THREE.MeshStandardMaterial({color:0x69cbe8}));
+    fin.position.set(x,0.2,z);
+    group.add(fin);
+  }
+  fin(-0.15,0.2);
+  fin(0.15,0.2);
+  fin(-0.13,-0.22);
+  fin(0.13,-0.22);
+  return group;
+}
+
+document.getElementById('monster-btn').onclick = function() {
+  // Randomly choose a monster type
+  const type = Math.random() > 0.5 ? "dino" : "ness";
+  let monster;
+  if (type === "dino") {
+    monster = createDinosaur();
+  } else {
+    monster = createLochNess();
+  }
+  monster.position.set(Math.random()*8-4, 0, Math.random()*8-4);
+  scene.add(monster);
+  monsters.push(monster);
+  showMonsterHint(type);
+};
+function showMonsterHint(type) {
+  if (!document.getElementById("monster-hint")) {
+    let hint = document.createElement("div");
+    hint.id = "monster-hint";
+    hint.innerHTML = type === "dino" ? 'Dinosaur spawned!' : 'Loch Ness Monster spawned!';
+    hint.style.position = "fixed";
+    hint.style.bottom = "70px";
+    hint.style.left = "50%";
+    hint.style.transform = "translateX(-50%)";
+    hint.style.background = "rgba(0,0,0,0.7)";
+    hint.style.color = "#ffe";
+    hint.style.padding = "9px 20px";
+    hint.style.borderRadius = "7px";
+    hint.style.fontFamily = "sans-serif";
+    hint.style.fontSize = "17px";
+    hint.style.zIndex = "100";
+    document.body.appendChild(hint);
+    setTimeout(() => { if(hint.parentNode) hint.parentNode.removeChild(hint); }, 2000);
+  }
+}
 
 // ===== Controls =====
 let moveForward = false,
@@ -371,6 +476,14 @@ const runSpeed    = 0.16;
 const jumpStrength = 0.24;
 const gravity      = 0.012;
 
+// ===== Camera orbit (Arrow keys only) =====
+let azimuth = 0, polar = Math.PI/5, radius = 8;
+const minPolar = 0.1, maxPolar = Math.PI/2-0.05;
+const minRadius = 2, maxRadius = 30;
+const camAzimuthStep = 0.06;
+const camPolarStep = 0.04;
+const camRadiusStep = 0.5;
+
 window.addEventListener('keydown', (e) => {
   switch (e.key) {
     case 's': moveForward = true; break;
@@ -378,7 +491,30 @@ window.addEventListener('keydown', (e) => {
     case 'a': moveLeft = true; break;
     case 'd': moveRight = true; break;
     case 'Shift': isRunning = true; break;
-    case ' ': 
+    case 'ArrowLeft':
+      azimuth -= camAzimuthStep;
+      break;
+    case 'ArrowRight':
+      azimuth += camAzimuthStep;
+      break;
+    case 'ArrowUp':
+      polar -= camPolarStep;
+      polar = Math.max(minPolar, Math.min(maxPolar, polar));
+      break;
+    case 'ArrowDown':
+      polar += camPolarStep;
+      polar = Math.max(minPolar, Math.min(maxPolar, polar));
+      break;
+    case '+': // Zoom in
+    case '=':
+      radius -= camRadiusStep;
+      radius = Math.max(minRadius, Math.min(maxRadius, radius));
+      break;
+    case '-': // Zoom out
+      radius += camRadiusStep;
+      radius = Math.max(minRadius, Math.min(maxRadius, radius));
+      break;
+    case ' ':
       if (isGrounded && !isJumping) {
         isJumping = true;
         velocityY = jumpStrength;
@@ -397,23 +533,7 @@ window.addEventListener('keyup', (e) => {
   }
 });
 
-// ===== Camera orbit =====
-let azimuth=0, polar=Math.PI/5, radius=8;
-const minPolar=0.1, maxPolar=Math.PI/2-0.05;
-let lastMouse={x:0,y:0}, mouseInitialized=false;
-const mouseSensitivity=0.005;
-
-document.addEventListener('mousemove', e=>{
-  if(!mouseInitialized){ lastMouse={x:e.clientX,y:e.clientY}; mouseInitialized=true; return; }
-  let dx=e.clientX-lastMouse.x, dy=e.clientY-lastMouse.y;
-  azimuth -= dx*mouseSensitivity; polar -= dy*mouseSensitivity;
-  polar = Math.max(minPolar, Math.min(maxPolar, polar));
-  lastMouse={x:e.clientX, y:e.clientY};
-});
-document.addEventListener('mouseleave', ()=>mouseInitialized=false);
-renderer.domElement.addEventListener('wheel', e=>{
-  radius += e.deltaY*0.01; radius=Math.max(2, Math.min(30, radius));
-});
+// Remove mouse camera controls
 
 function updateCamera(target){
   let camX=target.x+radius*Math.sin(polar)*Math.sin(azimuth);
