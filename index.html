@@ -44,7 +44,6 @@ body { margin: 0; overflow: hidden; background: #111; }
       Hold <b>Shift</b> to run, <b>Space</b> to jump |
       Arrow keys to rotate/zoom camera |
       Click weapon button to equip to right hand |
-      Drag red dots to move limbs (physics!) |
       Stickman single-player demo
     </span>
   </marquee>
@@ -67,7 +66,6 @@ body { margin: 0; overflow: hidden; background: #111; }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"></script>
 <script>
 // ===== Scene setup =====
 const scene = new THREE.Scene();
@@ -79,21 +77,6 @@ camera.position.set(0, 4, 8);
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-
-// ====== Physics setup ======
-const world = new CANNON.World({
-  gravity: new CANNON.Vec3(0, -9.82, 0)
-});
-world.broadphase = new CANNON.NaiveBroadphase();
-world.solver.iterations = 10;
-
-const groundBody = new CANNON.Body({
-  shape: new CANNON.Plane(),
-  mass: 0,
-  material: new CANNON.Material()
-});
-groundBody.quaternion.setFromEuler(-Math.PI/2,0,0);
-world.addBody(groundBody);
 
 // Lighting
 scene.add(new THREE.AmbientLight(0xffffff, 0.7));
@@ -108,7 +91,75 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
 
-// ===== 3D Weapons =====
+// ===== Stickman factory =====
+function createStickman(color=0xffffff) {
+  const stickman = new THREE.Group();
+  const stickMat = new THREE.MeshStandardMaterial({color: 0x181818});
+  const headMat = new THREE.MeshStandardMaterial({color: color});
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 32), headMat);
+  head.position.y = 2.25;
+  stickman.add(head);
+
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.95, 20), stickMat);
+  body.position.y = 1.5;
+  stickman.add(body);
+
+  function addLimb(rootPos, upperLen, lowerLen) {
+    const root = new THREE.Group();
+    root.position.copy(rootPos);
+    stickman.add(root);
+
+    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, upperLen, 14), stickMat);
+    upper.position.y = -upperLen/2;
+    root.add(upper);
+
+    const joint = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 10), stickMat);
+    joint.position.y = -upperLen;
+    root.add(joint);
+
+    const lower = new THREE.Group();
+    lower.position.y = -upperLen;
+    const lowerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, lowerLen, 12), stickMat);
+    lowerMesh.position.y = -lowerLen/2;
+    lower.add(lowerMesh);
+
+    const end = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), stickMat);
+    end.position.y = -lowerLen;
+    lower.add(end);
+
+    root.add(lower);
+    return {root, lower, joint, lowerMesh};
+  }
+
+  const leftArm = addLimb(new THREE.Vector3(-0.19, 1.9, 0), 0.49, 0.42);
+  const rightArm = addLimb(new THREE.Vector3(0.19, 1.9, 0), 0.49, 0.42);
+  const leftLeg = addLimb(new THREE.Vector3(-0.07, 0.99, 0), 0.58, 0.49);
+  const rightLeg = addLimb(new THREE.Vector3(0.07, 0.99, 0), 0.58, 0.49);
+
+  // Right hand for weapon
+  const rightHand = new THREE.Group();
+  // Attach to end of right forearm
+  rightHand.position.set(0, -0.42, 0);
+  rightArm.lower.add(rightHand);
+
+  return {
+    model: stickman,
+    head,
+    leftArm: leftArm.root, rightArm: rightArm.root,
+    leftForearm: leftArm.lower, rightForearm: rightArm.lower,
+    leftLeg: leftLeg.root, rightLeg: rightLeg.root,
+    leftShin: leftLeg.lower, rightShin: rightLeg.lower,
+    rightHand: rightHand, // for weapon attachment
+    // For handle mapping
+    leftArmJoint: leftArm.joint, rightArmJoint: rightArm.joint,
+    leftLegJoint: leftLeg.joint, rightLegJoint: rightLeg.joint,
+    leftForearmJoint: leftArm.lower, rightForearmJoint: rightArm.lower,
+    leftShinJoint: leftLeg.lower, rightShinJoint: rightLeg.lower
+  };
+}
+
+// ===== Weapon system =====
 function removeWeaponFromHand(hand) {
   while (hand.children.length > 0) hand.remove(hand.children[0]);
 }
@@ -230,205 +281,195 @@ function showEquipHint(weaponName) {
   }
 }
 
-// ===== Physics Stickman Factory (cannon.js) =====
-function createPhysicsStickman(color=0xffffff) {
-  const stickman = new THREE.Group();
-  const stickMat = new THREE.MeshStandardMaterial({color: 0x181818});
-  const headMat = new THREE.MeshStandardMaterial({color: color});
+// ===== Player setup =====
+const player = createStickman(0xffffff);
+scene.add(player.model);
+player.x = 0; player.y = 0; player.z = 0;
+player.facing = 0;
+player.walkCycle = 0;
+player.state = "idle";
 
-  // Physics objects
-  function makeSphereBody(radius, mass, pos) {
-    const shape = new CANNON.Sphere(radius);
-    const body = new CANNON.Body({ mass: mass, shape: shape, position: pos });
-    world.addBody(body);
-    return body;
-  }
-  function makeCapsuleBody(radius, height, mass, pos) {
-    // Capsule approximation as two spheres and a cylinder
-    const group = new CANNON.Body({ mass: mass });
-    const cylShape = new CANNON.Cylinder(radius, radius, height, 10);
-    group.addShape(cylShape, new CANNON.Vec3(0, 0, 0), new CANNON.Quaternion());
-    const sphereA = new CANNON.Sphere(radius);
-    group.addShape(sphereA, new CANNON.Vec3(0, height/2, 0));
-    group.addShape(sphereA, new CANNON.Vec3(0, -height/2, 0));
-    group.position.copy(pos);
-    world.addBody(group);
-    return group;
-  }
+// ===== NPC management + Limb Handles =====
+let npcs = [];
+let npcActiveIdx = -1; // -1 means no npc selected
+let npcDrag = false;
+let dragOffset = {x:0, z:0};
+let npcControlMode = false;
 
-  // Head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 32), headMat);
-  head.position.y = 2.25;
-  stickman.add(head);
-  const headBody = makeSphereBody(0.28, 1, new CANNON.Vec3(0,2.25,0));
-
-  // Body
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.95, 20), stickMat);
-  body.position.y = 1.5;
-  stickman.add(body);
-  const bodyBody = makeCapsuleBody(0.06, 0.95, 1.5, new CANNON.Vec3(0,1.5,0));
-
-  // Limbs (arms & legs)
-  function addLimb(rootPos, upperLen, lowerLen, isArm) {
-    // Upper limb
-    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, upperLen, 14), stickMat);
-    upper.position.set(rootPos.x, rootPos.y-upperLen/2, rootPos.z);
-    stickman.add(upper);
-    const upperBody = makeCapsuleBody(0.045, upperLen, 0.4, new CANNON.Vec3(rootPos.x, rootPos.y-upperLen/2, rootPos.z));
-
-    // Lower limb
-    const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, lowerLen, 12), stickMat);
-    lower.position.set(rootPos.x, rootPos.y-upperLen-lowerLen/2, rootPos.z);
-    stickman.add(lower);
-    const lowerBody = makeCapsuleBody(0.04, lowerLen, 0.3, new CANNON.Vec3(rootPos.x, rootPos.y-upperLen-lowerLen/2, rootPos.z));
-
-    // Joint: connect upper to lower
-    const c = new CANNON.ConeTwistConstraint(upperBody, lowerBody, {
-      pivotA: new CANNON.Vec3(0, -upperLen/2, 0),
-      pivotB: new CANNON.Vec3(0, lowerLen/2, 0),
-      axisA: new CANNON.Vec3(1,0,0),
-      axisB: new CANNON.Vec3(1,0,0),
-      angle: Math.PI/3
-    });
-    world.addConstraint(c);
-
-    // Attach upper to body (or to head for arms)
-    if (isArm) {
-      const attach = new CANNON.ConeTwistConstraint(bodyBody, upperBody, {
-        pivotA: new CANNON.Vec3(rootPos.x, 0.42, 0),
-        pivotB: new CANNON.Vec3(0, upperLen/2, 0),
-        axisA: new CANNON.Vec3(1,0,0),
-        axisB: new CANNON.Vec3(1,0,0),
-        angle: Math.PI/3
-      });
-      world.addConstraint(attach);
-    } else {
-      const attach = new CANNON.ConeTwistConstraint(bodyBody, upperBody, {
-        pivotA: new CANNON.Vec3(rootPos.x, -0.47, 0),
-        pivotB: new CANNON.Vec3(0, upperLen/2, 0),
-        axisA: new CANNON.Vec3(1,0,0),
-        axisB: new CANNON.Vec3(1,0,0),
-        angle: Math.PI/3
-      });
-      world.addConstraint(attach);
-    }
-    return {
-      upper, upperBody, lower, lowerBody
-    };
-  }
-  // Arms
-  const leftArm = addLimb(new THREE.Vector3(-0.19, 1.9, 0), 0.49, 0.42, true);
-  const rightArm = addLimb(new THREE.Vector3(0.19, 1.9, 0), 0.49, 0.42, true);
-  // Legs
-  const leftLeg = addLimb(new THREE.Vector3(-0.07, 0.99, 0), 0.58, 0.49, false);
-  const rightLeg = addLimb(new THREE.Vector3(0.07, 0.99, 0), 0.58, 0.49, false);
-
-  // Right hand for weapon
-  const rightHand = new THREE.Group();
-  rightHand.position.set(0, -0.42, 0);
-  rightArm.lower.add(rightHand);
-
-  // Handles for dragging
-  function makeLimbHandle(limb, color) {
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), new THREE.MeshBasicMaterial({ color }));
-    mesh.position.set(0, -0.49/2, 0);
-    limb.lower.add(mesh);
-    return mesh;
-  }
-  // Red handles for each lower limb
-  const handles = [
-    makeLimbHandle(leftArm, 0xff4444),
-    makeLimbHandle(rightArm, 0xff4444),
-    makeLimbHandle(leftLeg, 0xff4444),
-    makeLimbHandle(rightLeg, 0xff4444)
-  ];
-
-  return {
-    model: stickman,
-    head, headBody,
-    body, bodyBody,
-    leftArm, rightArm, leftLeg, rightLeg,
-    handles, // For drag
-    rightHand,
-    physicsLimbs: [
-      {mesh:leftArm.upper, body:leftArm.upperBody},
-      {mesh:leftArm.lower, body:leftArm.lowerBody},
-      {mesh:rightArm.upper, body:rightArm.upperBody},
-      {mesh:rightArm.lower, body:rightArm.lowerBody},
-      {mesh:leftLeg.upper, body:leftLeg.upperBody},
-      {mesh:leftLeg.lower, body:leftLeg.lowerBody},
-      {mesh:rightLeg.upper, body:rightLeg.upperBody},
-      {mesh:rightLeg.lower, body:rightLeg.lowerBody},
-      {mesh:body, body:bodyBody},
-      {mesh:head, body:headBody}
-    ]
-  };
+const handleMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444 });
+function createHandleMesh() {
+  return new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), handleMaterial);
 }
 
-// ===== Player setup (physics stickman) =====
-const player = createPhysicsStickman(0xffffff);
-scene.add(player.model);
+function addLimbHandles(npc) {
+  const handles = [];
+  function makeHandle(joint, parentModel, label) {
+    const mesh = createHandleMesh();
+    mesh.visible = false;
+    mesh.userData.label = label;
+    parentModel.add(mesh);
+    handles.push({mesh, joint, parentModel, label});
+  }
+  makeHandle(npc.leftArm, npc.model, "leftArm");
+  makeHandle(npc.rightArm, npc.model, "rightArm");
+  makeHandle(npc.leftLeg, npc.model, "leftLeg");
+  makeHandle(npc.rightLeg, npc.model, "rightLeg");
+  makeHandle(npc.leftForearm, npc.leftArm, "leftForearm");
+  makeHandle(npc.rightForearm, npc.rightArm, "rightForearm");
+  makeHandle(npc.leftShin, npc.leftLeg, "leftShin");
+  makeHandle(npc.rightShin, npc.rightLeg, "rightShin");
+  npc.limbHandles = handles;
+}
+function showHandles(npc, visible) {
+  if (npc.limbHandles) {
+    npc.limbHandles.forEach(h => h.mesh.visible = visible);
+  }
+}
+function updateHandlePositions(npc) {
+  if (!npc.limbHandles) return;
+  npc.limbHandles.forEach(h => {
+    let worldPos = new THREE.Vector3();
+    h.joint.getWorldPosition(worldPos);
+    h.parentModel.worldToLocal(worldPos);
+    h.mesh.position.copy(worldPos);
+  });
+}
 
-// ===== Limb Drag (cannon.js) =====
-let dragConstraint = null;
-let dragBody = null;
-let dragOffset = new CANNON.Vec3();
-renderer.domElement.addEventListener('mousedown', function(e){
-  // Raycast to handles
-  const rect = renderer.domElement.getBoundingClientRect();
-  const mouse = {
-    x: ((e.clientX-rect.left)/rect.width)*2-1,
-    y: -((e.clientY-rect.top)/rect.height)*2+1
-  };
-  const pointer = new THREE.Vector2(mouse.x, mouse.y);
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(pointer, camera);
-  const intersects = raycaster.intersectObjects(player.handles, false);
-  if(intersects.length > 0){
-    // Find which limb
-    const idx = player.handles.indexOf(intersects[0].object);
-    if(idx !== -1){
-      dragBody = player.physicsLimbs[idx*2+1].body; // lower limb body
-      // Get intersection point in world coords
-      let intersectPoint = intersects[0].point;
-      // Body local offset
-      dragOffset = dragBody.pointToLocalFrame(new CANNON.Vec3(intersectPoint.x,intersectPoint.y,intersectPoint.z));
-      // Constraint from body to a fixed point in space
-      dragConstraint = new CANNON.PointToPointConstraint(
-        dragBody, dragOffset,
-        null, new CANNON.Vec3(intersectPoint.x,intersectPoint.y,intersectPoint.z)
-      );
-      world.addConstraint(dragConstraint);
+// Spawn NPC button
+document.getElementById('npc-btn').onclick = function() {
+  const npc = createStickman(0xffdd22);
+  npc.x = Math.random()*6-3;
+  npc.z = Math.random()*6-3;
+  npc.y = 0;
+  npc.facing = 0;
+  npc.walkCycle = 0;
+  npc.state = "idle";
+  scene.add(npc.model);
+  npc.model.position.set(npc.x, npc.y, npc.z);
+  npcs.push(npc);
+  npcActiveIdx = npcs.length-1;
+  npcControlMode = true;
+  addLimbHandles(npc);
+  showHandles(npc, true);
+  showNpcControlHint();
+};
+
+// Control hint
+function showNpcControlHint() {
+  if (!document.getElementById("npc-hint")) {
+    let hint = document.createElement("div");
+    hint.id = "npc-hint";
+    hint.innerHTML = 'Press <b>E</b> to control NPC (drag with mouse, drag red dots to move limbs)';
+    hint.style.position = "fixed";
+    hint.style.bottom = "70px";
+    hint.style.left = "50%";
+    hint.style.transform = "translateX(-50%)";
+    hint.style.background = "rgba(0,0,0,0.7)";
+    hint.style.color = "#ffe";
+    hint.style.padding = "9px 20px";
+    hint.style.borderRadius = "7px";
+    hint.style.fontFamily = "sans-serif";
+    hint.style.fontSize = "17px";
+    hint.style.zIndex = "100";
+    document.body.appendChild(hint);
+    setTimeout(() => { if(hint.parentNode) hint.parentNode.removeChild(hint); }, 3700);
+  }
+}
+
+// NPC activation by E
+window.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() === 'e') {
+    if (npcs.length > 0) {
+      if (npcActiveIdx >= 0) showHandles(npcs[npcActiveIdx], false);
+      npcActiveIdx = (npcActiveIdx+1)%npcs.length;
+      npcControlMode = true;
+      showHandles(npcs[npcActiveIdx], true);
+      showNpcControlHint();
     }
   }
 });
-renderer.domElement.addEventListener('mousemove', function(e){
-  if(dragConstraint){
-    // Move constraint pivot to new mouse projection on ground plane (y=0), or use ray from camera
-    const rect = renderer.domElement.getBoundingClientRect();
-    const mouse = {
+
+// NPC drag controls
+renderer.domElement.addEventListener('mousedown', (e)=>{
+  let handleClicked = false;
+  if(npcControlMode && npcActiveIdx>=0) {
+    let npc = npcs[npcActiveIdx];
+    updateHandlePositions(npc);
+    let rect = renderer.domElement.getBoundingClientRect();
+    let mouse = {
       x: ((e.clientX-rect.left)/rect.width)*2-1,
       y: -((e.clientY-rect.top)/rect.height)*2+1
     };
-    const pointer = new THREE.Vector2(mouse.x, mouse.y);
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(pointer, camera);
-    // Intersect with y=0 plane
-    const plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
-    const intersect = new THREE.Vector3();
-    raycaster.ray.intersectPlane(plane, intersect);
-    if (intersect) {
-      dragConstraint.pivotB.copy(new CANNON.Vec3(intersect.x, intersect.y, intersect.z));
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    let objects = npc.limbHandles.map(h=>h.mesh).filter(m=>m.visible);
+    let intersects = raycaster.intersectObjects(objects);
+    if(intersects.length) {
+      handleClicked = true;
+      limbDrag.active = true;
+      limbDrag.npc = npc;
+      limbDrag.handle = npc.limbHandles.find(h=>h.mesh === intersects[0].object);
+      limbDrag.startX = e.clientX;
+      limbDrag.startRot = limbDrag.handle.joint.rotation.y;
+      return;
+    }
+  }
+  if(npcControlMode && npcActiveIdx>=0 && !handleClicked){
+    npcDrag = true;
+    let npc = npcs[npcActiveIdx];
+    let rect = renderer.domElement.getBoundingClientRect();
+    let mouse = {
+      x: ((e.clientX-rect.left)/rect.width)*2-1,
+      y: -((e.clientY-rect.top)/rect.height)*2+1
+    };
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    let intersects = raycaster.intersectObject(ground);
+    if(intersects.length){
+      dragOffset.x = npc.x - intersects[0].point.x;
+      dragOffset.z = npc.z - intersects[0].point.z;
     }
   }
 });
-renderer.domElement.addEventListener('mouseup', function(e){
-  if(dragConstraint){
-    world.removeConstraint(dragConstraint);
-    dragConstraint = null;
-    dragBody = null;
+
+renderer.domElement.addEventListener('mouseup', ()=>{
+  npcDrag=false;
+  limbDrag.active=false;
+});
+
+renderer.domElement.addEventListener('mousemove', (e)=>{
+  if(limbDrag.active && limbDrag.npc && limbDrag.handle){
+    let deltaX = e.clientX - limbDrag.startX;
+    let newRot = limbDrag.startRot + deltaX * 0.01;
+    newRot = Math.max(-2.5, Math.min(2.5, newRot));
+    limbDrag.handle.joint.rotation.y = newRot;
+    return;
+  }
+  if(npcDrag && npcActiveIdx>=0){
+    let npc = npcs[npcActiveIdx];
+    let rect = renderer.domElement.getBoundingClientRect();
+    let mouse = {
+      x: ((e.clientX-rect.left)/rect.width)*2-1,
+      y: -((e.clientY-rect.top)/rect.height)*2+1
+    };
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    let intersects = raycaster.intersectObject(ground);
+    if(intersects.length){
+      npc.x = intersects[0].point.x + dragOffset.x;
+      npc.z = intersects[0].point.z + dragOffset.z;
+      npc.model.position.set(npc.x, npc.y, npc.z);
+    }
   }
 });
+
+const limbDrag = {
+  active: false,
+  npc: null,
+  handle: null,
+  startX: 0,
+  startRot: 0
+};
 
 // ===== Controls =====
 let moveForward = false,
@@ -509,23 +550,96 @@ function updateCamera(target){
   camera.lookAt(target.x, target.y+1.4, target.z);
 }
 
+// ===== Stickman animation =====
+function animateStickman(player, dt){
+  let t=player.walkCycle;
+  let la=player.leftArm, ra=player.rightArm;
+  let lfa=player.leftForearm, rfa=player.rightForearm;
+  let ll=player.leftLeg, rl=player.rightLeg;
+  let ls=player.leftShin, rs=player.rightShin;
+  let state=player.state;
+
+  if(state==="idle"){
+    la.rotation.x=ra.rotation.x=lfa.rotation.x=rfa.rotation.x=0;
+    ll.rotation.x=rl.rotation.x=ls.rotation.x=rs.rotation.x=0;
+  } else if(state==="walk"){
+    let f=5, aa=0.65, al=0.7, sa=0.47, ph=t*f;
+    la.rotation.x=Math.sin(ph)*aa;
+    ra.rotation.x=Math.sin(ph+Math.PI)*aa;
+    ll.rotation.x=Math.sin(ph)*al;
+    rl.rotation.x=Math.sin(ph+Math.PI)*al;
+    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4))*sa;
+    rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4+Math.PI))*sa;
+    player.walkCycle += dt*(isRunning?1.04:1);
+  } else if(state==="run"){
+    let f=9.5, aa=1.6, al=1.8, sa=1.35, ph=t*f;
+    la.rotation.x=Math.sin(ph)*aa*0.6;
+    ra.rotation.x=Math.sin(ph+Math.PI)*aa*0.6;
+    lfa.rotation.x=Math.abs(Math.sin(ph))*0.9-1.1;
+    rfa.rotation.x=Math.abs(Math.sin(ph+Math.PI))*0.9-1.1;
+    ll.rotation.x=Math.sin(ph)*al;
+    rl.rotation.x=Math.sin(ph+Math.PI)*al;
+    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6))*sa +0.13*Math.abs(Math.sin(ph));
+    rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6+Math.PI))*sa +0.13*Math.abs(Math.sin(ph+Math.PI));
+    player.walkCycle += dt*1.3;
+  } else if(state==="jump"){
+    la.rotation.x=ra.rotation.x=-1.15;
+    lfa.rotation.x=rfa.rotation.x=-0.42;
+    ll.rotation.x=rl.rotation.x=0.88;
+    ls.rotation.x=rs.rotation.x=0.8;
+    player.walkCycle += dt*0.6;
+  }
+}
+
 // ===== Main loop =====
 let prevTime = performance.now();
 function animate(){
   requestAnimationFrame(animate);
+  let time = performance.now();
+  let dt = Math.min((time-prevTime)/1000,0.05);
+  prevTime = time;
 
-  // Step physics
-  world.step(1/60);
+  let dx=0,dz=0;
+  let speed = isRunning ? runSpeed : walkSpeed;
+  if(moveForward){dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed;}
+  if(moveBackward){dx-=Math.sin(azimuth)*speed; dz-=Math.cos(azimuth)*speed;}
+  if(moveLeft){dx+=Math.sin(azimuth-Math.PI/2)*speed; dz+=Math.cos(azimuth-Math.PI/2)*speed;}
+  if(moveRight){dx+=Math.sin(azimuth+Math.PI/2)*speed; dz+=Math.cos(azimuth+Math.PI/2)*speed;}
 
-  // Sync physics to mesh
-  player.physicsLimbs.forEach(({mesh, body}) => {
-    mesh.position.copy(body.position);
-    mesh.quaternion.copy(body.quaternion);
-  });
+  player.x += dx; player.z += dz;
+  if(isJumping||!isGrounded){
+    player.y += velocityY;
+    velocityY -= gravity;
+    if(player.y<=0){player.y=0; velocityY=0; isJumping=false; isGrounded=true;}
+    else{isGrounded=false;}
+  }
 
-  // Camera follows player body
-  updateCamera({x:player.bodyBody.position.x, y:player.bodyBody.position.y, z:player.bodyBody.position.z});
+  player.model.position.set(player.x,player.y,player.z);
+  if(dx!==0||dz!==0){player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing;}
 
+  let state="idle";
+  if(isJumping||!isGrounded) state="jump";
+  else if(dx!==0||dz!==0) state=isRunning?"run":"walk";
+  player.state=state;
+  animateStickman(player, dt);
+
+  for(let i=0;i<npcs.length;i++){
+    let npc = npcs[i];
+    if(npcActiveIdx===i && npcDrag){
+      npc.state = "jump";
+    } else {
+      npc.state = "idle";
+    }
+    animateStickman(npc, dt);
+    npc.model.position.set(npc.x, npc.y, npc.z);
+    if(npc.limbHandles) updateHandlePositions(npc);
+  }
+
+  for(let i=0;i<npcs.length;i++){
+    if(npcs[i].limbHandles) showHandles(npcs[i], i === npcActiveIdx && npcControlMode);
+  }
+
+  updateCamera(player);
   renderer.render(scene,camera);
 }
 animate();
