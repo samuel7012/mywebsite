@@ -20,7 +20,7 @@ body { margin: 0; overflow: hidden; background: #111; }
   z-index: 99;
   gap: 24px;
 }
-#npc-btn, #sword-btn, #axe-btn, #staff-btn {
+#npc-btn, #sword-btn, #axe-btn, #staff-btn, #gun-btn {
   background: #2e8bff;
   color: #fff;
   border: none;
@@ -31,10 +31,12 @@ body { margin: 0; overflow: hidden; background: #111; }
   transition: background 0.2s;
   box-shadow: 0 2px 8px #0005;
 }
-#npc-btn:hover, #sword-btn:hover, #axe-btn:hover, #staff-btn:hover {
+#npc-btn:hover, #sword-btn:hover, #axe-btn:hover, #staff-btn:hover, #gun-btn:hover {
   background: #1768c9;
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
 <div id="info" style="width:98%; height:11%;">
@@ -53,6 +55,7 @@ body { margin: 0; overflow: hidden; background: #111; }
   <button id="sword-btn">Equip Sword</button>
   <button id="axe-btn">Equip Axe</button>
   <button id="staff-btn">Equip Staff</button>
+  <button id="gun-btn">Equip Gun</button>
 </div>
 
 <style>
@@ -65,7 +68,6 @@ body { margin: 0; overflow: hidden; background: #111; }
 }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
 // ===== Scene setup =====
 const scene = new THREE.Scene();
@@ -248,6 +250,7 @@ function createStaff() {
   staff.position.set(0.08, 0, 0);
   return staff;
 }
+
 document.getElementById('sword-btn').onclick = function() {
   equipWeaponToHand(player.rightHand, createSword());
   showEquipHint('Sword');
@@ -260,6 +263,61 @@ document.getElementById('staff-btn').onclick = function() {
   equipWeaponToHand(player.rightHand, createStaff());
   showEquipHint('Staff');
 };
+
+// ===== Glock-19 gun code =====
+let gunGLB = null;
+const loader = new THREE.GLTFLoader();
+loader.load(
+  './glock-19.glb', // Make sure this file is in the same directory as your HTML
+  function(gltf) {
+    gunGLB = gltf.scene;
+    gunGLB.scale.set(0.45, 0.45, 0.45); // Size adjustment
+    gunGLB.rotation.x = Math.PI / 2;
+    gunGLB.position.set(0, 0, 0);
+  },
+  undefined,
+  function(error) {
+    console.error('Error loading glock-19.glb:', error);
+  }
+);
+
+function cloneGLB(object) {
+  return object.clone(true);
+}
+function equipGunToHand(hand) {
+  removeWeaponFromHand(hand);
+  if (gunGLB) {
+    const gun = cloneGLB(gunGLB);
+    gun.position.set(0.12, 0, 0);
+    gun.rotation.z = Math.PI / 2.1;
+    hand.add(gun);
+  } else {
+    alert('Gun model not loaded yet!');
+  }
+}
+document.getElementById('gun-btn').onclick = function() {
+  equipGunToHand(player.rightHand);
+  poseHandsForGun(player);
+  showEquipHint('Glock-19');
+};
+function poseHandsForGun(stickman) {
+  // Right arm forward, elbow slightly bent
+  stickman.rightArm.rotation.x = -Math.PI/2 + 0.22;
+  stickman.rightForearm.rotation.x = -0.30;
+  stickman.rightArm.rotation.y = -0.08;
+  stickman.rightForearm.rotation.y = 0;
+
+  // Left arm forward (to support gun), elbow bent more
+  stickman.leftArm.rotation.x = -Math.PI/2 + 0.25;
+  stickman.leftForearm.rotation.x = -0.7;
+  stickman.leftArm.rotation.y = 0.25;
+  stickman.leftForearm.rotation.y = 0.1;
+
+  // Bring hands together
+  stickman.leftArm.position.x = -0.11;
+  stickman.rightArm.position.x = 0.13;
+}
+
 function showEquipHint(weaponName) {
   if (!document.getElementById("equip-hint")) {
     let hint = document.createElement("div");
