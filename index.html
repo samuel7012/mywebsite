@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Stickman :P</title>
+<title>Stick playground</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info {
@@ -20,7 +20,7 @@ body { margin: 0; overflow: hidden; background: #111; }
   z-index: 99;
   gap: 24px;
 }
-#npc-btn, #sword-btn, #axe-btn, #staff-btn, #gun-btn {
+#sword-btn, #gun-btn {
   background: #2e8bff;
   color: #fff;
   border: none;
@@ -31,11 +31,13 @@ body { margin: 0; overflow: hidden; background: #111; }
   transition: background 0.2s;
   box-shadow: 0 2px 8px #0005;
 }
-#npc-btn:hover, #sword-btn:hover, #axe-btn:hover, #staff-btn:hover, #gun-btn:hover {
+#sword-btn:hover, #gun-btn:hover {
   background: #1768c9;
 }
 </style>
+<!-- Three.js core -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+<!-- GLTFLoader -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
@@ -45,16 +47,13 @@ body { margin: 0; overflow: hidden; background: #111; }
       <b>W</b>/<b>A</b>/<b>S</b>/<b>D</b> to move |
       Hold <b>Shift</b> to run, <b>Space</b> to jump |
       Arrow keys to rotate/zoom camera |
-      Click weapon button to equip to right hand |
-      Stickman single-player demo
+      Click a weapon button to equip it |
+      Stickman demo (Gun & Sword only)
     </span>
   </marquee>
 </div>
 <div id="bottom-bar">
-  <button id="npc-btn">Spawn NPC</button>
   <button id="sword-btn">Equip Sword</button>
-  <button id="axe-btn">Equip Axe</button>
-  <button id="staff-btn">Equip Staff</button>
   <button id="gun-btn">Equip Gun</button>
 </div>
 
@@ -152,8 +151,7 @@ function createStickman(color=0xffffff) {
     leftForearm: leftArm.lower, rightForearm: rightArm.lower,
     leftLeg: leftLeg.root, rightLeg: rightLeg.root,
     leftShin: leftLeg.lower, rightShin: rightLeg.lower,
-    rightHand: rightHand, // for weapon attachment
-    // For handle mapping
+    rightHand: rightHand,
     leftArmJoint: leftArm.joint, rightArmJoint: rightArm.joint,
     leftLegJoint: leftLeg.joint, rightLegJoint: rightLeg.joint,
     leftForearmJoint: leftArm.lower, rightForearmJoint: rightArm.lower,
@@ -199,79 +197,15 @@ function createSword() {
   sword.position.set(0.08, 0, 0);
   return sword;
 }
-function createAxe() {
-  const axe = new THREE.Group();
-  const handle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.025, 0.03, 0.36, 10),
-    new THREE.MeshStandardMaterial({color: 0x8b5c2b})
-  );
-  handle.position.y = -0.04;
-  axe.add(handle);
-  const blade = new THREE.Mesh(
-    new THREE.BoxGeometry(0.19, 0.08, 0.11),
-    new THREE.MeshStandardMaterial({color: 0xbfcbe2, metalness:0.5, roughness:0.2})
-  );
-  blade.position.set(0.09, 0.08, 0);
-  blade.rotation.z = Math.PI/11;
-  axe.add(blade);
-  const back = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.018, 0.018, 0.05, 10),
-    new THREE.MeshStandardMaterial({color: 0x444444})
-  );
-  back.position.set(-0.09, 0.08, 0);
-  back.rotation.x = Math.PI/2;
-  axe.add(back);
-  axe.rotation.z = Math.PI/2.15;
-  axe.position.set(0.08, 0, 0);
-  return axe;
-}
-function createStaff() {
-  const staff = new THREE.Group();
-  const shaft = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.022, 0.027, 0.61, 12),
-    new THREE.MeshStandardMaterial({color: 0x8b6c3d})
-  );
-  shaft.position.y = 0.19;
-  staff.add(shaft);
-  const orb = new THREE.Mesh(
-    new THREE.SphereGeometry(0.06, 18, 10),
-    new THREE.MeshStandardMaterial({color: 0x6cf4e7, emissive:0x1b8e8a, emissiveIntensity:0.6, transparent:true, opacity:0.85})
-  );
-  orb.position.y = 0.52;
-  staff.add(orb);
-  const band = new THREE.Mesh(
-    new THREE.TorusGeometry(0.045, 0.012, 7, 20),
-    new THREE.MeshStandardMaterial({color: 0xccc4b0, metalness:0.7, roughness:0.2})
-  );
-  band.position.y = 0.47;
-  band.rotation.x = Math.PI/2;
-  staff.add(band);
-  staff.rotation.z = Math.PI / 2.15;
-  staff.position.set(0.08, 0, 0);
-  return staff;
-}
-
-document.getElementById('sword-btn').onclick = function() {
-  equipWeaponToHand(player.rightHand, createSword());
-  showEquipHint('Sword');
-};
-document.getElementById('axe-btn').onclick = function() {
-  equipWeaponToHand(player.rightHand, createAxe());
-  showEquipHint('Axe');
-};
-document.getElementById('staff-btn').onclick = function() {
-  equipWeaponToHand(player.rightHand, createStaff());
-  showEquipHint('Staff');
-};
 
 // ===== Glock-19 gun code =====
 let gunGLB = null;
-const loader = new THREE.GLTFLoader();
+const loader = new GLTFLoader();
 loader.load(
-  './glock-19.glb', // Make sure this file is in the same directory as your HTML
+  './glock-19.glb', // Must be in the same directory as this HTML
   function(gltf) {
     gunGLB = gltf.scene;
-    gunGLB.scale.set(0.45, 0.45, 0.45); // Size adjustment
+    gunGLB.scale.set(0.45, 0.45, 0.45);
     gunGLB.rotation.x = Math.PI / 2;
     gunGLB.position.set(0, 0, 0);
   },
@@ -284,6 +218,7 @@ loader.load(
 function cloneGLB(object) {
   return object.clone(true);
 }
+
 function equipGunToHand(hand) {
   removeWeaponFromHand(hand);
   if (gunGLB) {
@@ -295,25 +230,46 @@ function equipGunToHand(hand) {
     alert('Gun model not loaded yet!');
   }
 }
+
+document.getElementById('sword-btn').onclick = function() {
+  equipWeaponToHand(player.rightHand, createSword());
+  poseHandsForSword(player);
+  showEquipHint('Sword');
+};
 document.getElementById('gun-btn').onclick = function() {
   equipGunToHand(player.rightHand);
   poseHandsForGun(player);
   showEquipHint('Glock-19');
 };
+
+function poseHandsForSword(stickman) {
+  // Sword pose: right arm forward, left arm relaxed
+  stickman.rightArm.rotation.x = -Math.PI/2 + 0.1;
+  stickman.rightForearm.rotation.x = -0.2;
+  stickman.rightArm.rotation.y = 0;
+  stickman.rightForearm.rotation.y = 0;
+
+  stickman.leftArm.rotation.x = 0.2;
+  stickman.leftForearm.rotation.x = 0;
+  stickman.leftArm.rotation.y = 0;
+  stickman.leftForearm.rotation.y = 0;
+
+  stickman.leftArm.position.x = -0.19;
+  stickman.rightArm.position.x = 0.19;
+}
+
 function poseHandsForGun(stickman) {
-  // Right arm forward, elbow slightly bent
+  // Two-hand gun grip
   stickman.rightArm.rotation.x = -Math.PI/2 + 0.22;
   stickman.rightForearm.rotation.x = -0.30;
   stickman.rightArm.rotation.y = -0.08;
   stickman.rightForearm.rotation.y = 0;
 
-  // Left arm forward (to support gun), elbow bent more
   stickman.leftArm.rotation.x = -Math.PI/2 + 0.25;
   stickman.leftForearm.rotation.x = -0.7;
   stickman.leftArm.rotation.y = 0.25;
   stickman.leftForearm.rotation.y = 0.1;
 
-  // Bring hands together
   stickman.leftArm.position.x = -0.11;
   stickman.rightArm.position.x = 0.13;
 }
@@ -346,188 +302,6 @@ player.x = 0; player.y = 0; player.z = 0;
 player.facing = 0;
 player.walkCycle = 0;
 player.state = "idle";
-
-// ===== NPC management + Limb Handles =====
-let npcs = [];
-let npcActiveIdx = -1; // -1 means no npc selected
-let npcDrag = false;
-let dragOffset = {x:0, z:0};
-let npcControlMode = false;
-
-const handleMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444 });
-function createHandleMesh() {
-  return new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), handleMaterial);
-}
-
-function addLimbHandles(npc) {
-  const handles = [];
-  function makeHandle(joint, parentModel, label) {
-    const mesh = createHandleMesh();
-    mesh.visible = false;
-    mesh.userData.label = label;
-    parentModel.add(mesh);
-    handles.push({mesh, joint, parentModel, label});
-  }
-  makeHandle(npc.leftArm, npc.model, "leftArm");
-  makeHandle(npc.rightArm, npc.model, "rightArm");
-  makeHandle(npc.leftLeg, npc.model, "leftLeg");
-  makeHandle(npc.rightLeg, npc.model, "rightLeg");
-  makeHandle(npc.leftForearm, npc.leftArm, "leftForearm");
-  makeHandle(npc.rightForearm, npc.rightArm, "rightForearm");
-  makeHandle(npc.leftShin, npc.leftLeg, "leftShin");
-  makeHandle(npc.rightShin, npc.rightLeg, "rightShin");
-  npc.limbHandles = handles;
-}
-function showHandles(npc, visible) {
-  if (npc.limbHandles) {
-    npc.limbHandles.forEach(h => h.mesh.visible = visible);
-  }
-}
-function updateHandlePositions(npc) {
-  if (!npc.limbHandles) return;
-  npc.limbHandles.forEach(h => {
-    let worldPos = new THREE.Vector3();
-    h.joint.getWorldPosition(worldPos);
-    h.parentModel.worldToLocal(worldPos);
-    h.mesh.position.copy(worldPos);
-  });
-}
-
-// Spawn NPC button
-document.getElementById('npc-btn').onclick = function() {
-  const npc = createStickman(0xffdd22);
-  npc.x = Math.random()*6-3;
-  npc.z = Math.random()*6-3;
-  npc.y = 0;
-  npc.facing = 0;
-  npc.walkCycle = 0;
-  npc.state = "idle";
-  scene.add(npc.model);
-  npc.model.position.set(npc.x, npc.y, npc.z);
-  npcs.push(npc);
-  npcActiveIdx = npcs.length-1;
-  npcControlMode = true;
-  addLimbHandles(npc);
-  showHandles(npc, true);
-  showNpcControlHint();
-};
-
-// Control hint
-function showNpcControlHint() {
-  if (!document.getElementById("npc-hint")) {
-    let hint = document.createElement("div");
-    hint.id = "npc-hint";
-    hint.innerHTML = 'Press <b>E</b> to control NPC (drag with mouse, drag red dots to move limbs)';
-    hint.style.position = "fixed";
-    hint.style.bottom = "70px";
-    hint.style.left = "50%";
-    hint.style.transform = "translateX(-50%)";
-    hint.style.background = "rgba(0,0,0,0.7)";
-    hint.style.color = "#ffe";
-    hint.style.padding = "9px 20px";
-    hint.style.borderRadius = "7px";
-    hint.style.fontFamily = "sans-serif";
-    hint.style.fontSize = "17px";
-    hint.style.zIndex = "100";
-    document.body.appendChild(hint);
-    setTimeout(() => { if(hint.parentNode) hint.parentNode.removeChild(hint); }, 3700);
-  }
-}
-
-// NPC activation by E
-window.addEventListener('keydown', (e) => {
-  if (e.key.toLowerCase() === 'e') {
-    if (npcs.length > 0) {
-      if (npcActiveIdx >= 0) showHandles(npcs[npcActiveIdx], false);
-      npcActiveIdx = (npcActiveIdx+1)%npcs.length;
-      npcControlMode = true;
-      showHandles(npcs[npcActiveIdx], true);
-      showNpcControlHint();
-    }
-  }
-});
-
-// NPC drag controls
-renderer.domElement.addEventListener('mousedown', (e)=>{
-  let handleClicked = false;
-  if(npcControlMode && npcActiveIdx>=0) {
-    let npc = npcs[npcActiveIdx];
-    updateHandlePositions(npc);
-    let rect = renderer.domElement.getBoundingClientRect();
-    let mouse = {
-      x: ((e.clientX-rect.left)/rect.width)*2-1,
-      y: -((e.clientY-rect.top)/rect.height)*2+1
-    };
-    let raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    let objects = npc.limbHandles.map(h=>h.mesh).filter(m=>m.visible);
-    let intersects = raycaster.intersectObjects(objects);
-    if(intersects.length) {
-      handleClicked = true;
-      limbDrag.active = true;
-      limbDrag.npc = npc;
-      limbDrag.handle = npc.limbHandles.find(h=>h.mesh === intersects[0].object);
-      limbDrag.startX = e.clientX;
-      limbDrag.startRot = limbDrag.handle.joint.rotation.y;
-      return;
-    }
-  }
-  if(npcControlMode && npcActiveIdx>=0 && !handleClicked){
-    npcDrag = true;
-    let npc = npcs[npcActiveIdx];
-    let rect = renderer.domElement.getBoundingClientRect();
-    let mouse = {
-      x: ((e.clientX-rect.left)/rect.width)*2-1,
-      y: -((e.clientY-rect.top)/rect.height)*2+1
-    };
-    let raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    let intersects = raycaster.intersectObject(ground);
-    if(intersects.length){
-      dragOffset.x = npc.x - intersects[0].point.x;
-      dragOffset.z = npc.z - intersects[0].point.z;
-    }
-  }
-});
-
-renderer.domElement.addEventListener('mouseup', ()=>{
-  npcDrag=false;
-  limbDrag.active=false;
-});
-
-renderer.domElement.addEventListener('mousemove', (e)=>{
-  if(limbDrag.active && limbDrag.npc && limbDrag.handle){
-    let deltaX = e.clientX - limbDrag.startX;
-    let newRot = limbDrag.startRot + deltaX * 0.01;
-    newRot = Math.max(-2.5, Math.min(2.5, newRot));
-    limbDrag.handle.joint.rotation.y = newRot;
-    return;
-  }
-  if(npcDrag && npcActiveIdx>=0){
-    let npc = npcs[npcActiveIdx];
-    let rect = renderer.domElement.getBoundingClientRect();
-    let mouse = {
-      x: ((e.clientX-rect.left)/rect.width)*2-1,
-      y: -((e.clientY-rect.top)/rect.height)*2+1
-    };
-    let raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    let intersects = raycaster.intersectObject(ground);
-    if(intersects.length){
-      npc.x = intersects[0].point.x + dragOffset.x;
-      npc.z = intersects[0].point.z + dragOffset.z;
-      npc.model.position.set(npc.x, npc.y, npc.z);
-    }
-  }
-});
-
-const limbDrag = {
-  active: false,
-  npc: null,
-  handle: null,
-  startX: 0,
-  startRot: 0
-};
 
 // ===== Controls =====
 let moveForward = false,
@@ -680,22 +454,6 @@ function animate(){
   else if(dx!==0||dz!==0) state=isRunning?"run":"walk";
   player.state=state;
   animateStickman(player, dt);
-
-  for(let i=0;i<npcs.length;i++){
-    let npc = npcs[i];
-    if(npcActiveIdx===i && npcDrag){
-      npc.state = "jump";
-    } else {
-      npc.state = "idle";
-    }
-    animateStickman(npc, dt);
-    npc.model.position.set(npc.x, npc.y, npc.z);
-    if(npc.limbHandles) updateHandlePositions(npc);
-  }
-
-  for(let i=0;i<npcs.length;i++){
-    if(npcs[i].limbHandles) showHandles(npcs[i], i === npcActiveIdx && npcControlMode);
-  }
 
   updateCamera(player);
   renderer.render(scene,camera);
