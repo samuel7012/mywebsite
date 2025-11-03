@@ -1,32 +1,46 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Stickman Gun & Sword Only</title>
+<title>Alpha Testing</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
-#bottom-bar {
-  position: fixed; left: 0; right: 0; bottom: 0;
-  height: 60px; background: rgba(40,40,40,0.8);
-  display: flex; align-items: center; justify-content: center; gap: 24px;
-  z-index: 99;
-}
-#sword-btn, #gun-btn {
-  background: #2e8bff; color: #fff; border: none; border-radius: 8px;
-  padding: 13px 24px; font-size: 17px; cursor: pointer; transition: background 0.2s;
-  box-shadow: 0 2px 8px #0005;
-}
-#sword-btn:hover, #gun-btn:hover { background: #1768c9; }
+#info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
 </style>
-<!-- Use unpkg CDN for proper GLTFLoader global exposure -->
-<script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
-<div id="bottom-bar">
-  <button id="sword-btn">Equip Sword</button>
-  <button id="gun-btn">Equip Gun</button>
-</div>
+<div id="info" style="width:98%; height:11%;">
+<marquee><big><b>W</b>: forward &nbsp; <b>S</b>: backward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
+Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
+Move mouse to rotate camera, scroll to zoom<br>
+Multiplayer stickman demo!
+</div></big><marquee>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
+// ===== Scene setup =====
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x222233);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0, 4, 8);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+directionalLight.position.set(5, 10, 7.5);
+scene.add(directionalLight);
+
+// Ground
+const groundGeometry = new THREE.PlaneGeometry(60, 60);
+const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x696969 });
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = -Math.PI/2;
+scene.add(ground);
+
 // ===== Stickman factory =====
 function createStickman(color=0xffffff) {
   const stickman = new THREE.Group();
@@ -65,7 +79,7 @@ function createStickman(color=0xffffff) {
     lower.add(end);
 
     root.add(lower);
-    return {root, lower, joint, lowerMesh};
+    return {root, lower};
   }
 
   const leftArm = addLimb(new THREE.Vector3(-0.19, 1.9, 0), 0.49, 0.42);
@@ -73,175 +87,98 @@ function createStickman(color=0xffffff) {
   const leftLeg = addLimb(new THREE.Vector3(-0.07, 0.99, 0), 0.58, 0.49);
   const rightLeg = addLimb(new THREE.Vector3(0.07, 0.99, 0), 0.58, 0.49);
 
-  // Right hand for weapon
-  const rightHand = new THREE.Group();
-  // Attach to end of right forearm
-  rightHand.position.set(0, -0.42, 0);
-  rightArm.lower.add(rightHand);
-
   return {
     model: stickman,
     head,
     leftArm: leftArm.root, rightArm: rightArm.root,
     leftForearm: leftArm.lower, rightForearm: rightArm.lower,
     leftLeg: leftLeg.root, rightLeg: rightLeg.root,
-    leftShin: leftLeg.lower, rightShin: rightLeg.lower,
-    rightHand: rightHand,
-    // For handle mapping
-    leftArmJoint: leftArm.joint, rightArmJoint: rightArm.joint,
-    leftLegJoint: leftLeg.joint, rightLegJoint: rightLeg.joint,
-    leftForearmJoint: leftArm.lower, rightForearmJoint: rightArm.lower,
-    leftShinJoint: leftLeg.lower, rightShinJoint: rightLeg.lower
+    leftShin: leftLeg.lower, rightShin: rightLeg.lower
   };
 }
 
-// ===== Three.js scene setup =====
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x222233);
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-camera.position.set(0, 4, 8);
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+// ===== Multiplayer state =====
+const playerId = Math.random().toString(36).substr(2, 9);
+const players = {};
+const npcs = []; // list of NPCs
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-directionalLight.position.set(5, 10, 7.5);
-scene.add(directionalLight);
-
-const groundGeometry = new THREE.PlaneGeometry(60, 60);
-const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x696969 });
-const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-ground.rotation.x = -Math.PI/2;
-scene.add(ground);
-
-// ===== Sword and Gun system =====
-function removeWeaponFromHand(hand) {
-  while (hand.children.length > 0) hand.remove(hand.children[0]);
-}
-function equipWeaponToHand(hand, weaponModel) {
-  removeWeaponFromHand(hand);
-  hand.add(weaponModel);
-}
-function createSword() {
-  const sword = new THREE.Group();
-  const blade = new THREE.Mesh(
-    new THREE.BoxGeometry(0.07, 0.44, 0.06),
-    new THREE.MeshStandardMaterial({color: 0xd0d0d0, metalness:0.5, roughness:0.25})
-  );
-  blade.position.y = 0.22;
-  sword.add(blade);
-  const guard = new THREE.Mesh(
-    new THREE.BoxGeometry(0.18, 0.05, 0.065),
-    new THREE.MeshStandardMaterial({color: 0x86632c, metalness:0.4, roughness:0.6})
-  );
-  guard.position.y = 0.02;
-  sword.add(guard);
-  const handle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.028, 0.028, 0.14, 12),
-    new THREE.MeshStandardMaterial({color: 0x603b17})
-  );
-  handle.position.y = -0.07;
-  sword.add(handle);
-  const pommel = new THREE.Mesh(
-    new THREE.SphereGeometry(0.032, 10, 8),
-    new THREE.MeshStandardMaterial({color: 0x666666, metalness:0.5})
-  );
-  pommel.position.y = -0.14;
-  sword.add(pommel);
-  sword.rotation.z = Math.PI / 2.5;
-  sword.position.set(0.08, 0, 0);
-  return sword;
-}
-
-// Gun loading
-let gunGLB = null;
-const loader = new GLTFLoader();
-loader.load(
-  './glock-19.glb', // Must be in the same directory as this HTML
-  function(gltf) {
-    gunGLB = gltf.scene;
-    gunGLB.scale.set(0.45, 0.45, 0.45);
-    gunGLB.rotation.x = Math.PI / 2;
-    gunGLB.position.set(0, 0, 0);
-  },
-  undefined,
-  function(error) {
-    console.error('Error loading glock-19.glb:', error);
-  }
-);
-function cloneGLB(object) { return object.clone(true); }
-function equipGunToHand(hand) {
-  removeWeaponFromHand(hand);
-  if (gunGLB) {
-    const gun = cloneGLB(gunGLB);
-    gun.position.set(0.12, 0, 0);
-    gun.rotation.z = Math.PI / 2.1;
-    hand.add(gun);
-  } else {
-    alert('Gun model not loaded yet!');
+function addPlayer(id, color) {
+  if (!players[id]) {
+    const parts = createStickman(color);
+    scene.add(parts.model);
+    players[id] = {
+      ...parts,
+      x: 0, y: 0, z: 0,
+      facing: 0,
+      targetX:0, targetY:0, targetZ:0,
+      movement: {running:false, jumping:false, grounded:true, velocityY:0},
+      walkCycle: 0,
+      state: "idle",
+      color
+    };
   }
 }
 
-// ===== Poses =====
-function poseHandsForSword(stickman) {
-  stickman.rightArm.rotation.x = -Math.PI/2 + 0.1;
-  stickman.rightForearm.rotation.x = -0.2;
-  stickman.rightArm.rotation.y = 0;
-  stickman.rightForearm.rotation.y = 0;
-  stickman.leftArm.rotation.x = 0.2;
-  stickman.leftForearm.rotation.x = 0;
-  stickman.leftArm.rotation.y = 0;
-  stickman.leftForearm.rotation.y = 0;
-  stickman.leftArm.position.x = -0.19;
-  stickman.rightArm.position.x = 0.19;
+// Local player
+addPlayer(playerId, 0xffffff);
+
+// ===== Spawn NPC in front of player =====
+function spawnNPCInFront(player, color = 0xffaa00, text = "Hello there!") {
+  const npc = createStickman(color);
+
+  const forward = new THREE.Vector3(0, 0, -1)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.facing);
+  npc.model.position.copy(player.model.position).add(forward.multiplyScalar(2));
+  scene.add(npc.model);
+
+  const speech = document.createElement("div");
+  speech.innerHtml = text;
+  speech.style.position = "absolute";
+  speech.style.padding = "4px 8px";
+  speech.style.background = "rgba(0,0,0,0.7)";
+  speech.style.color = "#fff";
+  speech.style.borderRadius = "6px";
+  speech.style.fontFamily = "sans-serif";
+  speech.style.fontSize = "14px";
+  document.body.appendChild(speech);
+
+  function updateSpeechBox() {
+    const pos = npc.model.position.clone();
+    pos.y += 2.6;
+    const projected = pos.project(camera);
+    const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+    speech.style.left = `${x - speech.offsetWidth / 2}px`;
+    speech.style.top = `${y - 30}px`;
+  }
+
+  npc.updateSpeechBox = updateSpeechBox;
+  npc.speechElement = speech;
+  npcs.push(npc);
+  return npc;
 }
-function poseHandsForGun(stickman) {
-  stickman.rightArm.rotation.x = -Math.PI/2 + 0.22;
-  stickman.rightForearm.rotation.x = -0.30;
-  stickman.rightArm.rotation.y = -0.08;
-  stickman.rightForearm.rotation.y = 0;
-  stickman.leftArm.rotation.x = -Math.PI/2 + 0.25;
-  stickman.leftForearm.rotation.x = -0.7;
-  stickman.leftArm.rotation.y = 0.25;
-  stickman.leftForearm.rotation.y = 0.1;
-  stickman.leftArm.position.x = -0.11;
-  stickman.rightArm.position.x = 0.13;
-}
 
-// ===== UI Event Handlers =====
-const player = createStickman(0xffffff);
-scene.add(player.model);
-player.x = 0; player.y = 0; player.z = 0;
-player.facing = 0;
-player.walkCycle = 0;
-player.state = "idle";
+spawnNPCInFront(players[playerId], 0xff000, "Welcome to the Tutorial! Look at the top of your screen, and once you are done moving");
+  
+//  MOVE ITT
+let moveForward = false,
+    moveBackward = false,
+    moveLeft = false,
+    moveRight = false;
 
-document.getElementById('sword-btn').onclick = function() {
-  equipWeaponToHand(player.rightHand, createSword());
-  poseHandsForSword(player);
-};
-document.getElementById('gun-btn').onclick = function() {
-  equipGunToHand(player.rightHand);
-  poseHandsForGun(player);
-};
-
-// ===== Controls (WASD, Shift, Space, Arrows, + -) =====
-let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
 let isRunning = false;
 let isJumping = false;
 let isGrounded = true;
+
 let velocityY = 0;
-const walkSpeed = 0.08;
-const runSpeed = 0.16;
+
+const walkSpeed   = 0.08;
+const runSpeed    = 0.16;
 const jumpStrength = 0.24;
-const gravity = 0.012;
-let azimuth = 0, polar = Math.PI/5, radius = 8;
-const minPolar = 0.1, maxPolar = Math.PI/2-0.05;
-const minRadius = 2, maxRadius = 30;
-const camAzimuthStep = 0.06;
-const camPolarStep = 0.04;
-const camRadiusStep = 0.5;
+const gravity      = 0.012;
+
+let walkCycle = 0; // for gait animation
+
 window.addEventListener('keydown', (e) => {
   switch (e.key) {
     case 's': moveForward = true; break;
@@ -249,17 +186,15 @@ window.addEventListener('keydown', (e) => {
     case 'a': moveLeft = true; break;
     case 'd': moveRight = true; break;
     case 'Shift': isRunning = true; break;
-    case 'ArrowLeft': azimuth -= camAzimuthStep; break;
-    case 'ArrowRight': azimuth += camAzimuthStep; break;
-    case 'ArrowUp': polar = Math.max(minPolar, polar-camPolarStep); break;
-    case 'ArrowDown': polar = Math.min(maxPolar, polar+camPolarStep); break;
-    case '+': case '=': radius = Math.max(minRadius, radius-camRadiusStep); break;
-    case '-': radius = Math.min(maxRadius, radius+camRadiusStep); break;
-    case ' ':
-      if (isGrounded && !isJumping) { isJumping = true; velocityY = jumpStrength; }
+    case ' ': 
+      if (isGrounded && !isJumping) {
+        isJumping = true;
+        velocityY = jumpStrength;
+      }
       break;
   }
 });
+
 window.addEventListener('keyup', (e) => {
   switch (e.key) {
     case 's': moveForward = false; break;
@@ -269,6 +204,24 @@ window.addEventListener('keyup', (e) => {
     case 'Shift': isRunning = false; break;
   }
 });
+  
+// ===== Camera orbit =====
+let azimuth=0, polar=Math.PI/5, radius=8;
+const minPolar=0.1, maxPolar=Math.PI/2-0.05;
+let lastMouse={x:0,y:0}, mouseInitialized=false;
+const mouseSensitivity=0.005;
+
+document.addEventListener('mousemove', e=>{
+  if(!mouseInitialized){ lastMouse={x:e.clientX,y:e.clientY}; mouseInitialized=true; return; }
+  let dx=e.clientX-lastMouse.x, dy=e.clientY-lastMouse.y;
+  azimuth -= dx*mouseSensitivity; polar -= dy*mouseSensitivity;
+  polar = Math.max(minPolar, Math.min(maxPolar, polar));
+  lastMouse={x:e.clientX, y:e.clientY};
+});
+document.addEventListener('mouseleave', ()=>mouseInitialized=false);
+renderer.domElement.addEventListener('wheel', e=>{
+  radius += e.deltaY*0.01; radius=Math.max(2, Math.min(30, radius));
+});
 function updateCamera(target){
   let camX=target.x+radius*Math.sin(polar)*Math.sin(azimuth);
   let camY=target.y+radius*Math.cos(polar)+1;
@@ -277,7 +230,7 @@ function updateCamera(target){
   camera.lookAt(target.x, target.y+1.4, target.z);
 }
 
-// ===== Stickman animation loop =====
+// ===== Stickman animation =====
 function animateStickman(player, dt){
   let t=player.walkCycle;
   let la=player.leftArm, ra=player.rightArm;
@@ -285,6 +238,7 @@ function animateStickman(player, dt){
   let ll=player.leftLeg, rl=player.rightLeg;
   let ls=player.leftShin, rs=player.rightShin;
   let state=player.state;
+
   if(state==="idle"){
     la.rotation.x=ra.rotation.x=lfa.rotation.x=rfa.rotation.x=0;
     ll.rotation.x=rl.rotation.x=ls.rotation.x=rs.rotation.x=0;
@@ -296,7 +250,7 @@ function animateStickman(player, dt){
     rl.rotation.x=Math.sin(ph+Math.PI)*al;
     ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4))*sa;
     rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4+Math.PI))*sa;
-    player.walkCycle += dt*(isRunning?1.04:1);
+    player.walkCycle += dt*(player.movement.running?1.04:1);
   } else if(state==="run"){
     let f=9.5, aa=1.6, al=1.8, sa=1.35, ph=t*f;
     la.rotation.x=Math.sin(ph)*aa*0.6;
@@ -325,7 +279,9 @@ function animate(){
   let dt = Math.min((time-prevTime)/1000,0.05);
   prevTime = time;
 
-  let dx=0, dz=0;
+  // Local player
+  const player = players[playerId];
+  let dx=0,dz=0;
   let speed = isRunning ? runSpeed : walkSpeed;
   if(moveForward){dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed;}
   if(moveBackward){dx-=Math.sin(azimuth)*speed; dz-=Math.cos(azimuth)*speed;}
@@ -343,11 +299,17 @@ function animate(){
   player.model.position.set(player.x,player.y,player.z);
   if(dx!==0||dz!==0){player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing;}
 
+  // State
   let state="idle";
   if(isJumping||!isGrounded) state="jump";
   else if(dx!==0||dz!==0) state=isRunning?"run":"walk";
   player.state=state;
   animateStickman(player, dt);
+
+  // Update NPC speech boxes
+  npcs.forEach(npc=>{
+    if(npc.updateSpeechBox) npc.updateSpeechBox();
+  });
 
   updateCamera(player);
   renderer.render(scene,camera);
