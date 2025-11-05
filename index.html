@@ -8,12 +8,6 @@ body { margin: 0; overflow: hidden; background: #111; }
 </style>
 </head>
 <body>
-<div id="info" style="width:98%; height:11%;">
-<marquee><big><b>W</b>: forward &nbsp; <b>S</b>: backward &nbsp; <b>A</b>: left &nbsp; <b>D</b>: right<br>
-Hold <b>Shift</b> to run, <b>Space</b> to jump<br>
-Move mouse to rotate camera, scroll to zoom<br>
-Multiplayer stickman demo!
-</div></big><marquee>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
@@ -122,44 +116,6 @@ function addPlayer(id, color) {
 // Local player
 addPlayer(playerId, 0xffffff);
 
-// ===== Spawn NPC in front of player =====
-function spawnNPCInFront(player, color = 0xffaa00, text = "Hello there!") {
-  const npc = createStickman(color);
-
-  const forward = new THREE.Vector3(0, 0, -1)
-    .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.facing);
-  npc.model.position.copy(player.model.position).add(forward.multiplyScalar(2));
-  scene.add(npc.model);
-
-  const speech = document.createElement("div");
-  speech.innerHtml = text;
-  speech.style.position = "absolute";
-  speech.style.padding = "4px 8px";
-  speech.style.background = "rgba(0,0,0,0.7)";
-  speech.style.color = "#fff";
-  speech.style.borderRadius = "6px";
-  speech.style.fontFamily = "sans-serif";
-  speech.style.fontSize = "14px";
-  document.body.appendChild(speech);
-
-  function updateSpeechBox() {
-    const pos = npc.model.position.clone();
-    pos.y += 2.6;
-    const projected = pos.project(camera);
-    const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
-    const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
-    speech.style.left = `${x - speech.offsetWidth / 2}px`;
-    speech.style.top = `${y - 30}px`;
-  }
-
-  npc.updateSpeechBox = updateSpeechBox;
-  npc.speechElement = speech;
-  npcs.push(npc);
-  return npc;
-}
-
-spawnNPCInFront(players[playerId], 0xff000, "Welcome to the Tutorial! Look at the top of your screen, and once you are done moving");
-  
 //  MOVE ITT
 let moveForward = false,
     moveBackward = false,
