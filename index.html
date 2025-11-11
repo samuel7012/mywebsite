@@ -195,8 +195,8 @@ const keyZoomSpeed = 0.2;
 
 window.addEventListener('keydown', e => {
   switch (e.code) {
-    case 'ArrowLeft': keyState.left = true; break;
-    case 'ArrowRight': keyState.right = true; break;
+    case 'ArrowLeft': keyState.left = false; break;
+    case 'ArrowRight': keyState.right = false; break;
     case 'ArrowUp': keyState.up = true; break;
     case 'ArrowDown': keyState.down = true; break;
     case 'PageUp': keyState.zoomIn = true; break;
