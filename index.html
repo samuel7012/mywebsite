@@ -1,45 +1,62 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>No playing</title>
+<title>Three.js City with Collision</title>
 <style>
-body { margin: 0; overflow: hidden; background: #111; }
-#info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
+  body { margin: 0; overflow: hidden; background: #000; }
+  canvas { display: block; }
 </style>
 </head>
 <body>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-// ===== Scene setup =====
+
+// ====== Scene & Renderer ======
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x222233);
-
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-camera.position.set(0, 4, 8);
-
-const renderer = new THREE.WebGLRenderer({antialias:true});
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 500);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// ===== Create City Ground =====
+// ====== Player ======
+const players = {};
+const playerId = "local";
+players[playerId] = {
+  x: 0, y: 0, z: 0,
+  facing: 0,
+  state: "idle",
+  walkCycle: 0,
+  model: new THREE.Group(),
+  movement: { running: false }
+};
+
+// Simple stickman placeholder
+const stickman = new THREE.Mesh(
+  new THREE.CapsuleGeometry(0.4, 1.2, 4, 8),
+  new THREE.MeshStandardMaterial({ color: 0x00ffcc })
+);
+stickman.castShadow = true;
+players[playerId].model.add(stickman);
+scene.add(players[playerId].model);
+
+// ====== City + Colliders ======
+const colliders = [];
+
 function createCity(scene) {
-  // Ground base
+  // Ground
   const groundGeo = new THREE.PlaneGeometry(200, 200);
-  const groundMat = new THREE.MeshStandardMaterial({
-    color: 0x222222,
-    roughness: 0.9,
-  });
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
 
-  // Street grid lines (optional aesthetic)
   const gridHelper = new THREE.GridHelper(200, 40, 0x444444, 0x222222);
   scene.add(gridHelper);
 
-  // City buildings
+  // Buildings
   const buildingMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.2, roughness: 0.8 });
   const buildings = new THREE.Group();
 
@@ -50,16 +67,21 @@ function createCity(scene) {
     const geo = new THREE.BoxGeometry(width, height, depth);
     const mat = buildingMat.clone();
     mat.color.setHSL(Math.random() * 0.1 + 0.55, 0.1, 0.4 + Math.random() * 0.2);
+
     const bldg = new THREE.Mesh(geo, mat);
     bldg.position.set(
       (Math.random() - 0.5) * 180,
       height / 2,
       (Math.random() - 0.5) * 180
     );
+
     if (Math.abs(bldg.position.x) > 20 || Math.abs(bldg.position.z) > 20) {
       bldg.castShadow = true;
       bldg.receiveShadow = true;
       buildings.add(bldg);
+
+      const box = new THREE.Box3().setFromObject(bldg);
+      colliders.push(box);
     }
   }
 
@@ -79,300 +101,154 @@ function createCity(scene) {
   dirLight.shadow.camera.right = 80;
   scene.add(dirLight);
 }
-
 createCity(scene);
 
-// ===== Stickman factory =====
-function createStickman(color=0xffffff) {
-  const stickman = new THREE.Group();
-  const stickMat = new THREE.MeshStandardMaterial({color: 0x181818});
-  const headMat = new THREE.MeshStandardMaterial({color: color});
-
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 32), headMat);
-  head.position.y = 2.25;
-  stickman.add(head);
-
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.95, 20), stickMat);
-  body.position.y = 1.5;
-  stickman.add(body);
-
-  function addLimb(rootPos, upperLen, lowerLen) {
-    const root = new THREE.Group();
-    root.position.copy(rootPos);
-    stickman.add(root);
-
-    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, upperLen, 14), stickMat);
-    upper.position.y = -upperLen/2;
-    root.add(upper);
-
-    const joint = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 10), stickMat);
-    joint.position.y = -upperLen;
-    root.add(joint);
-
-    const lower = new THREE.Group();
-    lower.position.y = -upperLen;
-    const lowerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, lowerLen, 12), stickMat);
-    lowerMesh.position.y = -lowerLen/2;
-    lower.add(lowerMesh);
-
-    const end = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), stickMat);
-    end.position.y = -lowerLen;
-    lower.add(end);
-
-    root.add(lower);
-    return {root, lower};
-  }
-
-  const leftArm = addLimb(new THREE.Vector3(-0.19, 1.9, 0), 0.49, 0.42);
-  const rightArm = addLimb(new THREE.Vector3(0.19, 1.9, 0), 0.49, 0.42);
-  const leftLeg = addLimb(new THREE.Vector3(-0.07, 0.99, 0), 0.58, 0.49);
-  const rightLeg = addLimb(new THREE.Vector3(0.07, 0.99, 0), 0.58, 0.49);
-
-  return {
-    model: stickman,
-    head,
-    leftArm: leftArm.root, rightArm: rightArm.root,
-    leftForearm: leftArm.lower, rightForearm: rightArm.lower,
-    leftLeg: leftLeg.root, rightLeg: rightLeg.root,
-    leftShin: leftLeg.lower, rightShin: rightLeg.lower
-  };
-}
-
-// ===== Multiplayer state =====
-const playerId = Math.random().toString(36).substr(2, 9);
-const players = {};
-const npcs = []; // list of NPCs
-
-function addPlayer(id, color) {
-  if (!players[id]) {
-    const parts = createStickman(color);
-    scene.add(parts.model);
-    players[id] = {
-      ...parts,
-      x: 0, y: 0, z: 0,
-      facing: 0,
-      targetX:0, targetY:0, targetZ:0,
-      movement: {running:false, jumping:false, grounded:true, velocityY:0},
-      walkCycle: 0,
-      state: "idle",
-      color
-    };
-  }
-}
-
-// Local player
-addPlayer(playerId, 0xffffff);
-
-//  MOVE ITT
-let moveForward = false,
-    moveBackward = false,
-    moveLeft = false,
-    moveRight = false;
-
-let isRunning = false;
-let isJumping = false;
-let isGrounded = true;
-
-let velocityY = 0;
-
-const walkSpeed   = 0.08;
-const runSpeed    = 0.16;
-const jumpStrength = 0.24;
-const gravity      = 0.012;
-
-let walkCycle = 0; // for gait animation
-
-window.addEventListener('keydown', (e) => {
-  switch (e.key) {
-    case 's': moveForward = true; break;
-    case 'w': moveBackward = true; break;
-    case 'a': moveLeft = true; break;
-    case 'd': moveRight = true; break;
-    case 'Shift': isRunning = true; break;
-    case ' ': 
-      if (isGrounded && !isJumping) {
-        isJumping = true;
-        velocityY = jumpStrength;
-      }
-      break;
-  }
-});
-
-window.addEventListener('keyup', (e) => {
-  switch (e.key) {
-    case 's': moveForward = false; break;
-    case 'w': moveBackward = false; break;
-    case 'a': moveLeft = false; break;
-    case 'd': moveRight = false; break;
-    case 'Shift': isRunning = false; break;
-  }
-});
-  
-// ===== Camera orbit =====
+// ====== Camera Orbit (Mouse + Arrow Keys + Zoom) ======
 let azimuth = 0, polar = Math.PI / 5, radius = 8;
-const minPolar = 0.1, maxPolar = Math.PI / 2 - 0.05;
-let lastMouse = { x: 0, y: 0 }, mouseInitialized = false;
+const minPolar = 0.1, maxPolar = Math.PI/2-0.05;
+let lastMouse = {x:0, y:0}, mouseInitialized = false;
 const mouseSensitivity = 0.005;
 
-// Mouse orbit
 document.addEventListener('mousemove', e => {
-  if (!mouseInitialized) {
-    lastMouse = { x: e.clientX, y: e.clientY };
-    mouseInitialized = true;
-    return;
-  }
-  let dx = e.clientX - lastMouse.x, dy = e.clientY - lastMouse.y;
-  azimuth -= dx * mouseSensitivity;
-  polar -= dy * mouseSensitivity;
+  if(!mouseInitialized){ lastMouse={x:e.clientX,y:e.clientY}; mouseInitialized=true; return; }
+  let dx = e.clientX-lastMouse.x, dy = e.clientY-lastMouse.y;
+  azimuth -= dx*mouseSensitivity;
+  polar -= dy*mouseSensitivity;
   polar = Math.max(minPolar, Math.min(maxPolar, polar));
-  lastMouse = { x: e.clientX, y: e.clientY };
+  lastMouse = {x:e.clientX, y:e.clientY};
 });
-document.addEventListener('mouseleave', () => mouseInitialized = false);
+document.addEventListener('mouseleave', ()=>mouseInitialized=false);
 
-// Mouse zoom
-renderer.domElement.addEventListener('wheel', e => {
-  radius += e.deltaY * 0.01;
-  radius = Math.max(2, Math.min(30, radius));
+renderer.domElement.addEventListener('wheel', e=>{
+  radius += e.deltaY*0.01; radius=Math.max(2, Math.min(30, radius));
 });
 
-// ===== Arrow key orbit control =====
-const keyState = { left: true, right: true, up: false, down: false, zoomIn: false, zoomOut: false };
-const keyOrbitSpeed = 0.02; // radians per frame
+// Arrow keys + PageUp/PageDown for camera
+const keyState = {left:false, right:false, up:false, down:false, zoomIn:false, zoomOut:false};
+const keyOrbitSpeed = 0.02;
 const keyZoomSpeed = 0.2;
 
-window.addEventListener('keydown', e => {
-  switch (e.code) {
-    case 'ArrowLeft': keyState.left = true; break;
-    case 'ArrowRight': keyState.right = true; break;
-    case 'ArrowUp': keyState.up = true; break;
-    case 'ArrowDown': keyState.down = true; break;
-    case 'PageUp': keyState.zoomIn = true; break;
-    case 'PageDown': keyState.zoomOut = true; break;
+window.addEventListener('keydown', e=>{
+  switch(e.code){
+    case 'ArrowLeft': keyState.left=true; break;
+    case 'ArrowRight': keyState.right=true; break;
+    case 'ArrowUp': keyState.up=true; break;
+    case 'ArrowDown': keyState.down=true; break;
+    case 'PageUp': keyState.zoomIn=true; break;
+    case 'PageDown': keyState.zoomOut=true; break;
   }
 });
-window.addEventListener('keyup', e => {
-  switch (e.code) {
-    case 'ArrowLeft': keyState.left = false; break;
-    case 'ArrowRight': keyState.right = false; break;
-    case 'ArrowUp': keyState.up = false; break;
-    case 'ArrowDown': keyState.down = false; break;
-    case 'PageUp': keyState.zoomIn = false; break;
-    case 'PageDown': keyState.zoomOut = false; break;
+window.addEventListener('keyup', e=>{
+  switch(e.code){
+    case 'ArrowLeft': keyState.left=false; break;
+    case 'ArrowRight': keyState.right=false; break;
+    case 'ArrowUp': keyState.up=false; break;
+    case 'ArrowDown': keyState.down=false; break;
+    case 'PageUp': keyState.zoomIn=false; break;
+    case 'PageDown': keyState.zoomOut=false; break;
   }
 });
 
-function updateCameraKeys() {
-  if (keyState.left) azimuth -= keyOrbitSpeed;
-  if (keyState.right) azimuth += keyOrbitSpeed;
-  if (keyState.up) polar -= keyOrbitSpeed;
-  if (keyState.down) polar += keyOrbitSpeed;
+function updateCameraKeys(){
+  if(keyState.left) azimuth -= keyOrbitSpeed;
+  if(keyState.right) azimuth += keyOrbitSpeed;
+  if(keyState.up) polar -= keyOrbitSpeed;
+  if(keyState.down) polar += keyOrbitSpeed;
   polar = Math.max(minPolar, Math.min(maxPolar, polar));
-  if (keyState.zoomIn) radius -= keyZoomSpeed;
-  if (keyState.zoomOut) radius += keyZoomSpeed;
+  if(keyState.zoomIn) radius -= keyZoomSpeed;
+  if(keyState.zoomOut) radius += keyZoomSpeed;
   radius = Math.max(2, Math.min(30, radius));
 }
 
-function updateCamera(target) {
-  updateCameraKeys(); // Apply arrow key input each frame
-
-  let camX = target.x + radius * Math.sin(polar) * Math.sin(azimuth);
-  let camY = target.y + radius * Math.cos(polar) + 1;
-  let camZ = target.z + radius * Math.sin(polar) * Math.cos(azimuth);
+function updateCamera(target){
+  updateCameraKeys();
+  const camX = target.x + radius*Math.sin(polar)*Math.sin(azimuth);
+  const camY = target.y + radius*Math.cos(polar)+1;
+  const camZ = target.z + radius*Math.sin(polar)*Math.cos(azimuth);
   camera.position.set(camX, camY, camZ);
-  camera.lookAt(target.x, target.y + 1.4, target.z);
+  camera.lookAt(target.x, target.y+1.4, target.z);
 }
 
-// ===== Stickman animation =====
-function animateStickman(player, dt){
-  let t=player.walkCycle;
-  let la=player.leftArm, ra=player.rightArm;
-  let lfa=player.leftForearm, rfa=player.rightForearm;
-  let ll=player.leftLeg, rl=player.rightLeg;
-  let ls=player.leftShin, rs=player.rightShin;
-  let state=player.state;
+// ====== Player Movement ======
+let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false, isRunning=false;
+let isJumping=false, isGrounded=true, velocityY=0, gravity=0.04;
+const walkSpeed = 0.2, runSpeed = 0.35;
 
-  if(state==="idle"){
-    la.rotation.x=ra.rotation.x=lfa.rotation.x=rfa.rotation.x=0;
-    ll.rotation.x=rl.rotation.x=ls.rotation.x=rs.rotation.x=0;
-  } else if(state==="walk"){
-    let f=5, aa=0.65, al=0.7, sa=0.47, ph=t*f;
-    la.rotation.x=Math.sin(ph)*aa;
-    ra.rotation.x=Math.sin(ph+Math.PI)*aa;
-    ll.rotation.x=Math.sin(ph)*al;
-    rl.rotation.x=Math.sin(ph+Math.PI)*al;
-    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4))*sa;
-    rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4+Math.PI))*sa;
-    player.walkCycle += dt*(player.movement.running?1.04:1);
-  } else if(state==="run"){
-    let f=9.5, aa=1.6, al=1.8, sa=1.35, ph=t*f;
-    la.rotation.x=Math.sin(ph)*aa*0.6;
-    ra.rotation.x=Math.sin(ph+Math.PI)*aa*0.6;
-    lfa.rotation.x=Math.abs(Math.sin(ph))*0.9-1.1;
-    rfa.rotation.x=Math.abs(Math.sin(ph+Math.PI))*0.9-1.1;
-    ll.rotation.x=Math.sin(ph)*al;
-    rl.rotation.x=Math.sin(ph+Math.PI)*al;
-    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6))*sa +0.13*Math.abs(Math.sin(ph));
-    rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6+Math.PI))*sa +0.13*Math.abs(Math.sin(ph+Math.PI));
-    player.walkCycle += dt*1.3;
-  } else if(state==="jump"){
-    la.rotation.x=ra.rotation.x=-1.15;
-    lfa.rotation.x=rfa.rotation.x=-0.42;
-    ll.rotation.x=rl.rotation.x=0.88;
-    ls.rotation.x=rs.rotation.x=0.8;
-    player.walkCycle += dt*0.6;
+window.addEventListener('keydown', e=>{
+  switch(e.code){
+    case 'KeyW': moveForward=true; break;
+    case 'KeyS': moveBackward=true; break;
+    case 'KeyA': moveLeft=true; break;
+    case 'KeyD': moveRight=true; break;
+    case 'ShiftLeft': isRunning=true; break;
+    case 'Space': if(isGrounded){velocityY=0.6; isJumping=true; isGrounded=false;} break;
   }
-}
+});
+window.addEventListener('keyup', e=>{
+  switch(e.code){
+    case 'KeyW': moveForward=false; break;
+    case 'KeyS': moveBackward=false; break;
+    case 'KeyA': moveLeft=false; break;
+    case 'KeyD': moveRight=false; break;
+    case 'ShiftLeft': isRunning=false; break;
+  }
+});
 
-// ===== Main loop =====
+// ====== Main Loop ======
 let prevTime = performance.now();
 function animate(){
   requestAnimationFrame(animate);
-  let time = performance.now();
-  let dt = Math.min((time-prevTime)/1000,0.05);
+  const time = performance.now();
+  const dt = Math.min((time-prevTime)/1000,0.05);
   prevTime = time;
 
-  // Local player
   const player = players[playerId];
-  let dx=0,dz=0;
-  let speed = isRunning ? runSpeed : walkSpeed;
-  if(moveForward){dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed;}
-  if(moveBackward){dx-=Math.sin(azimuth)*speed; dz-=Math.cos(azimuth)*speed;}
-  if(moveLeft){dx+=Math.sin(azimuth-Math.PI/2)*speed; dz+=Math.cos(azimuth-Math.PI/2)*speed;}
-  if(moveRight){dx+=Math.sin(azimuth+Math.PI/2)*speed; dz+=Math.cos(azimuth+Math.PI/2)*speed;}
+  let dx=0, dz=0;
+  const speed = isRunning ? runSpeed : walkSpeed;
+  if(moveForward){ dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed; }
+  if(moveBackward){ dx-=Math.sin(azimuth)*speed; dz-=Math.cos(azimuth)*speed; }
+  if(moveLeft){ dx+=Math.sin(azimuth-Math.PI/2)*speed; dz+=Math.cos(azimuth-Math.PI/2)*speed; }
+  if(moveRight){ dx+=Math.sin(azimuth+Math.PI/2)*speed; dz+=Math.cos(azimuth+Math.PI/2)*speed; }
 
-  player.x += dx; player.z += dz;
-  if(isJumping||!isGrounded){
-    player.y += velocityY;
-    velocityY -= gravity;
-    if(player.y<=0){player.y=0; velocityY=0; isJumping=false; isGrounded=true;}
-    else{isGrounded=false;}
+  let newX = player.x + dx;
+  let newZ = player.z + dz;
+
+  // ===== Collision Detection =====
+  const playerBox = new THREE.Box3(
+    new THREE.Vector3(newX-0.5, 0, newZ-0.5),
+    new THREE.Vector3(newX+0.5, 2, newZ+0.5)
+  );
+  let blocked = false;
+  for(const box of colliders){
+    if(box.intersectsBox(playerBox)){ blocked=true; break; }
+  }
+  if(!blocked){
+    player.x=newX; player.z=newZ;
   }
 
-  player.model.position.set(player.x,player.y,player.z);
-  if(dx!==0||dz!==0){player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing;}
+  // Jumping & gravity
+  if(isJumping || !isGrounded){
+    player.y += velocityY;
+    velocityY -= gravity;
+    if(player.y <= 0){ player.y=0; velocityY=0; isJumping=false; isGrounded=true; }
+    else{ isGrounded=false; }
+  }
 
-  // State
-  let state="idle";
-  if(isJumping||!isGrounded) state="jump";
-  else if(dx!==0||dz!==0) state=isRunning?"run":"walk";
-  player.state=state;
-  animateStickman(player, dt);
-
-  // Update NPC speech boxes
-  npcs.forEach(npc=>{
-    if(npc.updateSpeechBox) npc.updateSpeechBox();
-  });
+  player.model.position.set(player.x, player.y, player.z);
+  if(dx!==0||dz!==0){ player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing; }
 
   updateCamera(player);
-  renderer.render(scene,camera);
+  renderer.render(scene, camera);
 }
 animate();
 
+// ====== Handle Resize ======
 window.addEventListener('resize', ()=>{
-  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.aspect = window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 </script>
 </body>
 </html>
