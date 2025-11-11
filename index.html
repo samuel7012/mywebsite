@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Please speed my moms kinda homeless</title>
+<title>AUGHHHHHHHHHHHHHHHHH</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -189,14 +189,14 @@ renderer.domElement.addEventListener('wheel', e => {
 });
 
 // ===== Arrow key orbit control =====
-const keyState = { left: false, right: false, up: false, down: false, zoomIn: false, zoomOut: false };
+const keyState = { left: true, right: true, up: false, down: false, zoomIn: false, zoomOut: false };
 const keyOrbitSpeed = 0.02; // radians per frame
 const keyZoomSpeed = 0.2;
 
 window.addEventListener('keydown', e => {
   switch (e.code) {
-    case 'ArrowLeft': keyState.left = false; break;
-    case 'ArrowRight': keyState.right = false; break;
+    case 'ArrowLeft': keyState.left = true; break;
+    case 'ArrowRight': keyState.right = true; break;
     case 'ArrowUp': keyState.up = true; break;
     case 'ArrowDown': keyState.down = true; break;
     case 'PageUp': keyState.zoomIn = true; break;
