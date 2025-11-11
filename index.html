@@ -10,13 +10,11 @@
 </head>
 <body>
 
-<!-- Three.js r149 -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
-<!-- Old-style global examples (FontLoader + TextGeometry) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/examples/js/loaders/FontLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/examples/js/geometries/TextGeometry.js"></script>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.module.js';
+import { FontLoader } from 'https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/geometries/TextGeometry.js';
 
-<script>
 // ===== Scene setup =====
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222233);
@@ -39,24 +37,27 @@ dirLight.castShadow = true;
 scene.add(dirLight);
 
 // ===== 3D Text =====
-const fontLoader = new THREE.FontLoader();
-fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font){
-  const textGeo = new THREE.TextGeometry('my coding sucks im 9 yr old', {
-    font: font,
-    size: 0.5,
-    height: 0.2,
-    curveSegments: 12,
-    bevelEnabled: true,
-    bevelThickness: 0.03,
-    bevelSize: 0.02,
-    bevelSegments: 3
-  });
-  const textMat = new THREE.MeshStandardMaterial({color: 0xff66cc});
-  const textMesh = new THREE.Mesh(textGeo, textMat);
-  textMesh.position.set(-3, 4, 0);
-  textMesh.rotation.y = -0.3;
-  scene.add(textMesh);
-});
+const fontLoader = new FontLoader();
+fontLoader.load(
+  'https://cdn.jsdelivr.net/npm/three@0.154.0/examples/fonts/helvetiker_regular.typeface.json',
+  function(font) {
+      const textGeo = new TextGeometry('my coding sucks im 9 yr old', {
+          font: font,
+          size: 0.5,
+          height: 0.2,
+          curveSegments: 12,
+          bevelEnabled: true,
+          bevelThickness: 0.03,
+          bevelSize: 0.02,
+          bevelSegments: 3
+      });
+      const textMat = new THREE.MeshStandardMaterial({color: 0xff66cc});
+      const textMesh = new THREE.Mesh(textGeo, textMat);
+      textMesh.position.set(-3, 4, 0);
+      textMesh.rotation.y = -0.3;
+      scene.add(textMesh);
+  }
+);
 
 // ===== Stickman factory =====
 function createStickman(color=0xffffff){
@@ -113,8 +114,7 @@ addPlayer(playerId,0xffffff);
 // ===== Controls =====
 let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
 let isRunning=false, isJumping=false, isGrounded=true;
-let velocityY=0;
-const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
+const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24;
 
 window.addEventListener('keydown', e=>{
   switch(e.key){
@@ -124,7 +124,7 @@ window.addEventListener('keydown', e=>{
     case 'd': moveRight=true; break;
     case 'Shift': isRunning=true; break;
     case ' ':
-      if(isGrounded && !isJumping){ isJumping=true; velocityY=jumpStrength; isGrounded=false; } break;
+      if(isGrounded && !isJumping){ isJumping=true; } break;
   }
 });
 window.addEventListener('keyup', e=>{
@@ -139,7 +139,6 @@ window.addEventListener('keyup', e=>{
 
 // ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
-const minPolar=0.1,maxPolar=Math.PI/2-0.05;
 let lastMouse={x:0,y:0}, mouseInitialized=false;
 const mouseSensitivity=0.005;
 
@@ -147,72 +146,26 @@ document.addEventListener('mousemove',e=>{
   if(!mouseInitialized){ lastMouse={x:e.clientX,y:e.clientY}; mouseInitialized=true; return; }
   const dx=e.clientX-lastMouse.x, dy=e.clientY-lastMouse.y;
   azimuth-=dx*mouseSensitivity; polar-=dy*mouseSensitivity;
-  polar=Math.max(minPolar,Math.min(maxPolar,polar));
+  polar=Math.max(0.1, Math.min(Math.PI/2-0.05, polar));
   lastMouse={x:e.clientX, y:e.clientY};
 });
 document.addEventListener('mouseleave',()=>mouseInitialized=false);
-renderer.domElement.addEventListener('wheel', e=>{ radius+=e.deltaY*0.01; radius=Math.max(2,Math.min(30,radius)); });
-
-function updateCameraKeys(){ /* optional arrow key orbit */ }
-function updateCamera(target){ updateCameraKeys(); const camX=target.x+radius*Math.sin(polar)*Math.sin(azimuth); const camY=target.y+radius*Math.cos(polar)+1; const camZ=target.z+radius*Math.sin(polar)*Math.cos(azimuth); camera.position.set(camX,camY,camZ); camera.lookAt(target.x,target.y+1.4,target.z); }
-
-// ===== Stickman animation =====
-function animateStickman(player,dt){
-  let t=player.walkCycle;
-  let la=player.leftArm, ra=player.rightArm;
-  let lfa=player.leftForearm, rfa=player.rightForearm;
-  let ll=player.leftLeg, rl=player.rightLeg;
-  let ls=player.leftShin, rs=player.rightShin;
-  let state=player.state;
-
-  if(state==="idle"){
-    la.rotation.x=ra.rotation.x=lfa.rotation.x=rfa.rotation.x=0;
-    ll.rotation.x=rl.rotation.x=ls.rotation.x=rs.rotation.x=0;
-  } else if(state==="walk"){
-    let f=5, aa=0.65, al=0.7, sa=0.47, ph=t*f;
-    la.rotation.x=Math.sin(ph)*aa; ra.rotation.x=Math.sin(ph+Math.PI)*aa;
-    ll.rotation.x=Math.sin(ph)*al; rl.rotation.x=Math.sin(ph+Math.PI)*al;
-    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4))*sa; rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4+Math.PI))*sa;
-    player.walkCycle += dt*(player.movement.running?1.04:1);
-  } else if(state==="run"){
-    let f=9.5, aa=1.6, al=1.8, sa=1.35, ph=t*f;
-    la.rotation.x=Math.sin(ph)*aa*0.6; ra.rotation.x=Math.sin(ph+Math.PI)*aa*0.6;
-    lfa.rotation.x=Math.abs(Math.sin(ph))*0.9-1.1; rfa.rotation.x=Math.abs(Math.sin(ph+Math.PI))*0.9-1.1;
-    ll.rotation.x=Math.sin(ph)*al; rl.rotation.x=Math.sin(ph+Math.PI)*al;
-    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6))*sa +0.13*Math.abs(Math.sin(ph));
-    rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6+Math.PI))*sa +0.13*Math.abs(Math.sin(ph+Math.PI));
-    player.walkCycle += dt*1.3;
-  } else if(state==="jump"){
-    la.rotation.x=ra.rotation.x=-1.15; lfa.rotation.x=rfa.rotation.x=-0.42;
-    ll.rotation.x=rl.rotation.x=0.88; ls.rotation.x=rs.rotation.x=0.8;
-    player.walkCycle += dt*0.6;
-  }
-}
+renderer.domElement.addEventListener('wheel', e=>{ radius+=e.deltaY*0.01; radius=Math.max(2, Math.min(30, radius)); });
 
 // ===== Main loop =====
-let prevTime = performance.now();
 function animate(){
   requestAnimationFrame(animate);
-  let time = performance.now();
-  let dt = Math.min((time-prevTime)/1000,0.05);
-  prevTime = time;
 
   const player = players[playerId];
-  let dx=0,dz=0;
-  let speed = isRunning ? runSpeed : walkSpeed;
-  if(moveForward){ dx -= Math.sin(azimuth)*speed; dz -= Math.cos(azimuth)*speed; }
-  if(moveBackward){ dx += Math.sin(azimuth)*speed; dz += Math.cos(azimuth)*speed; }
-  if(moveLeft){ dx += Math.sin(azimuth-Math.PI/2)*speed; dz += Math.cos(azimuth-Math.PI/2)*speed; }
-  if(moveRight){ dx += Math.sin(azimuth+Math.PI/2)*speed; dz += Math.cos(azimuth+Math.PI/2)*speed; }
 
-  player.model.position.set(player.x,player.y,player.z);
-  if(dx!==0 || dz!==0){ player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing; }
+  // Camera follow
+  const camX = player.x + radius*Math.sin(polar)*Math.sin(azimuth);
+  const camY = player.y + radius*Math.cos(polar)+1;
+  const camZ = player.z + radius*Math.sin(polar)*Math.cos(azimuth);
+  camera.position.set(camX, camY, camZ);
+  camera.lookAt(player.x, player.y+1.4, player.z);
 
-  let state="idle"; if(isJumping||!isGrounded) state="jump"; else if(dx!==0||dz!==0) state=isRunning?"run":"walk"; player.state=state;
-  animateStickman(player,dt);
-
-  updateCamera(player);
-  renderer.render(scene,camera);
+  renderer.render(scene, camera);
 }
 
 animate();
