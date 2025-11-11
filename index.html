@@ -39,6 +39,31 @@ document.body.appendChild(renderer.domElement);
   dirLight.shadow.camera.right = 100;
   scene.add(dirLight);
 
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/FontLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/geometries/TextGeometry.js"></script>
+
+<script>
+  const loader = new THREE.FontLoader();
+  loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+    const textGeometry = new THREE.TextGeometry('my coding sucks im 9 yr old', {
+      font: font,
+      size: 0.5,
+      height: 0.2,
+      curveSegments: 12,
+      bevelEnabled: true,
+      bevelThickness: 0.03,
+      bevelSize: 0.02,
+      bevelSegments: 3
+    });
+
+    const textMaterial = new THREE.MeshStandardMaterial({ color: 0xff66cc });
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+    textMesh.position.set(-3, 4, 0); // adjust position
+    textMesh.rotation.y = -0.3; // slight rotation for 3D effect
+    scene.add(textMesh);
+  });
+
 // ===== Stickman factory =====
 function createStickman(color=0xffffff){
   const stickman = new THREE.Group();
