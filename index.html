@@ -136,8 +136,8 @@ const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
 
 window.addEventListener('keydown', e=>{
   switch(e.key){
-    case 'w': moveForward=true; break;
-    case 's': moveBackward=true; break;
+    case 'w': moveForward=false; break;
+    case 's': moveBackward=false; break;
     case 'a': moveLeft=true; break;
     case 'd': moveRight=true; break;
     case 'Shift': isRunning=true; break;
