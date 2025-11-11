@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>No playing</title>
+<title>Free game</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -22,77 +22,7 @@ const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-function createGtaCity(scene) {
-  const colliders = [];
 
-  // ===== Road layout =====
-  const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
-  const roadWidth = 6;
-  const streetCount = 10;
-  const spacing = 15;
-
-  // Horizontal streets
-  for (let i = -streetCount/2; i <= streetCount/2; i++) {
-    const roadGeo = new THREE.PlaneGeometry(streetCount*spacing, roadWidth);
-    const road = new THREE.Mesh(roadGeo, roadMat);
-    road.rotation.x = -Math.PI/2;
-    road.position.z = i * spacing;
-    road.receiveShadow = true;
-    scene.add(road);
-  }
-
-  // Vertical streets
-  for (let i = -streetCount/2; i <= streetCount/2; i++) {
-    const roadGeo = new THREE.PlaneGeometry(roadWidth, streetCount*spacing);
-    const road = new THREE.Mesh(roadGeo, roadMat);
-    road.rotation.x = -Math.PI/2;
-    road.position.x = i * spacing;
-    road.receiveShadow = true;
-    scene.add(road);
-  }
-
-  // ===== Sidewalks =====
-  const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
-  const sidewalkWidth = 2;
-  for (let i = -streetCount/2; i <= streetCount/2; i++) {
-    for (let j = -streetCount/2; j <= streetCount/2; j++) {
-      const geo = new THREE.PlaneGeometry(spacing - roadWidth, sidewalkWidth);
-      const swX = new THREE.Mesh(geo, sidewalkMat);
-      swX.rotation.x = -Math.PI/2;
-      swX.position.set(i*spacing, 0.01, j*spacing + (roadWidth/2 + sidewalkWidth/2));
-      scene.add(swX);
-
-      const swZ = new THREE.Mesh(geo, sidewalkMat);
-      swZ.rotation.x = -Math.PI/2;
-      swZ.position.set(i*spacing + (roadWidth/2 + sidewalkWidth/2), 0.01, j*spacing);
-      swZ.rotation.z = 0;
-      scene.add(swZ);
-    }
-  }
-
-  // ===== Buildings aligned to blocks =====
-  const buildingMat = new THREE.MeshStandardMaterial({ color: 0x777777, roughness: 0.7 });
-  for (let i = -streetCount/2; i < streetCount/2; i++) {
-    for (let j = -streetCount/2; j < streetCount/2; j++) {
-      const width = 6 + Math.random()*4;
-      const depth = 6 + Math.random()*4;
-      const height = 5 + Math.random()*25;
-      const geo = new THREE.BoxGeometry(width, height, depth);
-      const bldg = new THREE.Mesh(geo, buildingMat);
-      bldg.position.set(
-        i*spacing + (Math.random()-0.5)*spacing*0.5,
-        height/2,
-        j*spacing + (Math.random()-0.5)*spacing*0.5
-      );
-      bldg.castShadow = true;
-      bldg.receiveShadow = true;
-      scene.add(bldg);
-
-      // Add collider
-      const box = new THREE.Box3().setFromObject(bldg);
-      colliders.push(box);
-    }
-  }
 
   // ===== Lighting =====
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.7);
@@ -107,12 +37,6 @@ function createGtaCity(scene) {
   dirLight.shadow.camera.left = -100;
   dirLight.shadow.camera.right = 100;
   scene.add(dirLight);
-
-  return colliders;
-}
-
-// Use like:
-const colliders = createGtaCity(scene);
 
 // ===== Stickman factory =====
 function createStickman(color=0xffffff){
@@ -270,21 +194,6 @@ if(moveForward){ dx -= Math.sin(azimuth)*speed; dz -= Math.cos(azimuth)*speed; }
 if(moveBackward){ dx += Math.sin(azimuth)*speed; dz += Math.cos(azimuth)*speed; } // S moves forward
 if(moveLeft){ dx += Math.sin(azimuth-Math.PI/2)*speed; dz += Math.cos(azimuth-Math.PI/2)*speed; }
 if(moveRight){ dx += Math.sin(azimuth+Math.PI/2)*speed; dz += Math.cos(azimuth+Math.PI/2)*speed; }
-  
-  // ===== Collision detection =====
-  let newX = player.x + dx;
-  let newZ = player.z + dz;
-  const playerBox = new THREE.Box3(new THREE.Vector3(newX-0.5,0,newZ-0.5), new THREE.Vector3(newX+0.5,2,newZ+0.5));
-  let blocked=false;
-  for(const box of colliders){ if(box.intersectsBox(playerBox)){ blocked=true; break; } }
-  if(!blocked){ player.x=newX; player.z=newZ; }
-
-  if(isJumping || !isGrounded){
-    player.y += velocityY;
-    velocityY -= gravity;
-    if(player.y<=0){ player.y=0; velocityY=0; isJumping=false; isGrounded=true; }
-    else{ isGrounded=false; }
-  }
 
   player.model.position.set(player.x,player.y,player.z);
   if(dx!==0 || dz!==0){ player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing; }
