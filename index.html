@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>No play</title>
+<title>No playing</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -22,93 +22,116 @@ const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// ===== Create City with Colliders =====
+// ===== Create City Ground with Colliders =====
 const colliders = [];
 
 function createCity(scene) {
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(200, 200),
-    new THREE.MeshStandardMaterial({color:0x222222, roughness:0.9})
-  );
+  const groundGeo = new THREE.PlaneGeometry(200, 200);
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI/2;
   ground.receiveShadow = true;
   scene.add(ground);
 
-  scene.add(new THREE.GridHelper(200,40,0x444444,0x222222));
+  const gridHelper = new THREE.GridHelper(200, 40, 0x444444, 0x222222);
+  scene.add(gridHelper);
 
   const buildings = new THREE.Group();
-  const buildingMat = new THREE.MeshStandardMaterial({color:0x777777, metalness:0.2, roughness:0.8});
+  const buildingMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.2, roughness: 0.8 });
 
-  for(let i=0;i<120;i++){
-    const w = 4+Math.random()*4;
-    const d = 4+Math.random()*4;
-    const h = 5+Math.random()*25;
+  for (let i=0;i<120;i++){
+    const w = 4 + Math.random()*4;
+    const d = 4 + Math.random()*4;
+    const h = 5 + Math.random()*25;
     const geo = new THREE.BoxGeometry(w,h,d);
     const mat = buildingMat.clone();
-    mat.color.setHSL(Math.random()*0.1+0.55,0.1,0.4+Math.random()*0.2);
+    mat.color.setHSL(Math.random()*0.1+0.55, 0.1, 0.4+Math.random()*0.2);
 
     const bldg = new THREE.Mesh(geo, mat);
-    bldg.position.set((Math.random()-0.5)*180,h/2,(Math.random()-0.5)*180);
+    bldg.position.set((Math.random()-0.5)*180, h/2, (Math.random()-0.5)*180);
 
     if(Math.abs(bldg.position.x)>20 || Math.abs(bldg.position.z)>20){
-      bldg.castShadow=true; bldg.receiveShadow=true;
+      bldg.castShadow = true;
+      bldg.receiveShadow = true;
       buildings.add(bldg);
+
       const box = new THREE.Box3().setFromObject(bldg);
       colliders.push(box);
     }
   }
+
   scene.add(buildings);
 
-  const hemi = new THREE.HemisphereLight(0xffffff,0x444444,0.7); hemi.position.set(0,200,0); scene.add(hemi);
-  const dir = new THREE.DirectionalLight(0xffffff,0.8); dir.position.set(60,100,-30); dir.castShadow=true;
-  dir.shadow.camera.top=80; dir.shadow.camera.bottom=-80; dir.shadow.camera.left=-80; dir.shadow.camera.right=80;
-  scene.add(dir);
+  const hemiLight = new THREE.HemisphereLight(0xffffff,0x444444,0.7);
+  hemiLight.position.set(0,200,0);
+  scene.add(hemiLight);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff,0.8);
+  dirLight.position.set(60,100,-30);
+  dirLight.castShadow = true;
+  dirLight.shadow.camera.top=80; dirLight.shadow.camera.bottom=-80;
+  dirLight.shadow.camera.left=-80; dirLight.shadow.camera.right=80;
+  scene.add(dirLight);
 }
+
 createCity(scene);
 
 // ===== Stickman factory =====
 function createStickman(color=0xffffff){
   const stickman = new THREE.Group();
-  const stickMat = new THREE.MeshStandardMaterial({color:0x181818});
-  const headMat = new THREE.MeshStandardMaterial({color:color});
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28,32,32), headMat);
+  const stickMat = new THREE.MeshStandardMaterial({ color: 0x181818 });
+  const headMat = new THREE.MeshStandardMaterial({ color: color });
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32,32), headMat);
   head.position.y=2.25; stickman.add(head);
+
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.95,20), stickMat);
   body.position.y=1.5; stickman.add(body);
+
   function addLimb(rootPos, upperLen, lowerLen){
     const root = new THREE.Group(); root.position.copy(rootPos); stickman.add(root);
+
     const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,upperLen,14), stickMat);
     upper.position.y=-upperLen/2; root.add(upper);
-    const joint = new THREE.Mesh(new THREE.SphereGeometry(0.06,12,10), stickMat); joint.position.y=-upperLen; root.add(joint);
+
+    const joint = new THREE.Mesh(new THREE.SphereGeometry(0.06,12,10), stickMat);
+    joint.position.y=-upperLen; root.add(joint);
+
     const lower = new THREE.Group(); lower.position.y=-upperLen;
     const lowerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,lowerLen,12), stickMat);
     lowerMesh.position.y=-lowerLen/2; lower.add(lowerMesh);
-    const end = new THREE.Mesh(new THREE.SphereGeometry(0.05,10,8), stickMat); end.position.y=-lowerLen; lower.add(end);
+
+    const end = new THREE.Mesh(new THREE.SphereGeometry(0.05,10,8), stickMat);
+    end.position.y=-lowerLen; lower.add(end);
+
     root.add(lower);
-    return {root, lower};
+    return { root, lower };
   }
-  const leftArm=addLimb(new THREE.Vector3(-0.19,1.9,0),0.49,0.42);
-  const rightArm=addLimb(new THREE.Vector3(0.19,1.9,0),0.49,0.42);
-  const leftLeg=addLimb(new THREE.Vector3(-0.07,0.99,0),0.58,0.49);
-  const rightLeg=addLimb(new THREE.Vector3(0.07,0.99,0),0.58,0.49);
-  return {model:stickman, head, leftArm:leftArm.root, rightArm:rightArm.root, leftForearm:leftArm.lower, rightForearm:rightArm.lower, leftLeg:leftLeg.root, rightLeg:rightLeg.root, leftShin:leftLeg.lower, rightShin:rightLeg.lower};
+
+  const leftArm = addLimb(new THREE.Vector3(-0.19,1.9,0),0.49,0.42);
+  const rightArm = addLimb(new THREE.Vector3(0.19,1.9,0),0.49,0.42);
+  const leftLeg = addLimb(new THREE.Vector3(-0.07,0.99,0),0.58,0.49);
+  const rightLeg = addLimb(new THREE.Vector3(0.07,0.99,0),0.58,0.49);
+
+  return { model: stickman, head, leftArm:leftArm.root, rightArm:rightArm.root, leftForearm:leftArm.lower, rightForearm:rightArm.lower, leftLeg:leftLeg.root, rightLeg:rightLeg.root, leftShin:leftLeg.lower, rightShin:rightLeg.lower };
 }
 
-// ===== Player setup =====
+// ===== Multiplayer state =====
 const playerId = Math.random().toString(36).substr(2,9);
 const players = {};
 function addPlayer(id,color){
   if(!players[id]){
     const parts = createStickman(color);
     scene.add(parts.model);
-    players[id]={...parts, x:0, y:0, z:0, facing:0, movement:{running:false,jumping:false,grounded:true,velocityY:0}, walkCycle:0, state:"idle", color};
+    players[id] = { ...parts, x:0, y:0, z:0, facing:0, movement:{running:false,jumping:false,grounded:true,velocityY:0}, walkCycle:0, state:"idle", color };
   }
 }
 addPlayer(playerId,0xffffff);
 
 // ===== Controls =====
 let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
-let isRunning=false, isJumping=false, isGrounded=true; let velocityY=0;
+let isRunning=false, isJumping=false, isGrounded=true;
+let velocityY=0;
 const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
 
 window.addEventListener('keydown', e=>{
@@ -132,7 +155,7 @@ window.addEventListener('keyup', e=>{
   }
 });
 
-// ===== Camera =====
+// ===== Camera orbit =====
 let azimuth=0, polar=Math.PI/5, radius=8;
 const minPolar=0.1,maxPolar=Math.PI/2-0.05;
 let lastMouse={x:0,y:0}, mouseInitialized=false;
@@ -156,22 +179,54 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('keyup',e=>{
   switch(e.code){ case 'ArrowLeft': keyState.left=false; break; case 'ArrowRight': keyState.right=false; break; case 'ArrowUp': keyState.up=false; break; case 'ArrowDown': keyState.down=false; break; case 'PageUp': keyState.zoomIn=false; break; case 'PageDown': keyState.zoomOut=false; break; }
 });
+
 function updateCameraKeys(){ if(keyState.left)azimuth-=keyOrbitSpeed; if(keyState.right)azimuth+=keyOrbitSpeed; if(keyState.up)polar-=keyOrbitSpeed; if(keyState.down)polar+=keyOrbitSpeed; polar=Math.max(minPolar,Math.min(maxPolar,polar)); if(keyState.zoomIn)radius-=keyZoomSpeed; if(keyState.zoomOut)radius+=keyZoomSpeed; radius=Math.max(2,Math.min(30,radius)); }
 function updateCamera(target){ updateCameraKeys(); const camX=target.x+radius*Math.sin(polar)*Math.sin(azimuth); const camY=target.y+radius*Math.cos(polar)+1; const camZ=target.z+radius*Math.sin(polar)*Math.cos(azimuth); camera.position.set(camX,camY,camZ); camera.lookAt(target.x,target.y+1.4,target.z); }
 
-// ===== Animate =====
-function animateStickman(player,dt){ /* existing stickman animation code omitted for brevity */ }
+// ===== Stickman animation =====
+function animateStickman(player,dt){
+  let t=player.walkCycle;
+  let la=player.leftArm, ra=player.rightArm;
+  let lfa=player.leftForearm, rfa=player.rightForearm;
+  let ll=player.leftLeg, rl=player.rightLeg;
+  let ls=player.leftShin, rs=player.rightShin;
+  let state=player.state;
 
+  if(state==="idle"){
+    la.rotation.x=ra.rotation.x=lfa.rotation.x=rfa.rotation.x=0;
+    ll.rotation.x=rl.rotation.x=ls.rotation.x=rs.rotation.x=0;
+  } else if(state==="walk"){
+    let f=5, aa=0.65, al=0.7, sa=0.47, ph=t*f;
+    la.rotation.x=Math.sin(ph)*aa; ra.rotation.x=Math.sin(ph+Math.PI)*aa;
+    ll.rotation.x=Math.sin(ph)*al; rl.rotation.x=Math.sin(ph+Math.PI)*al;
+    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4))*sa; rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/4+Math.PI))*sa;
+    player.walkCycle += dt*(player.movement.running?1.04:1);
+  } else if(state==="run"){
+    let f=9.5, aa=1.6, al=1.8, sa=1.35, ph=t*f;
+    la.rotation.x=Math.sin(ph)*aa*0.6; ra.rotation.x=Math.sin(ph+Math.PI)*aa*0.6;
+    lfa.rotation.x=Math.abs(Math.sin(ph))*0.9-1.1; rfa.rotation.x=Math.abs(Math.sin(ph+Math.PI))*0.9-1.1;
+    ll.rotation.x=Math.sin(ph)*al; rl.rotation.x=Math.sin(ph+Math.PI)*al;
+    ls.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6))*sa +0.13*Math.abs(Math.sin(ph));
+    rs.rotation.x=Math.max(0,-Math.sin(ph+Math.PI/6+Math.PI))*sa +0.13*Math.abs(Math.sin(ph+Math.PI));
+    player.walkCycle += dt*1.3;
+  } else if(state==="jump"){
+    la.rotation.x=ra.rotation.x=-1.15; lfa.rotation.x=rfa.rotation.x=-0.42;
+    ll.rotation.x=rl.rotation.x=0.88; ls.rotation.x=rs.rotation.x=0.8;
+    player.walkCycle += dt*0.6;
+  }
+}
+
+// ===== Main loop =====
 let prevTime = performance.now();
 function animate(){
   requestAnimationFrame(animate);
   let time = performance.now();
   let dt = Math.min((time-prevTime)/1000,0.05);
-  prevTime=time;
+  prevTime = time;
 
   const player = players[playerId];
   let dx=0,dz=0;
-  let speed = isRunning?runSpeed:walkSpeed;
+  let speed = isRunning ? runSpeed : walkSpeed;
   if(moveForward) { dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed; }
   if(moveBackward){ dx-=Math.sin(azimuth)*speed; dz-=Math.cos(azimuth)*speed; }
   if(moveLeft){ dx+=Math.sin(azimuth-Math.PI/2)*speed; dz+=Math.cos(azimuth-Math.PI/2)*speed; }
@@ -185,10 +240,15 @@ function animate(){
   for(const box of colliders){ if(box.intersectsBox(playerBox)){ blocked=true; break; } }
   if(!blocked){ player.x=newX; player.z=newZ; }
 
-  if(isJumping||!isGrounded){ player.y+=velocityY; velocityY-=gravity; if(player.y<=0){player.y=0; velocityY=0; isJumping=false; isGrounded=true;} else isGrounded=false; }
+  if(isJumping || !isGrounded){
+    player.y += velocityY;
+    velocityY -= gravity;
+    if(player.y<=0){ player.y=0; velocityY=0; isJumping=false; isGrounded=true; }
+    else{ isGrounded=false; }
+  }
 
   player.model.position.set(player.x,player.y,player.z);
-  if(dx!==0||dz!==0){ player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing; }
+  if(dx!==0 || dz!==0){ player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing; }
 
   let state="idle"; if(isJumping||!isGrounded) state="jump"; else if(dx!==0||dz!==0) state=isRunning?"run":"walk"; player.state=state;
   animateStickman(player,dt);
@@ -196,13 +256,15 @@ function animate(){
   updateCamera(player);
   renderer.render(scene,camera);
 }
+
 animate();
 
-window.addEventListener('resize',()=>{
-  camera.aspect=window.innerWidth/window.innerHeight;
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
+
 </body>
 </html>
