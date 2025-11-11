@@ -226,12 +226,13 @@ function animate(){
 
   const player = players[playerId];
   let dx=0,dz=0;
-  let speed = isRunning ? runSpeed : walkSpeed;
-  if(moveForward) { dx+=Math.sin(azimuth)*speed; dz+=Math.cos(azimuth)*speed; }
-  if(moveBackward){ dx-=Math.sin(azimuth)*speed; dz-=Math.cos(azimuth)*speed; }
-  if(moveLeft){ dx+=Math.sin(azimuth-Math.PI/2)*speed; dz+=Math.cos(azimuth-Math.PI/2)*speed; }
-  if(moveRight){ dx+=Math.sin(azimuth+Math.PI/2)*speed; dz+=Math.cos(azimuth+Math.PI/2)*speed; }
-
+let speed = isRunning ? runSpeed : walkSpeed;
+// Swap forward/backward
+if(moveForward){ dx -= Math.sin(azimuth)*speed; dz -= Math.cos(azimuth)*speed; } // W moves backward
+if(moveBackward){ dx += Math.sin(azimuth)*speed; dz += Math.cos(azimuth)*speed; } // S moves forward
+if(moveLeft){ dx += Math.sin(azimuth-Math.PI/2)*speed; dz += Math.cos(azimuth-Math.PI/2)*speed; }
+if(moveRight){ dx += Math.sin(azimuth+Math.PI/2)*speed; dz += Math.cos(azimuth+Math.PI/2)*speed; }
+  
   // ===== Collision detection =====
   let newX = player.x + dx;
   let newZ = player.z + dz;
