@@ -22,59 +22,97 @@ const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// ===== Create City Ground with Colliders =====
-const colliders = [];
+function createGtaCity(scene) {
+  const colliders = [];
 
-function createCity(scene) {
-  const groundGeo = new THREE.PlaneGeometry(200, 200);
-  const groundMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
-  const ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI/2;
-  ground.receiveShadow = true;
-  scene.add(ground);
+  // ===== Road layout =====
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+  const roadWidth = 6;
+  const streetCount = 10;
+  const spacing = 15;
 
-  const gridHelper = new THREE.GridHelper(200, 40, 0x444444, 0x222222);
-  scene.add(gridHelper);
+  // Horizontal streets
+  for (let i = -streetCount/2; i <= streetCount/2; i++) {
+    const roadGeo = new THREE.PlaneGeometry(streetCount*spacing, roadWidth);
+    const road = new THREE.Mesh(roadGeo, roadMat);
+    road.rotation.x = -Math.PI/2;
+    road.position.z = i * spacing;
+    road.receiveShadow = true;
+    scene.add(road);
+  }
 
-  const buildings = new THREE.Group();
-  const buildingMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.2, roughness: 0.8 });
+  // Vertical streets
+  for (let i = -streetCount/2; i <= streetCount/2; i++) {
+    const roadGeo = new THREE.PlaneGeometry(roadWidth, streetCount*spacing);
+    const road = new THREE.Mesh(roadGeo, roadMat);
+    road.rotation.x = -Math.PI/2;
+    road.position.x = i * spacing;
+    road.receiveShadow = true;
+    scene.add(road);
+  }
 
-  for (let i=0;i<120;i++){
-    const w = 4 + Math.random()*4;
-    const d = 4 + Math.random()*4;
-    const h = 5 + Math.random()*25;
-    const geo = new THREE.BoxGeometry(w,h,d);
-    const mat = buildingMat.clone();
-    mat.color.setHSL(Math.random()*0.1+0.55, 0.1, 0.4+Math.random()*0.2);
+  // ===== Sidewalks =====
+  const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
+  const sidewalkWidth = 2;
+  for (let i = -streetCount/2; i <= streetCount/2; i++) {
+    for (let j = -streetCount/2; j <= streetCount/2; j++) {
+      const geo = new THREE.PlaneGeometry(spacing - roadWidth, sidewalkWidth);
+      const swX = new THREE.Mesh(geo, sidewalkMat);
+      swX.rotation.x = -Math.PI/2;
+      swX.position.set(i*spacing, 0.01, j*spacing + (roadWidth/2 + sidewalkWidth/2));
+      scene.add(swX);
 
-    const bldg = new THREE.Mesh(geo, mat);
-    bldg.position.set((Math.random()-0.5)*180, h/2, (Math.random()-0.5)*180);
+      const swZ = new THREE.Mesh(geo, sidewalkMat);
+      swZ.rotation.x = -Math.PI/2;
+      swZ.position.set(i*spacing + (roadWidth/2 + sidewalkWidth/2), 0.01, j*spacing);
+      swZ.rotation.z = 0;
+      scene.add(swZ);
+    }
+  }
 
-    if(Math.abs(bldg.position.x)>20 || Math.abs(bldg.position.z)>20){
+  // ===== Buildings aligned to blocks =====
+  const buildingMat = new THREE.MeshStandardMaterial({ color: 0x777777, roughness: 0.7 });
+  for (let i = -streetCount/2; i < streetCount/2; i++) {
+    for (let j = -streetCount/2; j < streetCount/2; j++) {
+      const width = 6 + Math.random()*4;
+      const depth = 6 + Math.random()*4;
+      const height = 5 + Math.random()*25;
+      const geo = new THREE.BoxGeometry(width, height, depth);
+      const bldg = new THREE.Mesh(geo, buildingMat);
+      bldg.position.set(
+        i*spacing + (Math.random()-0.5)*spacing*0.5,
+        height/2,
+        j*spacing + (Math.random()-0.5)*spacing*0.5
+      );
       bldg.castShadow = true;
       bldg.receiveShadow = true;
-      buildings.add(bldg);
+      scene.add(bldg);
 
+      // Add collider
       const box = new THREE.Box3().setFromObject(bldg);
       colliders.push(box);
     }
   }
 
-  scene.add(buildings);
-
-  const hemiLight = new THREE.HemisphereLight(0xffffff,0x444444,0.7);
-  hemiLight.position.set(0,200,0);
+  // ===== Lighting =====
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.7);
+  hemiLight.position.set(0, 200, 0);
   scene.add(hemiLight);
 
-  const dirLight = new THREE.DirectionalLight(0xffffff,0.8);
-  dirLight.position.set(60,100,-30);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(60, 100, -30);
   dirLight.castShadow = true;
-  dirLight.shadow.camera.top=80; dirLight.shadow.camera.bottom=-80;
-  dirLight.shadow.camera.left=-80; dirLight.shadow.camera.right=80;
+  dirLight.shadow.camera.top = 100;
+  dirLight.shadow.camera.bottom = -100;
+  dirLight.shadow.camera.left = -100;
+  dirLight.shadow.camera.right = 100;
   scene.add(dirLight);
+
+  return colliders;
 }
 
-createCity(scene);
+// Use like:
+const colliders = createGtaCity(scene);
 
 // ===== Stickman factory =====
 function createStickman(color=0xffffff){
