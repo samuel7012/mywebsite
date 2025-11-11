@@ -129,15 +129,15 @@ function addPlayer(id,color){
 addPlayer(playerId,0xffffff);
 
 // ===== Controls =====
-let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
+let moveForward=true, moveBackward=true, moveLeft=false, moveRight=false;
 let isRunning=false, isJumping=false, isGrounded=true;
 let velocityY=0;
 const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
 
 window.addEventListener('keydown', e=>{
   switch(e.key){
-    case 'w': moveForward=false; break;
-    case 's': moveBackward=false; break;
+    case 'w': moveForward=true; break;
+    case 's': moveBackward=true; break;
     case 'a': moveLeft=true; break;
     case 'd': moveRight=true; break;
     case 'Shift': isRunning=true; break;
