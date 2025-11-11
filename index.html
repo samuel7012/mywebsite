@@ -1,16 +1,20 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Free game</title>
 <style>
-body { margin: 0; overflow: hidden; background: #111; }
-#info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
+  body { margin: 0; overflow: hidden; background: #111; }
+  #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
 </style>
-  <h6>my coding sucks im 9 yr old</h6>
 </head>
 <body>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+<!-- Use old-style examples for global THREE -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/FontLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/geometries/TextGeometry.js"></script>
+
 <script>
 // ===== Scene setup =====
 const scene = new THREE.Scene();
@@ -23,46 +27,35 @@ const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// ===== Lighting =====
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.7);
+hemiLight.position.set(0, 200, 0);
+scene.add(hemiLight);
 
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(60, 100, -30);
+dirLight.castShadow = true;
+scene.add(dirLight);
 
-  // ===== Lighting =====
-  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.7);
-  hemiLight.position.set(0, 200, 0);
-  scene.add(hemiLight);
-
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  dirLight.position.set(60, 100, -30);
-  dirLight.castShadow = true;
-  dirLight.shadow.camera.top = 100;
-  dirLight.shadow.camera.bottom = -100;
-  dirLight.shadow.camera.left = -100;
-  dirLight.shadow.camera.right = 100;
-  scene.add(dirLight);
-
-  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/FontLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/geometries/TextGeometry.js"></script>
-
-<script>
-  const loader = new THREE.FontLoader();
-  loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
-    const textGeometry = new THREE.TextGeometry('my coding sucks im 9 yr old', {
-      font: font,
-      size: 0.5,
-      height: 0.2,
-      curveSegments: 12,
-      bevelEnabled: true,
-      bevelThickness: 0.03,
-      bevelSize: 0.02,
-      bevelSegments: 3
-    });
-
-    const textMaterial = new THREE.MeshStandardMaterial({ color: 0xff66cc });
-    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-
-    textMesh.position.set(-3, 4, 0); // adjust position
-    textMesh.rotation.y = -0.3; // slight rotation for 3D effect
-    scene.add(textMesh);
+// ===== 3D Text =====
+const fontLoader = new THREE.FontLoader();
+fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font){
+  const textGeo = new THREE.TextGeometry('my coding sucks im 9 yr old', {
+    font: font,
+    size: 0.5,
+    height: 0.2,
+    curveSegments: 12,
+    bevelEnabled: true,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelSegments: 3
   });
+  const textMat = new THREE.MeshStandardMaterial({color: 0xff66cc});
+  const textMesh = new THREE.Mesh(textGeo, textMat);
+  textMesh.position.set(-3, 4, 0);
+  textMesh.rotation.y = -0.3;
+  scene.add(textMesh);
+});
 
 // ===== Stickman factory =====
 function createStickman(color=0xffffff){
@@ -117,7 +110,7 @@ function addPlayer(id,color){
 addPlayer(playerId,0xffffff);
 
 // ===== Controls =====
-let moveForward=true, moveBackward=true, moveLeft=false, moveRight=false;
+let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
 let isRunning=false, isJumping=false, isGrounded=true;
 let velocityY=0;
 const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
@@ -159,16 +152,7 @@ document.addEventListener('mousemove',e=>{
 document.addEventListener('mouseleave',()=>mouseInitialized=false);
 renderer.domElement.addEventListener('wheel', e=>{ radius+=e.deltaY*0.01; radius=Math.max(2,Math.min(30,radius)); });
 
-const keyState={left:false,right:false,up:false,down:false,zoomIn:false,zoomOut:false};
-const keyOrbitSpeed=0.02,keyZoomSpeed=0.2;
-window.addEventListener('keydown',e=>{
-  switch(e.code){ case 'ArrowLeft': keyState.left=true; break; case 'ArrowRight': keyState.right=true; break; case 'ArrowUp': keyState.up=true; break; case 'ArrowDown': keyState.down=true; break; case 'PageUp': keyState.zoomIn=true; break; case 'PageDown': keyState.zoomOut=true; break; }
-});
-window.addEventListener('keyup',e=>{
-  switch(e.code){ case 'ArrowLeft': keyState.left=false; break; case 'ArrowRight': keyState.right=false; break; case 'ArrowUp': keyState.up=false; break; case 'ArrowDown': keyState.down=false; break; case 'PageUp': keyState.zoomIn=false; break; case 'PageDown': keyState.zoomOut=false; break; }
-});
-
-function updateCameraKeys(){ if(keyState.left)azimuth-=keyOrbitSpeed; if(keyState.right)azimuth+=keyOrbitSpeed; if(keyState.up)polar-=keyOrbitSpeed; if(keyState.down)polar+=keyOrbitSpeed; polar=Math.max(minPolar,Math.min(maxPolar,polar)); if(keyState.zoomIn)radius-=keyZoomSpeed; if(keyState.zoomOut)radius+=keyZoomSpeed; radius=Math.max(2,Math.min(30,radius)); }
+function updateCameraKeys(){ /* optional arrow key orbit */ }
 function updateCamera(target){ updateCameraKeys(); const camX=target.x+radius*Math.sin(polar)*Math.sin(azimuth); const camY=target.y+radius*Math.cos(polar)+1; const camZ=target.z+radius*Math.sin(polar)*Math.cos(azimuth); camera.position.set(camX,camY,camZ); camera.lookAt(target.x,target.y+1.4,target.z); }
 
 // ===== Stickman animation =====
@@ -214,12 +198,11 @@ function animate(){
 
   const player = players[playerId];
   let dx=0,dz=0;
-let speed = isRunning ? runSpeed : walkSpeed;
-// Swap forward/backward
-if(moveForward){ dx -= Math.sin(azimuth)*speed; dz -= Math.cos(azimuth)*speed; } // W moves backward
-if(moveBackward){ dx += Math.sin(azimuth)*speed; dz += Math.cos(azimuth)*speed; } // S moves forward
-if(moveLeft){ dx += Math.sin(azimuth-Math.PI/2)*speed; dz += Math.cos(azimuth-Math.PI/2)*speed; }
-if(moveRight){ dx += Math.sin(azimuth+Math.PI/2)*speed; dz += Math.cos(azimuth+Math.PI/2)*speed; }
+  let speed = isRunning ? runSpeed : walkSpeed;
+  if(moveForward){ dx -= Math.sin(azimuth)*speed; dz -= Math.cos(azimuth)*speed; }
+  if(moveBackward){ dx += Math.sin(azimuth)*speed; dz += Math.cos(azimuth)*speed; }
+  if(moveLeft){ dx += Math.sin(azimuth-Math.PI/2)*speed; dz += Math.cos(azimuth-Math.PI/2)*speed; }
+  if(moveRight){ dx += Math.sin(azimuth+Math.PI/2)*speed; dz += Math.cos(azimuth+Math.PI/2)*speed; }
 
   player.model.position.set(player.x,player.y,player.z);
   if(dx!==0 || dz!==0){ player.facing=Math.atan2(dx,dz); player.model.rotation.y=player.facing; }
