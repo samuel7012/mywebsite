@@ -216,8 +216,8 @@ window.addEventListener('keyup', e => {
 });
 
 function updateCameraKeys() {
-  if (keyState.left) azimuth -= keyOrbitSpeed;
-  if (keyState.right) azimuth += keyOrbitSpeed;
+  if (keyState.left) azimuth += keyOrbitSpeed;
+  if (keyState.right) azimuth -= keyOrbitSpeed;
   if (keyState.up) polar -= keyOrbitSpeed;
   if (keyState.down) polar += keyOrbitSpeed;
   polar = Math.max(minPolar, Math.min(maxPolar, polar));
