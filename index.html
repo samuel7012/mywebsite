@@ -187,53 +187,6 @@ renderer.domElement.addEventListener('wheel', e => {
   radius += e.deltaY * 0.01;
   radius = Math.max(2, Math.min(30, radius));
 });
-
-// ===== Arrow key orbit control =====
-const keyState = { left: false, right: false, up: false, down: false, zoomIn: false, zoomOut: false };
-const keyOrbitSpeed = 0.02; // radians per frame
-const keyZoomSpeed = 0.2;
-
-window.addEventListener('keydown', e => {
-  switch (e.code) {
-    case 'ArrowLeft': keyState.left = true; break;
-    case 'ArrowRight': keyState.right = true; break;
-    case 'ArrowUp': keyState.up = true; break;
-    case 'ArrowDown': keyState.down = true; break;
-    case 'PageUp': keyState.zoomIn = true; break;
-    case 'PageDown': keyState.zoomOut = true; break;
-  }
-});
-window.addEventListener('keyup', e => {
-  switch (e.code) {
-    case 'ArrowLeft': keyState.left = false; break;
-    case 'ArrowRight': keyState.right = false; break;
-    case 'ArrowUp': keyState.up = false; break;
-    case 'ArrowDown': keyState.down = false; break;
-    case 'PageUp': keyState.zoomIn = false; break;
-    case 'PageDown': keyState.zoomOut = false; break;
-  }
-});
-
-function updateCameraKeys() {
-  if (keyState.left) azimuth -= keyOrbitSpeed;
-  if (keyState.right) azimuth += keyOrbitSpeed;
-  if (keyState.up) polar -= keyOrbitSpeed;
-  if (keyState.down) polar += keyOrbitSpeed;
-  polar = Math.max(minPolar, Math.min(maxPolar, polar));
-  if (keyState.zoomIn) radius -= keyZoomSpeed;
-  if (keyState.zoomOut) radius += keyZoomSpeed;
-  radius = Math.max(2, Math.min(30, radius));
-}
-
-function updateCamera(target) {
-  updateCameraKeys(); // Apply arrow key input each frame
-
-  let camX = target.x + radius * Math.sin(polar) * Math.sin(azimuth);
-  let camY = target.y + radius * Math.cos(polar) + 1;
-  let camZ = target.z + radius * Math.sin(polar) * Math.cos(azimuth);
-  camera.position.set(camX, camY, camZ);
-  camera.lookAt(target.x, target.y + 1.4, target.z);
-}
   
 // ===== Stickman animation =====
 function animateStickman(player, dt){
