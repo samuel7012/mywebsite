@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Stickman :P</title>
+<title>Silly Platformer</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -162,30 +162,79 @@ window.addEventListener('keyup', (e) => {
 });
   
 // ===== Camera orbit =====
-let azimuth=0, polar=Math.PI/5, radius=8;
-const minPolar=0.1, maxPolar=Math.PI/2-0.05;
-let lastMouse={x:0,y:0}, mouseInitialized=false;
-const mouseSensitivity=0.005;
+let azimuth = 0, polar = Math.PI / 5, radius = 8;
+const minPolar = 0.1, maxPolar = Math.PI / 2 - 0.05;
+let lastMouse = { x: 0, y: 0 }, mouseInitialized = false;
+const mouseSensitivity = 0.005;
 
-document.addEventListener('mousemove', e=>{
-  if(!mouseInitialized){ lastMouse={x:e.clientX,y:e.clientY}; mouseInitialized=true; return; }
-  let dx=e.clientX-lastMouse.x, dy=e.clientY-lastMouse.y;
-  azimuth -= dx*mouseSensitivity; polar -= dy*mouseSensitivity;
+// Mouse orbit
+document.addEventListener('mousemove', e => {
+  if (!mouseInitialized) {
+    lastMouse = { x: e.clientX, y: e.clientY };
+    mouseInitialized = true;
+    return;
+  }
+  let dx = e.clientX - lastMouse.x, dy = e.clientY - lastMouse.y;
+  azimuth -= dx * mouseSensitivity;
+  polar -= dy * mouseSensitivity;
   polar = Math.max(minPolar, Math.min(maxPolar, polar));
-  lastMouse={x:e.clientX, y:e.clientY};
+  lastMouse = { x: e.clientX, y: e.clientY };
 });
-document.addEventListener('mouseleave', ()=>mouseInitialized=false);
-renderer.domElement.addEventListener('wheel', e=>{
-  radius += e.deltaY*0.01; radius=Math.max(2, Math.min(30, radius));
+document.addEventListener('mouseleave', () => mouseInitialized = false);
+
+// Mouse zoom
+renderer.domElement.addEventListener('wheel', e => {
+  radius += e.deltaY * 0.01;
+  radius = Math.max(2, Math.min(30, radius));
 });
-function updateCamera(target){
-  let camX=target.x+radius*Math.sin(polar)*Math.sin(azimuth);
-  let camY=target.y+radius*Math.cos(polar)+1;
-  let camZ=target.z+radius*Math.sin(polar)*Math.cos(azimuth);
-  camera.position.set(camX, camY, camZ);
-  camera.lookAt(target.x, target.y+1.4, target.z);
+
+// ===== Arrow key orbit control =====
+const keyState = { left: false, right: false, up: false, down: false, zoomIn: false, zoomOut: false };
+const keyOrbitSpeed = 0.02; // radians per frame
+const keyZoomSpeed = 0.2;
+
+window.addEventListener('keydown', e => {
+  switch (e.code) {
+    case 'ArrowLeft': keyState.left = true; break;
+    case 'ArrowRight': keyState.right = true; break;
+    case 'ArrowUp': keyState.up = true; break;
+    case 'ArrowDown': keyState.down = true; break;
+    case 'PageUp': keyState.zoomIn = true; break;
+    case 'PageDown': keyState.zoomOut = true; break;
+  }
+});
+window.addEventListener('keyup', e => {
+  switch (e.code) {
+    case 'ArrowLeft': keyState.left = false; break;
+    case 'ArrowRight': keyState.right = false; break;
+    case 'ArrowUp': keyState.up = false; break;
+    case 'ArrowDown': keyState.down = false; break;
+    case 'PageUp': keyState.zoomIn = false; break;
+    case 'PageDown': keyState.zoomOut = false; break;
+  }
+});
+
+function updateCameraKeys() {
+  if (keyState.left) azimuth -= keyOrbitSpeed;
+  if (keyState.right) azimuth += keyOrbitSpeed;
+  if (keyState.up) polar -= keyOrbitSpeed;
+  if (keyState.down) polar += keyOrbitSpeed;
+  polar = Math.max(minPolar, Math.min(maxPolar, polar));
+  if (keyState.zoomIn) radius -= keyZoomSpeed;
+  if (keyState.zoomOut) radius += keyZoomSpeed;
+  radius = Math.max(2, Math.min(30, radius));
 }
 
+function updateCamera(target) {
+  updateCameraKeys(); // Apply arrow key input each frame
+
+  let camX = target.x + radius * Math.sin(polar) * Math.sin(azimuth);
+  let camY = target.y + radius * Math.cos(polar) + 1;
+  let camZ = target.z + radius * Math.sin(polar) * Math.cos(azimuth);
+  camera.position.set(camX, camY, camZ);
+  camera.lookAt(target.x, target.y + 1.4, target.z);
+}
+  
 // ===== Stickman animation =====
 function animateStickman(player, dt){
   let t=player.walkCycle;
