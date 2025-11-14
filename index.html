@@ -1,7 +1,8 @@
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Please speed my moms kinda homeless</title>
+<title>Silly Platformer</title>
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
@@ -188,7 +189,7 @@ renderer.domElement.addEventListener('wheel', e => {
   radius = Math.max(2, Math.min(30, radius));
 });
 
-// ===== Arrow key orbit control =====
+  // ===== Arrow key orbit control =====
 const keyState = { left: false, right: false, up: false, down: false, zoomIn: false, zoomOut: false };
 const keyOrbitSpeed = 0.02; // radians per frame
 const keyZoomSpeed = 0.2;
@@ -234,7 +235,7 @@ function updateCamera(target) {
   camera.position.set(camX, camY, camZ);
   camera.lookAt(target.x, target.y + 1.4, target.z);
 }
-
+  
 // ===== Stickman animation =====
 function animateStickman(player, dt){
   let t=player.walkCycle;
