@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Silly Platformer + Procedural Sky</title>
+<title>BROOO WHAT SHOULD I TURN THIS INTOOOOOO</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
@@ -293,11 +293,6 @@ function animate(){
   else if(dx!==0||dz!==0) state=isRunning?"run":"walk";
   player.state=state;
   animateStickman(player, dt);
-
-  // Update NPC speech boxes
-  npcs.forEach(npc=>{
-    if(npc.updateSpeechBox) npc.updateSpeechBox();
-  });
 
   updateCamera(player);
   renderer.render(scene,camera);
