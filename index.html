@@ -259,47 +259,6 @@ function animateStickman(player, dt){
   }
 }
 
-// ---- Punch override ---- 
-  if (player.punch && player.punch.active) { player.punch.timer += dt; const t = player.punch.timer; const dur = player.punch.duration; const wind = player.punch.windup; const ext = player.punch.extension; const rec = player.punch.recovery;
-// choose side limbs
-const armRoot = player.punch.side === 'right' ? ra : la;
-const fore = player.punch.side === 'right' ? rfa : lfa;
-
-// targets (radians)
-const windShoulder = -0.9;   // pull back
-const punchShoulder = 1.6;   // fast forward swing
-const windFore = -0.6;       // forearm folded during windup
-const punchFore = -0.05;     // near straight on extension
-
-if (t < wind) {
-  // windup (pull back)
-  const p = easeInCubic(t / wind);
-  armRoot.rotation.x = THREE.MathUtils.lerp(armRoot.rotation.x, windShoulder, p);
-  fore.rotation.x = THREE.MathUtils.lerp(fore.rotation.x, windFore, p);
-} else if (t < wind + ext) {
-  // extension (punch)
-  const p = easeOutCubic((t - wind) / ext);
-  armRoot.rotation.x = THREE.MathUtils.lerp(windShoulder, punchShoulder, p);
-  fore.rotation.x = THREE.MathUtils.lerp(windFore, punchFore, p);
-} else if (t < dur) {
-  // recovery (return towards neutral)
-  const p = easeOutCubic((t - wind - ext) / Math.max(0.0001, rec));
-  armRoot.rotation.x = THREE.MathUtils.lerp(punchShoulder, 0, p);
-  fore.rotation.x = THREE.MathUtils.lerp(punchFore, 0, p);
-} else {
-  // done
-  player.punch.active = false;
-  player.punch.timer = 0;
-  player.punch.cooldown = 0.5; // cooldown seconds
-}
-
-// small twist outward for the punching arm to look more natural
-armRoot.rotation.z = THREE.MathUtils.lerp(armRoot.rotation.z, (player.punch.side === 'right' ? -0.25 : 0.25), 0.6);
-
-// while punching, skip the walk/run arm overrides (so we return early)
-return;
-} else { // decrement cooldown if (player.punch && player.punch.cooldown > 0) player.punch.cooldown = Math.max(0, player.punch.cooldown - dt); }
-  
 // ===== Main loop =====
 let prevTime = performance.now();
 function animate(){
