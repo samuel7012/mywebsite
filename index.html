@@ -38,7 +38,11 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
   
-  // Request pointer lock on click
+  const gameArea = document.getElementById('gameArea');
+    let yaw = 0;   // Horizontal rotation
+    let pitch = 0; // Vertical rotation
+
+    // Request pointer lock on click
     gameArea.addEventListener('click', () => {
       gameArea.requestPointerLock();
     });
@@ -53,6 +57,17 @@ scene.add(ground);
         document.removeEventListener('mousemove', onMouseMove);
       }
     });
+
+    // Handle mouse movement
+    function onMouseMove(event) {
+      yaw += event.movementX * 0.1;   // sensitivity
+      pitch -= event.movementY * 0.1; // invert Y
+
+      // Clamp pitch to avoid flipping
+      pitch = Math.max(-89, Math.min(89, pitch));
+
+      gameArea.textContent = `Yaw: ${yaw.toFixed(1)}°, Pitch: ${pitch.toFixed(1)}°`;
+    }
   
 // ===== Stickman factory =====
 function createStickman(color=0xffffff) {
