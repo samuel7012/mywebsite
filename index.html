@@ -6,6 +6,17 @@
 <style>
 body { margin: 0; overflow: hidden; background: #111; }
 #info { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: sans-serif; }
+
+ #gameArea {
+      width: 80%;
+      height: 80%;
+      background: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: crosshair;
+    }
+  
 </style>
 </head>
 <body>
@@ -68,6 +79,11 @@ scene.add(ground);
 
       gameArea.textContent = `Yaw: ${yaw.toFixed(1)}°, Pitch: ${pitch.toFixed(1)}°`;
     }
+
+   // Handle errors
+    document.addEventListener('pointerlockerror', () => {
+      console.error('Error locking pointer');
+    });
   
 // ===== Stickman factory =====
 function createStickman(color=0xffffff) {
