@@ -20,4 +20,190 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHei
 camera.position.set(0, 4, 8);
 
 const renderer = new THREE.WebGLRenderer({antialias:true});
-rend...  (content truncated for brevity)`,
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// ===== Lighting =====
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.7);
+hemiLight.position.set(0, 200, 0);
+scene.add(hemiLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(60, 100, -30);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+// ===== Ground =====
+const groundGeo = new THREE.PlaneGeometry(100, 100);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = 0;
+scene.add(ground);
+
+// ===== Stickman factory =====
+function createStickman(color=0xffffff){
+  const stickman = new THREE.Group();
+  const stickMat = new THREE.MeshStandardMaterial({ color: 0x181818 });
+  const headMat = new THREE.MeshStandardMaterial({ color: color });
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32,32), headMat);
+  head.position.y=2.25; stickman.add(head);
+
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.95,20), stickMat);
+  body.position.y=1.5; stickman.add(body);
+
+  function addLimb(rootPos, upperLen, lowerLen){
+    const root = new THREE.Group(); root.position.copy(rootPos); stickman.add(root);
+
+    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,upperLen,14), stickMat);
+    upper.position.y=-upperLen/2; root.add(upper);
+
+    const joint = new THREE.Mesh(new THREE.SphereGeometry(0.06,12,10), stickMat);
+    joint.position.y=-upperLen; root.add(joint);
+
+    const lower = new THREE.Group(); lower.position.y=-upperLen;
+    const lowerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,lowerLen,12), stickMat);
+    lowerMesh.position.y=-lowerLen/2; lower.add(lowerMesh);
+
+    const end = new THREE.Mesh(new THREE.SphereGeometry(0.05,10,8), stickMat);
+    end.position.y=-lowerLen; lower.add(end);
+
+    root.add(lower);
+    return { root, lower };
+  }
+
+  const leftArm = addLimb(new THREE.Vector3(-0.19,1.9,0),0.49,0.42);
+  const rightArm = addLimb(new THREE.Vector3(0.19,1.9,0),0.49,0.42);
+  const leftLeg = addLimb(new THREE.Vector3(-0.07,0.99,0),0.58,0.49);
+  const rightLeg = addLimb(new THREE.Vector3(0.07,0.99,0),0.58,0.49);
+
+  return { model: stickman, head, leftArm:leftArm.root, rightArm:rightArm.root, leftForearm:leftArm.lower, rightForearm:rightArm.lower, leftLeg:leftLeg.root, rightLeg:rightLeg.root, leftShin:leftLeg.lower, rightShin:rightLeg.lower };
+}
+
+// ===== Multiplayer state =====
+const playerId = Math.random().toString(36).substr(2,9);
+const players = {};
+function addPlayer(id,color){
+  if(!players[id]){
+    const parts = createStickman(color);
+    scene.add(parts.model);
+    players[id] = { ...parts, x:0, y:0, z:0, facing:0, movement:{running:false,jumping:false,grounded:true,velocityY:0}, walkCycle:0, state:"idle", color };
+  }
+}
+addPlayer(playerId,0xffffff);
+
+// ===== Controls =====
+let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
+let isRunning=false, isJumping=false, isGrounded=true;
+let velocityY=0;
+const walkSpeed=0.08, runSpeed=0.16, jumpStrength=0.24, gravity=0.012;
+
+window.addEventListener('keydown', e=>{
+  switch(e.key){
+    case 'w': moveForward=true; break;
+    case 's': moveBackward=true; break;
+    case 'a': moveLeft=true; break;
+    case 'd': moveRight=true; break;
+    case 'Shift': isRunning=true; break;
+    case ' ': if(isGrounded && !isJumping){ isJumping=true; velocityY=jumpStrength; isGrounded=false; } break;
+  }
+});
+window.addEventListener('keyup', e=>{
+  switch(e.key){
+    case 'w': moveForward=false; break;
+    case 's': moveBackward=false; break;
+    case 'a': moveLeft=false; break;
+    case 'd': moveRight=false; break;
+    case 'Shift': isRunning=false; break;
+  }
+});
+
+// ===== Camera orbit =====
+let azimuth=0, polar=Math.PI/5, radius=8;
+const minPolar=0.1,maxPolar=Math.PI/2-0.05;
+let lastMouse={x:0,y:0}, mouseInitialized=false;
+const mouseSensitivity=0.005;
+
+document.addEventListener('mousemove',e=>{
+  if(!mouseInitialized){ lastMouse={x:e.clientX,y:e.clientY}; mouseInitialized=true; return; }
+  const dx=e.clientX-lastMouse.x, dy=e.clientY-lastMouse.y;
+  azimuth-=dx*mouseSensitivity; polar-=dy*mouseSensitivity;
+  polar=Math.max(minPolar,Math.min(maxPolar,polar));
+  lastMouse={x:e.clientX, y:e.clientY};
+});
+document.addEventListener('mouseleave',()=>mouseInitialized=false);
+
+window.addEventListener('resize',()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ===== Main loop =====
+function animate() {
+  requestAnimationFrame(animate);
+
+  const player = players[playerId];
+  
+  // Movement
+  const speed = isRunning ? runSpeed : walkSpeed;
+  let moveX = 0, moveZ = 0;
+  
+  if(moveForward) { moveZ -= speed; }
+  if(moveBackward) { moveZ += speed; }
+  if(moveLeft) { moveX -= speed; }
+  if(moveRight) { moveX += speed; }
+  
+  if(moveX !== 0 || moveZ !== 0) {
+    player.facing = Math.atan2(moveX, -moveZ);
+    player.model.rotation.y = player.facing;
+    player.state = isRunning ? "running" : "walking";
+  } else {
+    player.state = "idle";
+  }
+  
+  // Apply movement
+  const cos = Math.cos(player.facing);
+  const sin = Math.sin(player.facing);
+  player.x += moveX * cos - moveZ * sin;
+  player.z += moveX * sin + moveZ * cos;
+  
+  // Gravity & jumping
+  velocityY -= gravity;
+  player.y += velocityY;
+  if(player.y <= 0) {
+    player.y = 0;
+    isGrounded = true;
+    velocityY = 0;
+    isJumping = false;
+  }
+  
+  // Animation
+  player.walkCycle += (player.state === "idle" ? 0 : isRunning ? 0.15 : 0.08);
+  const wc = Math.sin(player.walkCycle) * 0.3;
+  const wc2 = Math.cos(player.walkCycle) * 0.3;
+  
+  player.leftLeg.rotation.z = wc;
+  player.rightLeg.rotation.z = -wc;
+  player.leftArm.rotation.z = -wc2;
+  player.rightArm.rotation.z = wc2;
+  
+  player.model.position.set(player.x, player.y, player.z);
+  
+  // Camera
+  const camX = player.x + Math.sin(azimuth) * radius * Math.cos(polar);
+  const camY = player.y + 1.5 + radius * Math.sin(polar);
+  const camZ = player.z + Math.cos(azimuth) * radius * Math.cos(polar);
+  
+  camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.1);
+  camera.lookAt(player.x, player.y + 1.5, player.z);
+  
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+
+</body>
+</html>
