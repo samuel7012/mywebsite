@@ -9,9 +9,11 @@ body { margin: 0; overflow: hidden; background: #111; }
 </style>
 </head>
 <body>
-
+  
+ <div id="gameArea">Click here to lock cursor</div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 <script>
+    const gameArea = document.getElementById('gameArea');
 // ===== Scene setup =====
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222233);
@@ -36,7 +38,7 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 ground.rotation.x = -Math.PI/2;
 scene.add(ground);
   
-   // Request pointer lock on click
+  // Request pointer lock on click
     gameArea.addEventListener('click', () => {
       gameArea.requestPointerLock();
     });
